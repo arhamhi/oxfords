@@ -56,9 +56,10 @@ All of the named faces are free to use. Check each licence before you bundle a f
 - Fewer icons. A label alone is often clearer. An icon beside every row and heading is
   decoration.
 - No emoji in the interface. No sparkle beside AI features: name the feature.
-- Do not draw icon paths by hand. Use the set. When nothing can be loaded from outside,
-  paste the set's own SVG for the few icons you need, or use no icons. Text labels alone are
-  a good interface.
+- Do not invent icon shapes. Use the set. When nothing can be loaded from outside, copy the
+  set's own SVG source for the few icons you need into the page. That is using the set.
+- Text labels alone are a good interface on the web. A native tab bar or toolbar is the
+  exception: it needs icons, with labels under them.
 - No icon in a tinted rounded square above a heading. Put the icon beside the text, in flow.
 - Filled icons mark the selected item; outlines everywhere else. Or all one style. Decide once.
 - Every icon-only control has an accessible name.

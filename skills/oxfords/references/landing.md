@@ -10,7 +10,11 @@ photographs, no real product, only feature copy. That is what reads as soulless.
 
 - Show the audience's world: their tools, their setting, the real product in use.
 - Put the product on a device in the customer's setting, not as a flat floating screenshot.
-- Never build a fake product screenshot out of divs. Use the real interface or a real image.
+- Never build a fake product screenshot out of boxes and grey bars. A live, working piece of
+  the real interface with believable data is not fake: it is the product. Use that, or a
+  real image.
+- Before launch, with no customers, leave proof out or state one true thing: who built it,
+  what it replaces, what it costs. Invent nothing.
 
 ## Message
 
@@ -20,6 +24,22 @@ photographs, no real product, only feature copy. That is what reads as soulless.
 - One label per intent. Not "Contact us", "Get in touch" and "Let's talk" on one page.
 - Name buttons for the outcome: "Start a free trial", "See pricing". Not "Get started".
 - Cut the copy hard. Most sections need a fraction of the words first written.
+
+## Plain is not bare
+
+This is where a plain page most easily turns grey and empty. A landing page may carry more
+character than product UI, as long as each choice has a reason.
+
+- The hero states the promise large enough to read in a glance, and shows the product
+  beside or below it at a size that matters.
+- Every section has one thing the eye lands on. A column left empty beside a heading is a
+  layout bug: fill it, or use one column.
+- One typeface choice you can defend is allowed here, and encouraged when the system font
+  would make the page anonymous.
+- Use the full width. A page of narrow text columns separated by large gaps reads as
+  unfinished.
+- One accent, used with confidence on the things that matter, beats a page with almost no
+  colour at all.
 
 ## Structure
 
@@ -61,9 +81,24 @@ photographs, no real product, only feature copy. That is what reads as soulless.
 
 - Motion directs the eye. Decide the focal point of each section first.
 - Choose one or two motion ideas and repeat them. They become part of the identity.
-- No hard break between the hero and the next section.
+- When sections animate on scroll, the hero hands over to the next section. It does not cut.
 - Nothing is hidden until a script reveals it. The page is complete at rest.
 - See `motion.md` for timing and reduced motion.
+
+## Landing page done gate
+
+| Slot | Must exist |
+|---|---|
+| Promise | one heading a customer would say, readable in a glance |
+| Product | the real thing shown, working or photographed, in the first screen |
+| Actions | one label per intent, named for the outcome, same label everywhere |
+| Sections | each has a focal point; no empty columns; layouts vary |
+| Pricing | price large, plan name small, same rows in the same order, real discount |
+| Form | label, hint, error under the field, input kept, all button states |
+| Navigation | one line on desktop; on a phone, the key link and the action stay visible |
+| Footer | present, with the links a person looks for |
+| Links | every link goes somewhere; in a prototype, an on-page anchor is fine |
+| Phone | no sideways scroll at 320px, 16px body, 44px targets |
 
 ## Performance is part of the impression
 

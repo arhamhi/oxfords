@@ -28,7 +28,7 @@ made it.
 </p>
 
 <p align="center">
-  <img src="docs/compare.gif" alt="The same dashboard brief built without Oxfords, then with it" width="100%">
+  <img src="docs/dashboard.gif" alt="The same dashboard brief built without Oxfords, then with it" width="100%">
 </p>
 
 <p align="center"><sub>Same model, same one-paragraph brief. First with no skill, then with Oxfords.</sub></p>
@@ -149,12 +149,46 @@ and add nothing, you get a grey page with one accent colour, and that's just a d
 of generic. So Oxfords asks for real content, one clear thing to look at first, and choices
 you can give a reason for.
 
+## More examples
+
+Same deal as the dashboard up top. Same model, same brief, first with no skill and then with
+Oxfords.
+
+**A startup landing page**
+
+<p align="center">
+  <img src="docs/landing.gif" alt="A startup landing page built without Oxfords, then with it" width="100%">
+</p>
+
+The one without the skill looks fine at first, I'll be honest. But look at what's on it: a
+little uppercase label over every section, numbered steps, an italic word in the headline, a
+grid of icon cards. It's the same page you've seen a hundred times. The Oxfords one shows the
+actual product instead, an invoice, the reminder email, and who owes what.
+
+**A calorie tracking app**
+
+<p align="center">
+  <img src="docs/mobile.gif" alt="A calorie tracking app screen built without Oxfords, then with it" width="360">
+</p>
+
+The big add button comes out of the middle of the tab bar and gets a label. The number you
+care about is the biggest thing on the screen. And the food names are dark enough to read.
+
 ## How it was tested
 
-I gave the same model the same one-paragraph dashboard brief twice, once with no skill and
-once with Oxfords. Both builds are in [`docs/builds`](docs/builds) exactly as they came out,
-and you can run the checker on them yourself. It's one run each, so take it as an example and
-not a benchmark.
+I gave the same model the same one-paragraph brief twice for each example, once with no skill
+and once with Oxfords. All six builds are in [`docs/builds`](docs/builds) exactly as they came
+out, and you can run the checker on them yourself:
+
+```text
+dashboard-no-skill.html   1 fail, 3 warn
+landing-no-skill.html     0 fail, 3 warn
+mobile-no-skill.html      2 fail, 3 warn
+the three Oxfords builds  0 fail, 1 warn between them
+```
+
+It's one run each, so take it as an example and not a benchmark. And the checker only catches
+the mechanical stuff. Most of what's different in those GIFs is the part it can't see.
 
 <p align="center">
   <img src="art/bands-strip.jpg" alt="" width="100%">

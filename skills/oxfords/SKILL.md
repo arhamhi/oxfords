@@ -129,7 +129,7 @@ one line on why it is deliberate.
 | Radius | one per tier (controls, cards); nested inner = outer minus the gap |
 | Button padding | horizontal about twice vertical |
 | Icon size | the text line height; stroke matched to the text weight |
-| Type scale | 6 sizes at most. App UI 13-14px body, rarely above 24px. Marketing 16px body and up. Nothing under 11px |
+| Type scale | about six steps, plus at most one hero figure or headline outside the scale. Web app 13-14px body, rarely above 24px. Native app 17pt body, 15 minimum. Marketing 16px body and up. Nothing under 11px |
 | Line length and leading | 45-75 characters; body leading about 1.5, display 1.05-1.2 |
 | Heading tracking | -2% to -4% on large display type only; body 0 |
 | Targets | 44px touch; 24px absolute floor on desktop |

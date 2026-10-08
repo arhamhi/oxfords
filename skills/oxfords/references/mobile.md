@@ -28,8 +28,9 @@ question: what is the one job here?
 ## Navigation
 
 - A tab bar holds two to five destinations. Destinations, not actions.
-- Keep the primary action out of the middle of the tab bar. Put it beside the bar as its own
-  control, or in the screen it belongs to.
+- Keep the primary action out of the middle of the tab bar. Put it at the end of the bar as
+  its own control at the same height, as the trailing button in the top bar, or inside the
+  screen it belongs to. Give it a label or a universally known icon.
 - Keep one bottom layout across the app and swap its contents per screen.
 - If there are too many destinations for a bar, make the list of destinations the home
   screen and give the bottom to search and the primary action.
@@ -65,6 +66,15 @@ question: what is the one job here?
   at. Edges resist instead of stopping dead.
 
 ## Platform manners
+
+- Tab bar items are an icon with a label under it. A text-only tab bar reads as a web page.
+- In a mock, draw the status bar the way the system does (time, signal, battery glyph) or
+  leave the space empty. Never write it out as words.
+- A mock needs the main screen and the main flow to work. Other tabs can open a plain
+  placeholder that names what will be there.
+- Without swipe, give a row's secondary actions a visible route: an edit mode, or a menu.
+- One large figure per screen may sit outside the type scale. It is the thing the screen is
+  for. It does not need a card around it.
 
 - Use the platform's icon set and system font unless there is a stated reason. A screen that
   looks ported from a web page loses trust.

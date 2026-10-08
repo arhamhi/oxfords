@@ -80,6 +80,8 @@ const FILE_RULES = [
     test: s => /outline\s*:\s*(?:none|0)\b/i.test(s) && !/:focus-visible|focus-visible:|:focus-within/i.test(s) ? 1 : 0 },
   { id: 'no-reduced-motion', level: 'warn', msg: 'has animation but no prefers-reduced-motion rule',
     test: s => /@keyframes|animation\s*:|transition\s*:/i.test(s) && !/prefers-reduced-motion|motion-reduce:|motion-safe:/i.test(s) ? 1 : 0 },
+  { id: 'many-sizes', level: 'warn', msg: 'more than eight distinct font sizes; keep to a scale',
+    test: s => { const z = new Set([...s.matchAll(/font-size\s*:\s*([\d.]+(?:px|rem|em))/gi)].map(m => m[1].toLowerCase())); return z.size > 8 ? z.size : 0; } },
   { id: 'many-fonts', level: 'warn', msg: 'more than two font families declared',
     test: s => { const f = new Set([...s.matchAll(/font-family\s*:\s*["']?([^,;"'}]+)/gi)].map(m => m[1].trim().toLowerCase()).filter(n => !/^(inherit|var\(|system-ui|-apple-system|ui-|sans-serif|serif|monospace)/.test(n))); return f.size > 2 ? f.size : 0; } },
 ];
