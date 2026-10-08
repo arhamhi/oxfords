@@ -28,10 +28,10 @@ made it.
 </p>
 
 <p align="center">
-  <img src="docs/compare.png" alt="The same dashboard brief built without and with Oxfords" width="100%">
+  <img src="docs/compare.gif" alt="The same dashboard brief built without Oxfords, then with it" width="100%">
 </p>
 
-<p align="center"><sub>Same model, same one-paragraph brief. Left: no skill. Right: Oxfords.</sub></p>
+<p align="center"><sub>Same model, same one-paragraph brief. First with no skill, then with Oxfords.</sub></p>
 
 ## What you get
 
