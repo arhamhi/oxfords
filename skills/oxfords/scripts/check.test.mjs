@@ -20,10 +20,11 @@ const bad = {
   'eyebrow': `.eyebrow{text-transform:uppercase;letter-spacing:.08em}`,
   'no-focus-style': `button{outline:none}`,
   'no-reduced-motion': `.a{transition: opacity .2s}`,
+  'bone-page': `:root{--bg:#FBF1E3}\nbody{margin:0;background:var(--bg)}`,
 };
 for (const [id, src] of Object.entries(bad)) assert(ids(src).has(id), `expected ${id} on: ${src}`);
 const clean = `<!doctype html><style>
-body{font-family:system-ui,sans-serif;font-size:14px}
+body{font-family:system-ui,sans-serif;font-size:14px;background:#FAFAFA}
 .nav a[aria-current]{background:#eee}
 .b{transition:opacity .15s cubic-bezier(0.16, 1, 0.3, 1)}
 button:focus-visible{outline:2px solid #246}

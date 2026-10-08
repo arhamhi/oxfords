@@ -54,10 +54,24 @@ skills loaded, so there's a strict list of them and what to use instead:
 | A small uppercase label above every heading | The heading |
 | Inter, Geist, Poppins, Instrument Serif, Playfair | The system font, or a face you can give a reason for |
 | Emoji as icons, the stock icon set at default stroke | One icon set, one weight, matched to the text |
-| Purple gradients, gradient text, glows | One accent, used for action and state |
+| Bone and orange, white and blue, purple gradients | A palette chosen for the product, with a reason |
+| Gradient text, glows | One accent, used for action and state |
 | A tinted pill on every status | Colour only where something needs attention |
 | Bounce, fade-up on everything, pulsing dots | Short ease-out transitions that explain a change |
 | "Seamless", "Get started", Acme, 99.9% | The plain sentence and believable data |
+
+**Colours somebody actually picked.** You've probably noticed Claude goes for the same bone
+background with an orange accent on pretty much everything now. Before that it was purple
+gradients, and if you tell it to be "clean" you get white, grey and one blue button. They're
+all the same problem, the colour got picked by default. So Oxfords comes with 26 palettes,
+three colours each, and the agent has to choose one for your product and say why. The
+palette goes on top of proper neutrals though, white, black and greys still do most of the
+work, so you don't end up with a page that's cream from edge to edge. On a phone it sits on
+pure black or pure white, with the navigation in Liquid Glass.
+
+<p align="center">
+  <img src="docs/palettes.png" alt="The Oxfords palettes, each shown as lead, support and pop colour on a white or black card" width="100%">
+</p>
 
 **A checker, so it's not just vibes.** One script, no dependencies:
 
@@ -126,6 +140,7 @@ skills/oxfords/
     mobile.md                    app screens, navigation, sheets, gestures
     landing.md                   message, structure, what to leave out
     states-forms-copy.md         every state, forms, errors, copy, accessibility
+    palettes.md                  neutrals, 26 palettes and how to apply them
     slop-floor.md                the full ban list with replacements
     motion.md                    timing, easing, gestures, reduced motion
     review.md                    the two-pass review and severity scale
@@ -137,8 +152,8 @@ file for the thing it's actually building.
 
 ## What Oxfords is not
 
-- **It won't pick your brand.** No palette, no typeface, no art direction. If your project has
-  a design system, that wins.
+- **It won't replace your brand.** If your project already has colours or a design system,
+  those win. The palettes are for when you've got nothing.
 - **It won't give you a look.** If you want a landing page with a signature animation, use a
   design skill built for that and let Oxfords check the result after.
 - **It can't see everything.** The checker reads text, so it can't tell if a label is clipped
@@ -160,10 +175,10 @@ Oxfords.
   <img src="docs/landing.gif" alt="A startup landing page built without Oxfords, then with it" width="100%">
 </p>
 
-The one without the skill looks fine at first, I'll be honest. But look at what's on it: a
-little uppercase label over every section, numbered steps, an italic word in the headline, a
-grid of icon cards. It's the same page you've seen a hundred times. The Oxfords one shows the
-actual product instead, an invoice, the reminder email, and who owes what.
+The one without the skill looks fine at first, I'll be honest. But it's the bone background
+again, with a little uppercase label over every section, numbered steps and an italic word in
+the headline. You've seen that page a hundred times. The Oxfords one sits on white, shows the
+actual product, and keeps the colour for two sections and the one button that matters.
 
 **A calorie tracking app**
 
@@ -171,24 +186,29 @@ actual product instead, an invoice, the reminder email, and who owes what.
   <img src="docs/mobile.gif" alt="A calorie tracking app screen built without Oxfords, then with it" width="360">
 </p>
 
-The big add button comes out of the middle of the tab bar and gets a label. The number you
-care about is the biggest thing on the screen. And the food names are dark enough to read.
+Pure black, so it looks right on an OLED screen. The add button comes out of the middle of
+the tab bar, the tab bar is glass with the list scrolling under it, and only the things that
+matter get colour.
 
 ## How it was tested
 
-I gave the same model the same one-paragraph brief twice for each example, once with no skill
-and once with Oxfords. All six builds are in [`docs/builds`](docs/builds) exactly as they came
-out, and you can run the checker on them yourself:
+I gave the same model the same one-paragraph brief for each example, once with no skill and
+once with Oxfords. All six builds are in [`docs/builds`](docs/builds) and you can run the
+checker on them yourself:
 
 ```text
 dashboard-no-skill.html   1 fail, 3 warn
-landing-no-skill.html     0 fail, 3 warn
+landing-no-skill.html     1 fail, 3 warn
 mobile-no-skill.html      2 fail, 3 warn
 the three Oxfords builds  0 fail, 1 warn between them
 ```
 
-It's one run each, so take it as an example and not a benchmark. And the checker only catches
-the mechanical stuff. Most of what's different in those GIFs is the part it can't see.
+To be straight about it: the no-skill builds are first attempts, and the Oxfords ones aren't.
+I rebuilt them a few times while I was fixing the skill, mostly the colour rules, and for
+these three I told it which palette to use so the examples wouldn't all come out the same.
+So take it as an example of what the skill is going for and not a benchmark. And the checker
+only catches the mechanical stuff. Most of what's different in those GIFs is the part it
+can't see.
 
 <p align="center">
   <img src="art/bands-strip.jpg" alt="" width="100%">

@@ -1,0 +1,9 @@
+<!doctype html><meta charset="utf-8"><style>
+html,body{margin:0;background:#fff}body{width:1600px;padding:40px;box-sizing:border-box;display:grid;grid-template-columns:repeat(5,1fr);gap:20px;font:600 19px/1.2 -apple-system,system-ui,sans-serif;color:#111}
+.p{border:1px solid #E5E5E5;border-radius:12px;padding:16px;display:grid;gap:14px;background:#fff}
+.p.k{background:#000;border-color:#2A2A2A;color:#F5F5F5}
+.c{display:grid;grid-template-columns:3fr 2fr 1fr;height:72px;border-radius:8px;overflow:hidden}
+</style><body><script>
+const P=[["Orchard","#E14543","#665244","#FEEEC3"],["Breeze","#4F404C","#B6CCDD","#F9E7C9"],["Poppy","#075431","#F63434","#FCF4D2"],["Olive Bar","#3C3F8C","#76202D","#F8DFC1"],["Citron","#6162A3","#D1D127","#FCF4D2"],["Kite","#DE2C1D","#BCD8F1","#F7EB49"],["Lemonade","#2A3F73","#D82D32","#FEEFA7"],["Blueprint","#224D95","#D93D7F","#EDEBDE"],["Signal","#001B8C","#FFF002","#F5F5F5"],["Lagoon","#028397","#DC6665","#F6F9F8"],["Rosewood","#715445","#DE5276","#D8DBD8"],["Meadow","#F64830","#B9B965","#D5E3FC"],["Regatta","#0F6FDC","#FEFD15","#9BB9C1"],["Saddle","#FF5305","#4A2A1C","#B4A49A"],["Harbour","#4EA3CB","#CA391A","#00232E",1],["Greenhouse","#7EA288","#FA0201","#482E22",1],["Orchid","#D8B54C","#8B2E47","#3A0E14",1],["Nightshift","#7778DE","#F44631","#342E35",1],["Arcade","#28B467","#FE1C66","#3E283D",1],["Tideline","#326E6E","#CE7D36","#C5CFCB"],["Conservatory","#293D25","#4A91BF","#A97F62"],["Fresco","#4288C3","#925B38","#D9DAD4"],["Regent","#067BCE","#033263","#DE2C1D"],["Cellar","#983219","#3E3428","#C1BB97",1],["Aurora","#74A897","#244030","#D3EDE0",1],["Mono","#111111","#6B6B6B","#FFFFFF"]];
+for(const [n,l,s,p,k] of P){document.body.insertAdjacentHTML('beforeend',`<div class="p${k?' k':''}"><span>${n}</span><div class="c"><div style="background:${l}"></div><div style="background:${s}"></div><div style="background:${p}"></div></div></div>`)}
+</script></body>

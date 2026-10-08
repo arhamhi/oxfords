@@ -71,8 +71,9 @@ the people who asked for less movement.
 
 ## Translucency
 
-- Blur and glass are for the navigation layer that floats over content. Not for cards, not
-  for dashboards, never one translucent surface on another.
+- Blur and glass are for the navigation layer that floats over content. On a native app that
+  layer is always Liquid Glass (see `mobile.md`). Not for content cards, not for web
+  dashboards, never one translucent surface on another.
 - Always provide a solid fallback.
 - Text over a translucent surface needs more weight and more contrast than usual.
 

@@ -16,9 +16,11 @@ screen, where, how visible, how it responds, and what must not be there.
 **The test behind every rule:** nobody reads a screen. They arrive with one question and hunt
 for the answer. A choice either makes that hunt faster or it is decoration.
 
-**Plain is not generic.** Stripping slop and stopping leaves a grey, empty page that is just a
-different default. Plain means every element is there for a reason and is finished. Real
-content, real numbers, one clear focal point per screen.
+**Plain is not generic, and it is not colourless.** Stripping slop and stopping leaves a
+white page with grey text and one blue button. That is a default too. Plain is about
+structure: every element there for a reason, and finished. Colour is where the product gets
+its character. Build on neutrals (white, black, greys) and put a real palette on top of
+them.
 
 ## How to use
 
@@ -37,7 +39,8 @@ Oxfords for everything they leave open.
 | Native mobile app screen | `references/mobile.md` |
 | Landing page, marketing site | `references/landing.md` |
 | States, forms, errors, UX copy | `references/states-forms-copy.md` |
-| Fonts, icons, colour, the full ban list | `references/slop-floor.md` |
+| Colour: choosing and applying a palette | `references/palettes.md` (read this for every build) |
+| Fonts, icons, the full ban list | `references/slop-floor.md` |
 | Motion, gestures, reduced motion | `references/motion.md` |
 | Reviewing a finished screen | `references/review.md` |
 
@@ -57,16 +60,21 @@ Oxfords for everything they leave open.
    to be read. Every element locks to an edge and creates the edge for the next. Fill empty
    space by moving content onto edges, not by adding content. Use the layout people expect
    (top to bottom, left to right, navigation on top or left) before anything distinctive.
-5. **Hierarchy.** Size, position, weight, then colour. Most important goes top-left and
+5. **Colour.** Start from neutrals: a white, black or grey page, neutral surfaces, near-black
+   or near-white text. Then, unless the project has its own colours, choose a palette from
+   `references/palettes.md` and place its three colours on top as lead, support and pop.
+   Write one line on why it fits. Never a bone or cream page; never neutrals with one blue
+   button.
+6. **Hierarchy.** Size, position, weight, then colour. Most important goes top-left and
    largest. Group, rank, stack, then delete every label the layout already implies. Emphasis
    is relative: quiet the neighbours instead of colouring the hero.
-6. **Disclosure.** Primary action always visible with a label. Secondary actions in a menu,
+7. **Disclosure.** Primary action always visible with a label. Secondary actions in a menu,
    or revealed on hover with a visible equivalent on touch. Rare ones in a popover. Never
    put a primary item behind a click.
-7. **Container.** Inline first, if it fits. Then: simple and non-blocking is a popover;
+8. **Container.** Inline first, if it fits. Then: simple and non-blocking is a popover;
    complex but same page is a modal followed by a confirmation; large or permanent is a new
    page with a way back; on mobile, picking without leaving is a bottom sheet.
-8. **The invisible layer.** States, feedback, focus, empty and broken content. This is the
+9. **The invisible layer.** States, feedback, focus, empty and broken content. This is the
    half that gets skipped. The Done gate lists it.
 
 ## Done gate
@@ -89,7 +97,8 @@ Answer every line for the screen you built. "None" needs a reason.
 | Keyboard and contrast | everything reachable by Tab with visible focus, Esc closes overlays, text 4.5:1, large text and icons 3:1, state never by colour alone |
 | Touch | 44px targets, nothing that works only on hover, 16px inputs, safe areas respected |
 | Motion | under 250ms for feedback, never blocks input, a reduced-motion version that keeps the feedback |
-| Consistency | one type family, one accent, one icon set at one weight, one radius per tier, same thing looks and behaves the same everywhere |
+| Colour | a neutral base (white, black, greys) covering most of the screen; a named palette with a reason; all three of its colours used, each for one job; no bone or cream page |
+| Consistency | one type family, one palette, one icon set at one weight, one radius per tier, same thing looks and behaves the same everywhere |
 | Slop floor | the checker passes, or every warning has a one-line reason |
 
 ## Slop floor
@@ -105,8 +114,10 @@ replacements in `references/slop-floor.md`.
   DM Sans, Space Grotesk, Instrument Serif, Playfair Display, Fraunces); a serif word dropped
   into a sans headline; emoji as icons; the stock icon set at its default stroke; an icon in
   a tinted square above every heading.
-- **Colour:** purple or indigo gradients; gradient text; glows and blurred colour blobs; a
-  tinted pill on every status; more than one accent; pure black on pure white.
+- **Colour:** a bone or cream page with an orange or red accent; a neutral page whose only
+  colour is one blue button; a whole interface tinted in palette colours with no neutrals;
+  purple or indigo gradients; gradient text; glows and blurred colour blobs; a tinted pill on
+  every status.
 - **Motion:** bounce; everything fading up on scroll; pulsing dots; marquees; content hidden
   until a script reveals it.
 - **Copy:** seamless, effortless, unlock, elevate, supercharge; "Get started" and "Submit";
@@ -137,6 +148,7 @@ one line on why it is deliberate.
 | Easing | ease-out with no overshoot |
 | Shadows | soft, low contrast, tinted to the background; if you notice the shadow it is wrong |
 | Dark mode depth | no shadows: each layer up is slightly lighter and less saturated than the one below |
+| Phone ground | pure black `#000` or pure white `#FFF`; navigation layer in Liquid Glass |
 | Contrast | 4.5:1 text, 3:1 large text, icons, input borders and focus rings |
 
 ## Four tests before you call it done

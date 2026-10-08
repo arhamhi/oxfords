@@ -74,16 +74,22 @@ All of the named faces are free to use. Check each licence before you bundle a f
 - A different pastel for every tile or category. More than three or four saturated hues.
 - A tinted pill on every status, so that everything is coloured and nothing stands out.
 - Grey text on a coloured background, and grey on grey that fails contrast.
-- Pure black on pure white. Use an off-black and an off-white.
+- A bone, cream or beige page with an orange, red or terracotta accent. It is the most
+  common generated look right now.
+- A neutral page whose only colour is one blue button.
+- A whole interface tinted in palette colours, with no white, black or grey for it to rest
+  on.
 - Dark mode made by inverting light mode.
 - A gradient on a button.
-- Cream paper with a terracotta or forest accent as the automatic "tasteful" choice. It is as
-  much a default as the purple gradient.
+- Reaching for the same palette every time. Any palette becomes slop when it is automatic.
 
 **Use instead.**
 
-- Neutrals carrying a slight tint of the accent, plus one accent, used for action, selection
-  and state only. Roughly a tenth of the screen at most.
+- A neutral base: a white, black or grey page, neutral surfaces, near-black or near-white
+  text. That is most of the screen.
+- A palette from `palettes.md` on top of it, its three colours placed as lead, support and
+  pop in clear blocks and marks.
+- On a phone, a pure black or pure white page.
 - At most four state colours (good, attention, critical, neutral), each paired with a word or
   a shape. Saturation follows urgency: only what needs action is strong.
 - The same accent on every section and every screen.

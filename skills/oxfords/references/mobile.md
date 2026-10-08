@@ -81,9 +81,30 @@ question: what is the one job here?
 - Targets are 44pt on iOS and 48dp on Android.
 - Respect safe areas at the top and bottom. Leave room so the last item clears a floating bar.
 - Settings use the platform's grouped list. No bespoke stack of cards.
-- Glass and blur belong to the navigation layer only. Never on content, never glass on glass.
+- The page is pure `#000000` or `#FFFFFF`, surfaces are neutral, and the palette appears
+  as the action, the key figure or progress, and a few filled marks. See `palettes.md`.
 - Haptics mark meaningful moments: a selection snapping, a success, an error. Not every tap.
 - Light and dark are both first-class. Dark mode is designed, not inverted.
+
+## Liquid Glass
+
+The navigation layer of a native app is Liquid Glass. Always. It is what makes a screen read
+as a current iOS app instead of a web page in a frame.
+
+- What is glass: the tab bar, the top bar buttons, the primary action button, sheets,
+  menus and the toast. These float above the content.
+- What is never glass: content. Lists, cards, the hero figure and text sit on the ground.
+  No glass on glass.
+- Shape: floating capsules and circles, inset from the screen edges (about 16-20pt at the
+  sides, a little above the home indicator). Not a full-width bar glued to the bottom.
+- Content scrolls underneath and shows through, blurred.
+- On the web, approximate it:
+  `backdrop-filter: blur(24px) saturate(180%)`, a fill of white at 55-70% on a white ground
+  or white at 8-14% on a black ground, a 1px inner highlight (white at 30-50% on the top
+  edge), and a soft shadow underneath.
+- Text and icons on glass are heavier and higher contrast than on a solid surface.
+- The selected tab is a brighter or tinted capsule inside the bar.
+- Give every glass surface a solid fallback for reduced transparency.
 
 ## Empty states
 

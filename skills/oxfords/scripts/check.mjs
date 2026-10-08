@@ -80,6 +80,16 @@ const FILE_RULES = [
     test: s => /outline\s*:\s*(?:none|0)\b/i.test(s) && !/:focus-visible|focus-visible:|:focus-within/i.test(s) ? 1 : 0 },
   { id: 'no-reduced-motion', level: 'warn', msg: 'has animation but no prefers-reduced-motion rule',
     test: s => /@keyframes|animation\s*:|transition\s*:/i.test(s) && !/prefers-reduced-motion|motion-reduce:|motion-safe:/i.test(s) ? 1 : 0 },
+  { id: 'bone-page', level: 'fail', msg: 'bone or cream page background; the page is white, black or grey',
+    test: s => {
+      const m = /(?:^|[\s},])(?:body|html)\s*\{[^}]*?background(?:-color)?\s*:\s*(#[0-9a-f]{6}\b|#[0-9a-f]{3}\b|var\(\s*(--[\w-]+))/i.exec(s);
+      if (!m) return 0;
+      let hex = m[1];
+      if (m[2]) { const v = new RegExp(m[2] + '\\s*:\\s*(#[0-9a-f]{6}\\b|#[0-9a-f]{3}\\b)', 'i').exec(s); if (!v) return 0; hex = v[1]; }
+      hex = hex.slice(1); if (hex.length === 3) hex = [...hex].map(c => c + c).join('');
+      const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+      return r >= 232 && g >= 215 && b >= 170 && r - b >= 12 ? 1 : 0; // light and clearly warm
+    } },
   { id: 'many-sizes', level: 'warn', msg: 'more than eight distinct font sizes; keep to a scale',
     test: s => { const z = new Set([...s.matchAll(/font-size\s*:\s*([\d.]+(?:px|rem|em))/gi)].map(m => m[1].toLowerCase())); return z.size > 8 ? z.size : 0; } },
   { id: 'many-fonts', level: 'warn', msg: 'more than two font families declared',

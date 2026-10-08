@@ -123,6 +123,18 @@ This is for a web app opened on a phone. For a native app, read `mobile.md`.
 - A modal becomes a bottom sheet.
 - Targets are 44px. Hover-revealed actions are always visible or in a menu.
 
+## Colour in product UI
+
+- The page is white, black or grey, and so are the table, the text and the lines. See
+  `palettes.md` for the neutral steps.
+- Choose a palette and place it on top. The lead colour goes on the primary action, the
+  selected item and the chart's main series.
+- Give the palette at least one solid block so it is more than a button: the sidebar, the
+  top bar, or one panel in the lead or support colour.
+- The support colour takes a second series or a secondary block. The pop marks the one thing
+  that needs attention.
+- Quiet chips, secondary text and dividers are neutral greys.
+
 ## Dashboard type and density
 
 - One family. A fixed scale in small steps, for example 24 / 20 / 16 / 14 / 12.

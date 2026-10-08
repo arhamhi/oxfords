@@ -38,8 +38,9 @@ character than product UI, as long as each choice has a reason.
   would make the page anonymous.
 - Use the full width. A page of narrow text columns separated by large gaps reads as
   unfinished.
-- One accent, used with confidence on the things that matter, beats a page with almost no
-  colour at all.
+- The page itself is white, black or grey. Pick a palette from `palettes.md` and use it at
+  full strength on top: one or two whole sections flooded in the lead or support colour,
+  with neutral sections between them so the colour has something to stand against.
 
 ## Structure
 
@@ -89,6 +90,7 @@ character than product UI, as long as each choice has a reason.
 
 | Slot | Must exist |
 |---|---|
+| Colour | a neutral page; a named palette with a reason; at least one full-colour section; all three colours used |
 | Promise | one heading a customer would say, readable in a glance |
 | Product | the real thing shown, working or photographed, in the first screen |
 | Actions | one label per intent, named for the outcome, same label everywhere |
