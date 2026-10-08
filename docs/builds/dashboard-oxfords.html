@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tableside overview</title>
 <style>
-/* Palette: Lemonade on white. Lead #2A3F73 navy, support #D82D32 red, pop #FEEFA7 pale yellow.
-   Everything else is neutral. */
+/* Poppy on white. A floor manager reads this between services, on the office laptop or the
+   host-stand tablet, by day. The chrome is white, black and grey. Deep green #075431 carries
+   the week's takings in one panel, red #F63434 flags the orders that are late, pale yellow
+   #FCF4D2 marks today. Nothing else is coloured. */
 :root{
-  --page:#FFFFFF; --raised:#F4F4F5; --line:#E5E5E5; --quiet:#6B6B6B; --text:#111111; --mid:#D4D4D4;
-  --lead:#2A3F73; --support:#D82D32; --pop:#FEEFA7;
-  --bad:#B42318; --good:#1A7F37;
-  --r-c:6px; --r-p:8px;
+  --page:#FFFFFF; --raised:#F4F4F5; --line:#E5E5E5; --mid:#D4D4D4; --quiet:#6B6B6B; --text:#111111;
+  --lead:#075431; --support:#F63434; --pop:#FCF4D2;
+  --bad:#B42318;
+  --r-c:6px; --r-p:10px;
   --font:system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 *{box-sizing:border-box;margin:0}
 html{color-scheme:light}
@@ -25,23 +26,27 @@ button{cursor:pointer}
 .num{font-variant-numeric:tabular-nums}
 .quiet{color:var(--quiet)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-/* shell */
-.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100svh}
-.side{background:var(--lead);color:#fff;position:sticky;top:0;height:100svh;display:flex;flex-direction:column;padding:16px 12px}
-.side :focus-visible{outline-color:#fff}
-.brand{font-size:16px;font-weight:700;letter-spacing:-.01em;padding:4px 8px 0}
-.loc{display:block;padding:2px 8px 16px;font-size:13px}
-.side nav{display:flex;flex-direction:column;gap:2px}
-.side a{display:flex;align-items:center;justify-content:space-between;min-height:36px;padding:0 8px;border-radius:var(--r-c);color:#fff;text-decoration:none;font-weight:500}
-.side a:hover{background:rgba(255,255,255,.14)}
-.side a[aria-current=page]{background:#fff;color:var(--text);font-weight:600}
-.badge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--support);color:#fff;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
-.side .foot{margin-top:auto;display:flex;flex-direction:column;gap:2px;border-top:1px solid rgba(255,255,255,.35);padding-top:12px}
-.who{padding:8px;font-size:13px;line-height:1.35}
-.who b{display:block;font-weight:600}
+/* shell: top bar */
+.bar{display:flex;align-items:center;gap:24px;height:56px;padding:0 32px;border-bottom:1px solid var(--line);background:var(--page);position:sticky;top:0;z-index:10}
+.brand{font-weight:700;font-size:16px;letter-spacing:-.01em;white-space:nowrap}
+.brand .loc{font-weight:400;font-size:13px;color:var(--quiet);margin-left:8px}
+.bar nav{display:flex;gap:2px;flex:1}
+.bar nav a{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:var(--r-c);color:var(--text);text-decoration:none;font-weight:500;white-space:nowrap}
+.bar nav a:hover{background:var(--raised)}
+.bar nav a[aria-current=page]{background:var(--text);color:#fff;font-weight:600}
+.badge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--support);color:#000;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.acct{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 4px 0 12px;border:0;border-radius:var(--r-c);background:transparent;font-weight:500;white-space:nowrap}
+.acct:hover{background:var(--raised)}
+#acctMenu,#more{margin:0;border:1px solid var(--line);border-radius:var(--r-p);padding:4px;background:var(--page);box-shadow:0 8px 24px rgba(17,17,17,.14);min-width:200px}
+#acctMenu{inset:60px 32px auto auto}
+#acctMenu a,#more a{display:flex;align-items:center;min-height:40px;padding:0 12px;color:var(--text);text-decoration:none;border-radius:var(--r-c)}
+#acctMenu a:hover,#more a:hover{background:var(--raised)}
+#acctMenu .who{padding:8px 12px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;font-size:13px;color:var(--quiet)}
+#acctMenu .who b{display:block;color:var(--text);font-weight:600;font-size:14px}
 
-main{padding:24px 32px 48px;min-width:0}
+main{padding:24px 32px 48px;max-width:1400px;margin:0 auto;min-width:0}
 .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px}
 h1{font-size:24px;line-height:1.2;letter-spacing:-.02em;font-weight:650}
 .top p{margin-top:2px}
@@ -52,7 +57,6 @@ h1{font-size:24px;line-height:1.2;letter-spacing:-.02em;font-weight:650}
 .btn.primary:hover{background:#2b2b2b}
 .btn.sm{min-height:32px;padding:0 12px;font-size:13px}
 .btn:disabled{color:var(--quiet);background:var(--raised);border-color:var(--line);cursor:not-allowed}
-.btn svg,.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 
 /* key figures: one ruled strip */
 .figs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:32px}
@@ -62,13 +66,13 @@ h1{font-size:24px;line-height:1.2;letter-spacing:-.02em;font-weight:650}
 .fig dd{margin:0}
 .fig .v{font-size:24px;line-height:1.25;font-weight:650;letter-spacing:-.02em;display:block}
 .fig .d{font-size:13px;color:var(--quiet)}
-.up{color:var(--good);font-weight:600}.down{color:var(--bad);font-weight:600}
+.fig .d b{font-weight:600;color:var(--text)}
 
-.work{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start}
+.work{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:32px;align-items:start}
 h2{font-size:16px;line-height:1.3;font-weight:650;letter-spacing:-.01em}
 
 /* orders */
-.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+.tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
 .search{position:relative;flex:1 1 180px;max-width:260px}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--quiet);pointer-events:none}
 .search input{width:100%;height:36px;padding:0 10px 0 32px;border:1px solid var(--quiet);border-radius:var(--r-c);background:var(--page)}
@@ -76,9 +80,8 @@ h2{font-size:16px;line-height:1.3;font-weight:650;letter-spacing:-.01em}
 .tabs button{height:32px;padding:0 12px;border:0;border-radius:var(--r-c);background:transparent;color:var(--quiet);font-weight:500}
 .tabs button:hover{background:var(--raised);color:var(--text)}
 .tabs button[aria-pressed=true]{background:var(--text);color:#fff}
-.bulk{display:none;align-items:center;gap:12px;padding:8px 12px;margin-bottom:8px;border-radius:var(--r-c);background:var(--raised);border:1px solid var(--line)}
+.bulk{display:none;align-items:center;gap:12px;margin-left:auto}
 .bulk.on{display:flex}
-.bulk span{flex:1}
 table{width:100%;border-collapse:collapse}
 th{font-size:12px;font-weight:600;color:var(--quiet);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -95,40 +98,47 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--lead)}
 .mk.p{background:conic-gradient(var(--text) 0 50%,transparent 0)}
 .mk.r{background:var(--text)}
 .mk.s{border-color:#8a8a8a;background:#8a8a8a}
-.late{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;background:var(--support);color:#fff;font-size:12px;font-weight:700}
+.late{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;background:var(--support);color:#000;font-size:12px;font-weight:700}
 .act{white-space:nowrap}
 .act .done{color:var(--quiet);font-size:13px}
 .empty{padding:32px 0;max-width:420px}
 .empty p{margin:4px 0 12px}
 .sk{height:52px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,var(--raised) 0 30%,transparent 30%) 0 12px/100% 12px no-repeat,linear-gradient(90deg,var(--raised) 0 55%,transparent 55%) 0 30px/100% 10px no-repeat}
 .err{display:none;padding:12px;border:1px solid var(--bad);border-radius:var(--r-c);margin:8px 0}
+.err b{color:var(--bad)}
 
-/* chart */
+/* chart: the one coloured panel */
+.chart{background:var(--lead);color:#fff;border-radius:var(--r-p);padding:20px 20px 16px}
+.chart :focus-visible{outline-color:#fff}
+.chart ::selection{background:#fff;color:var(--lead)}
 .chart .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.seg{display:flex;border:1px solid var(--mid);border-radius:var(--r-c);padding:2px}
-.seg button{height:28px;padding:0 10px;border:0;border-radius:4px;background:transparent;font-size:13px;font-weight:500;color:var(--quiet)}
-.seg button[aria-pressed=true]{background:var(--text);color:#fff}
-.total{font-size:24px;font-weight:650;letter-spacing:-.02em;line-height:1.25;margin-top:8px}
-.readout{min-height:40px;margin:4px 0 8px;padding:6px 10px;border-radius:var(--r-c);background:var(--raised);font-size:13px;display:flex;align-items:center}
-.legend{display:flex;gap:16px;font-size:13px;color:var(--quiet);margin-bottom:8px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
-.plot{display:grid;grid-template-columns:40px 1fr;height:300px;margin-top:12px}
-.yax{position:relative;font-size:12px;color:var(--quiet);text-align:right;padding-right:8px}
+.chart .dim{color:rgba(255,255,255,.78)}
+.seg{display:flex;border:1px solid rgba(255,255,255,.55);border-radius:var(--r-c);padding:2px}
+.seg button{height:28px;padding:0 10px;border:0;border-radius:4px;background:transparent;font-size:13px;font-weight:500;color:#fff}
+.seg button:hover{background:rgba(255,255,255,.14)}
+.seg button[aria-pressed=true]{background:#fff;color:var(--lead);font-weight:600}
+.total{font-size:28px;font-weight:650;letter-spacing:-.02em;line-height:1.2;margin-top:12px}
+.readout{min-height:40px;margin:12px 0 8px;padding:6px 10px;border-radius:var(--r-c);background:rgba(255,255,255,.12);font-size:13px;display:flex;align-items:center}
+.legend{display:flex;gap:14px;font-size:13px;color:rgba(255,255,255,.78);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.plot{display:grid;grid-template-columns:40px 1fr;height:260px;margin-top:8px}
+.yax{position:relative;font-size:12px;color:rgba(255,255,255,.78);text-align:right;padding-right:8px}
 .yax span{position:absolute;right:8px;transform:translateY(50%)}
-.area{position:relative;margin-bottom:24px;border-bottom:1px solid var(--quiet)}
-.grid{position:absolute;left:0;right:0;border-top:1px solid var(--line)}
+.area{position:relative;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.6)}
+.grid{position:absolute;left:0;right:0;border-top:1px solid rgba(255,255,255,.18)}
 .groups{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.g{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:0 4px;border:0;background:transparent;border-radius:var(--r-c) var(--r-c) 0 0}
+.g{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:0 4px;border:0;background:transparent;border-radius:var(--r-c) var(--r-c) 0 0;color:inherit}
 .g .b{flex:1;max-width:18px;border-radius:2px 2px 0 0;transition:opacity .15s ease-out}
-.g .cur{background:var(--lead)}.g .prev{background:var(--mid)}
-.g .lab{position:absolute;top:100%;left:0;right:0;margin-top:4px;font-size:12px;color:var(--quiet)}
+.g .cur{background:#fff}.g .prev{background:rgba(255,255,255,.38)}
+.g.today .cur{background:var(--pop)}
+.g .lab{position:absolute;top:100%;left:0;right:0;margin-top:4px;font-size:12px;color:rgba(255,255,255,.78)}
 .g:focus-visible{outline-offset:0}
-.g:last-child .lab{left:50%;right:auto;transform:translateX(-50%);padding:0 6px;border-radius:4px;background:var(--pop);color:var(--text);font-weight:600}
+.g.today .lab{left:50%;right:auto;transform:translateX(-50%);padding:0 6px;border-radius:4px;background:var(--pop);color:var(--text);font-weight:600}
 .groups:has(.g:hover) .g:not(:hover),.groups:has(.g:focus-visible) .g:not(:focus-visible){opacity:.45}
-.g:hover .lab,.g:focus-visible .lab{color:var(--text);font-weight:600}
+.g:hover .lab,.g:focus-visible .lab{color:#fff;font-weight:600}
 
 /* dialog */
-dialog{border:0;padding:0;border-radius:var(--r-p);width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 32px);background:var(--page);color:var(--text);box-shadow:0 12px 40px rgba(17,17,17,.18);margin:auto;overflow:auto}
+dialog{border:0;padding:0;border-radius:var(--r-p);width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--page);color:var(--text);box-shadow:0 12px 40px rgba(17,17,17,.18);margin:auto;overflow:auto}
 dialog::backdrop{background:rgba(17,17,17,.45)}
 dialog form{display:flex;flex-direction:column}
 .dh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
@@ -139,7 +149,7 @@ dialog form{display:flex;flex-direction:column}
 .df .why{flex:1;color:var(--quiet);font-size:13px}
 label,legend{display:block;font-weight:600;margin-bottom:4px;font-size:13px;padding:0}
 fieldset{border:0;padding:0;min-width:0}
-.field input[type=text],.field input[type=number]{width:100%;height:40px;padding:0 12px;border:1px solid var(--quiet);border-radius:var(--r-c);background:var(--page);font-size:16px}
+.field input[type=text]{width:100%;height:40px;padding:0 12px;border:1px solid var(--quiet);border-radius:var(--r-c);background:var(--page);font-size:16px}
 .field .hint{color:var(--quiet);font-size:13px;margin-top:4px}
 .field .error{color:var(--bad);font-size:13px;margin-top:4px;display:none}
 .field.bad input{border-color:var(--bad);border-width:2px}
@@ -166,22 +176,21 @@ fieldset{border:0;padding:0;min-width:0}
 .toast{pointer-events:auto;display:flex;align-items:center;gap:16px;padding:10px 12px 10px 16px;background:var(--text);color:#fff;border-radius:var(--r-c);box-shadow:0 4px 16px rgba(17,17,17,.2)}
 .toast button{border:0;background:transparent;color:#fff;font-weight:700;text-decoration:underline;min-height:32px;padding:0 4px}
 .toast button:focus-visible{outline-color:#fff}
-.offline{display:none}
 
-/* mobile bar */
+/* phone bottom bar */
 .mbar{display:none}
-#more{margin:0;inset:auto 8px 68px auto;border:1px solid var(--line);border-radius:var(--r-p);padding:4px;background:var(--page);box-shadow:0 8px 24px rgba(17,17,17,.15)}
-#more a{display:flex;align-items:center;min-height:44px;padding:0 16px;color:var(--text);text-decoration:none;border-radius:var(--r-c)}
-#more a:hover{background:var(--raised)}
+#more{inset:auto 8px 68px auto}
 
 @media (max-width:1100px){
   .work{grid-template-columns:1fr}
 }
 @media (max-width:760px){
-  .app{display:block}
-  main{overflow-x:clip}
-  .side{display:none}
-  main{padding:16px 16px calc(88px + env(safe-area-inset-bottom))}
+  .bar{height:52px;padding:0 16px;gap:12px}
+  .bar nav{display:none}
+  .brand .loc{display:block;margin:0;line-height:1.2}
+  .acct{margin-left:auto}
+  #acctMenu{inset:56px 16px auto auto}
+  main{padding:16px 16px calc(88px + env(safe-area-inset-bottom));overflow-x:clip}
   .top{align-items:center;margin-bottom:16px}
   .top p{font-size:13px}
   .btn{min-height:44px}
@@ -196,6 +205,9 @@ fieldset{border:0;padding:0;min-width:0}
   .tabs{overflow-x:auto;width:100%;padding-bottom:2px}
   .tabs button{height:44px;flex:none}
   .search input{height:44px}
+  .bulk{margin:0;width:100%}
+  .bulk span{flex:1}
+  .bulk .btn{width:auto}
   thead{display:none}
   table,tbody{display:block}
   tr.row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;column-gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
@@ -207,113 +219,109 @@ fieldset{border:0;padding:0;min-width:0}
   td.st{grid-column:2/4;margin-top:6px;display:flex!important;gap:12px;align-items:center}
   td.act{grid-column:2/4;margin-top:8px}
   td.act .btn{width:100%}
+  .chart{padding:16px 16px 12px}
   .seg button{height:36px}
   .plot{height:200px}
   #toasts{left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom))}
   .toast{justify-content:space-between}
-  dialog{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:var(--r-p) var(--r-p) 0 0;max-height:92vh}
+  dialog{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:var(--r-p) var(--r-p) 0 0;max-height:92dvh}
   .df{flex-wrap:wrap;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
   .df .why{flex-basis:100%}
   .df .btn{flex:1}
-  .mbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--lead);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
-  .mbar a,.mbar button{display:flex;align-items:center;justify-content:center;min-height:48px;border:0;background:transparent;color:#fff;text-decoration:none;font-size:13px;font-weight:500;border-radius:var(--r-c);position:relative}
-  .mbar :focus-visible{outline-color:#fff}
-  .mbar a[aria-current=page]{background:#fff;color:var(--text);font-weight:600}
+  .step button{width:44px;height:44px}
+  .mbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--page);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+  .mbar a,.mbar button{display:flex;align-items:center;justify-content:center;min-height:48px;border:0;background:transparent;color:var(--text);text-decoration:none;font-size:13px;font-weight:500;border-radius:var(--r-c);position:relative}
+  .mbar a[aria-current=page]{background:var(--text);color:#fff;font-weight:600}
   .mbar .badge{position:absolute;top:4px;right:6px;height:18px;min-width:18px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="app">
-  <aside class="side" aria-label="Main">
-    <div class="brand">Tableside</div>
-    <span class="loc">The Salt Cellar, Harbour St</span>
-    <nav aria-label="Sections">
-      <a href="#" aria-current="page">Overview</a>
-      <a href="#">Orders <span class="badge" id="navLate" aria-label="late orders">3</span></a>
-      <a href="#">Menu</a>
-      <a href="#">Tables</a>
-      <a href="#">Inventory</a>
-    </nav>
-    <div class="foot">
-      <a href="#">Settings</a>
-      <a href="#">Help</a>
-      <a href="#" class="who"><span><b>Maren Voss</b>Floor manager</span></a>
-    </div>
-  </aside>
+<header class="bar">
+  <div class="brand">Tableside<span class="loc">The Salt Cellar, Harbour St</span></div>
+  <nav aria-label="Sections">
+    <a href="#" aria-current="page">Overview</a>
+    <a href="#">Orders <span class="badge" id="navLate" aria-label="late orders">3</span></a>
+    <a href="#">Menu</a>
+    <a href="#">Tables</a>
+    <a href="#">Inventory</a>
+  </nav>
+  <button class="acct" type="button" popovertarget="acctMenu">Maren Voss<svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></button>
+  <div id="acctMenu" popover>
+    <div class="who"><b>Maren Voss</b>Floor manager</div>
+    <a href="#">Settings</a><a href="#">Help</a><a href="#">Sign out</a>
+  </div>
+</header>
 
-  <main id="main">
-    <div class="top">
-      <div>
-        <h1>Overview</h1>
-        <p class="quiet">Thursday 8 October, as of 14:32</p>
+<main id="main">
+  <div class="top">
+    <div>
+      <h1>Overview</h1>
+      <p class="quiet">Thursday 8 October, as of 14:32</p>
+    </div>
+    <button class="btn primary" id="newBtn" type="button"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>New order</button>
+  </div>
+
+  <dl class="figs" aria-label="Today so far">
+    <div class="fig"><dt>Revenue</dt><dd><span class="v num" id="fRev"></span><span class="d num" id="fRevD"></span></dd></div>
+    <div class="fig"><dt>Orders</dt><dd><span class="v num" id="fOrd"></span><span class="d num" id="fOrdD"></span></dd></div>
+    <div class="fig"><dt>Average order</dt><dd><span class="v num" id="fAvg"></span><span class="d num" id="fAvgD"></span></dd></div>
+    <div class="fig"><dt>Time to table</dt><dd><span class="v num">11 min 20 s</span><span class="d num"><b>40 s under</b> the 12 min target</span></dd></div>
+  </dl>
+
+  <div class="work">
+    <section aria-labelledby="oh">
+      <h2 id="oh">Recent orders</h2>
+      <div class="tools">
+        <div class="search">
+          <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+          <label class="sr" for="q">Search orders</label>
+          <input id="q" type="search" placeholder="Search name, table or dish" autocomplete="off">
+        </div>
+        <div class="tabs" role="group" aria-label="Filter orders" id="tabs">
+          <button type="button" data-f="all" aria-pressed="true">All</button>
+          <button type="button" data-f="open" aria-pressed="false">Open</button>
+          <button type="button" data-f="late" aria-pressed="false">Late</button>
+          <button type="button" data-f="served" aria-pressed="false">Served</button>
+        </div>
+        <div class="bulk" id="bulk"><span id="bulkN" class="num quiet"></span><button class="btn sm" id="bulkGo" type="button">Advance selected</button></div>
       </div>
-      <button class="btn primary" id="newBtn" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>New order</button>
-    </div>
+      <div class="err" id="err" role="alert"><b>Orders did not load.</b> Check the connection, then <button class="btn sm" id="retry" type="button" style="width:auto">Try again</button></div>
+      <table id="tbl">
+        <thead><tr><th class="chk"><span class="sr">Select</span></th><th>Order</th><th>Status</th><th class="r">Total</th><th><span class="sr">Action</span></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="skel" hidden><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
+      <div class="empty" id="empty" hidden></div>
+    </section>
 
-    <dl class="figs" aria-label="Today so far">
-      <div class="fig"><dt>Revenue</dt><dd><span class="v num" id="fRev"></span><span class="d" id="fRevD"></span></dd></div>
-      <div class="fig"><dt>Orders</dt><dd><span class="v num" id="fOrd"></span><span class="d" id="fOrdD"></span></dd></div>
-      <div class="fig"><dt>Average order</dt><dd><span class="v num" id="fAvg"></span><span class="d" id="fAvgD"></span></dd></div>
-      <div class="fig"><dt>Time to table</dt><dd><span class="v num">11 min 20 s</span><span class="d"><span class="up">40 s under</span> the 12 min target</span></dd></div>
-    </dl>
-
-    <div class="work">
-      <section aria-labelledby="oh">
-        <h2 id="oh">Recent orders</h2>
-        <div class="bar">
-          <div class="search">
-            <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
-            <label class="sr" for="q">Search orders</label>
-            <input id="q" type="search" placeholder="Search name, table or dish" autocomplete="off">
-          </div>
-          <div class="tabs" role="group" aria-label="Filter orders" id="tabs">
-            <button type="button" data-f="all" aria-pressed="true">All</button>
-            <button type="button" data-f="open" aria-pressed="false">Open</button>
-            <button type="button" data-f="late" aria-pressed="false">Late</button>
-            <button type="button" data-f="served" aria-pressed="false">Served</button>
-          </div>
+    <section class="chart" aria-labelledby="ch">
+      <div class="head">
+        <h2 id="ch">Last 7 days</h2>
+        <div class="seg" role="group" aria-label="Metric">
+          <button type="button" data-m="rev" aria-pressed="true">Revenue</button>
+          <button type="button" data-m="ord" aria-pressed="false">Orders</button>
         </div>
-        <div class="bulk" id="bulk"><span id="bulkN" class="num"></span><button class="btn sm" id="bulkGo" type="button">Advance selected</button></div>
-        <div class="err" id="err" role="alert"><b>Orders did not load.</b> Check the connection, then <button class="btn sm" id="retry" type="button" style="width:auto">Try again</button></div>
-        <table id="tbl">
-          <thead><tr><th class="chk"><span class="sr">Select</span></th><th>Order</th><th>Status</th><th class="r">Total</th><th><span class="sr">Action</span></th></tr></thead>
-          <tbody id="rows"></tbody>
-        </table>
-        <div id="skel" hidden><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
-        <div class="empty" id="empty" hidden></div>
-      </section>
-
-      <section class="chart" aria-labelledby="ch">
-        <div class="head">
-          <div>
-            <h2 id="ch">Last 7 days</h2>
-          </div>
-          <div class="seg" role="group" aria-label="Metric">
-            <button type="button" data-m="rev" aria-pressed="true">Revenue</button>
-            <button type="button" data-m="ord" aria-pressed="false">Orders</button>
-          </div>
-        </div>
-        <div class="total num" id="tot"></div>
-        <div class="quiet" id="totD" style="font-size:13px"></div>
-        <div class="legend"><span><i style="background:var(--lead)"></i>Last 7 days</span><span><i style="background:var(--mid)"></i>Previous 7 days</span></div>
-        <div class="readout num" id="readout" aria-live="polite"></div>
-        <div class="plot"><div class="yax" id="yax" aria-hidden="true"></div><div class="area" id="area"></div></div>
-      </section>
-    </div>
-  </main>
-</div>
+      </div>
+      <div class="total num" id="tot"></div>
+      <div class="dim num" id="totD" style="font-size:13px"></div>
+      <div class="legend"><span><i style="background:#fff"></i>This week</span><span><i style="background:rgba(255,255,255,.38)"></i>Last week</span><span><i style="background:var(--pop)"></i>Today so far</span></div>
+      <div class="readout num" id="readout" aria-live="polite"></div>
+      <div class="plot"><div class="yax" id="yax" aria-hidden="true"></div><div class="area" id="area"></div></div>
+    </section>
+  </div>
+</main>
 
 <nav class="mbar" aria-label="Main">
   <a href="#" aria-current="page">Overview</a>
   <a href="#">Orders <span class="badge" id="navLate2" aria-label="late orders">3</span></a>
   <a href="#">Menu</a>
   <a href="#">Tables</a>
-  <button type="button" popovertarget="more" aria-label="More sections">More</button>
+  <button type="button" popovertarget="more">More</button>
 </nav>
 <div id="more" popover>
-  <a href="#">Inventory</a><a href="#">Settings</a><a href="#">Help</a>
+  <a href="#">Inventory</a><a href="#">Settings</a><a href="#">Help</a><a href="#">Sign out</a>
 </div>
 
 <div id="toasts" role="status" aria-live="polite"></div>
@@ -364,12 +372,12 @@ var orders=[
  {id:1043,type:"Dine-in",who:"Table 15",items:"2x Chicken biryani, Mint lemonade",s:3,m:55,t:5830},
  {id:1042,type:"Takeaway",who:"Hui Min Tan",items:"Garlic naan x2, Raita",s:3,m:61,t:1450}
 ];
-var ST=["New","Preparing","Ready","Served"], NEXT=[null,"Start","Mark ready","Mark served","Mark served"];
+var ST=["New","Preparing","Ready","Served"];
 var ACT=["Start","Mark ready","Mark served",null];
 var BASE={rev:241860,ord:143,lastRev:223510,lastOrd:146};
 var filter="all",q="",sel={},nextId=1052,added=0,addedTotal=0;
 var $=function(i){return document.getElementById(i)};
-var money=function(p,d){return "£"+(p/100).toLocaleString("en-GB",{minimumFractionDigits:d===0?0:2,maximumFractionDigits:d===0?0:2})};
+var money=function(p){return "£"+(p/100).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2})};
 function rel(m){return m<1?"Just now":m<60?m+" min ago":"1 hr "+(m-60)+" min ago"}
 function clock(m){var t=NOW-m;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")}
 function isLate(o){return o.s<2&&o.m>=LATE_AFTER}
@@ -449,13 +457,13 @@ function figs(){
   var lastAvg=Math.round(BASE.lastRev/BASE.lastOrd);
   $("fRev").textContent=money(rev);
   var rp=(rev/BASE.lastRev-1)*100;
-  $("fRevD").innerHTML="<span class='"+(rp>=0?"up":"down")+"'>"+(rp>=0?"+":"")+rp.toFixed(1)+"%</span> on last Thursday";
+  $("fRevD").innerHTML="<b>"+(rp>=0?"+":"")+rp.toFixed(1)+"%</b> on last Thursday";
   $("fOrd").textContent=ord;
   var od=ord-BASE.lastOrd;
-  $("fOrdD").innerHTML="<span class='"+(od>=0?"up":"down")+"'>"+(od>=0?"+":"")+od+"</span> on last Thursday";
+  $("fOrdD").innerHTML="<b>"+(od>=0?"+":"")+od+"</b> on last Thursday";
   $("fAvg").textContent=money(avg);
   var ad=avg-lastAvg;
-  $("fAvgD").innerHTML="<span class='"+(ad>=0?"up":"down")+"'>"+(ad>=0?"+":"-")+money(Math.abs(ad))+"</span> on last Thursday";
+  $("fAvgD").innerHTML="<b>"+(ad>=0?"+":"-")+money(Math.abs(ad))+"</b> on last Thursday";
 }
 
 /* chart */
@@ -469,23 +477,24 @@ var metric="rev";
 function pct(a,b){var d=(a/b-1)*100;return (d>=0?"+":"")+d.toFixed(1)+"%"}
 function chart(){
   var D=DATA[metric],sum=function(a){return a.reduce(function(x,y){return x+y},0)};
+  D.cur[6]=metric==="rev"?Math.round((BASE.rev+addedTotal)/100):BASE.ord+added; /* today tracks the figures strip */
   var c=sum(D.cur),p=sum(D.prev);
   $("tot").textContent=D.fmt(c);
-  $("totD").innerHTML="<span class='"+(c>=p?"up":"down")+"'>"+pct(c,p)+"</span> on the previous 7 days ("+D.fmt(p)+")";
+  $("totD").innerHTML="<b>"+pct(c,p)+"</b> on the previous 7 days ("+D.fmt(p)+")";
   var y="",g="";
   for(var v=0;v<=D.max;v+=D.step){var pos=v/D.max*100;y+="<span style='bottom:"+pos+"%'>"+(metric==="rev"&&v?"£"+v/1000+"k":v)+"</span>";if(v)g+="<div class='grid' style='bottom:"+pos+"%'></div>"}
   $("yax").innerHTML=y;
   var h="<div class='groups' role='group' aria-label='Daily "+D.label+"'>";
   DAYS.forEach(function(d,i){
-    h+="<button type='button' class='g' data-i='"+i+"' aria-label='"+FULL[i]+": "+D.fmt(D.cur[i])+", previous week "+D.fmt(D.prev[i])+"'>"+
+    h+="<button type='button' class='g"+(i===6?" today":"")+"' data-i='"+i+"' aria-label='"+FULL[i]+": "+D.fmt(D.cur[i])+", previous week "+D.fmt(D.prev[i])+"'>"+
        "<span class='b prev' style='height:"+D.prev[i]/D.max*100+"%'></span><span class='b cur' style='height:"+D.cur[i]/D.max*100+"%'></span><span class='lab'>"+d+"</span></button>"});
   $("area").innerHTML=g+h+"</div>";
   readout(null);
 }
 function readout(i){
   var D=DATA[metric];
-  $("readout").innerHTML=i===null?"<span class='quiet'>Hover or focus a day for its figures.</span>":
-   "<span><b>"+FULL[i]+"</b>&nbsp; "+D.fmt(D.cur[i])+" &nbsp;<span class='quiet'>vs "+D.fmt(D.prev[i])+"</span> &nbsp;<span class='"+(D.cur[i]>=D.prev[i]?"up":"down")+"'>"+pct(D.cur[i],D.prev[i])+"</span></span>";
+  $("readout").innerHTML=i===null?"<span class='dim'>Hover or focus a day for its figures.</span>":
+   "<span><b>"+FULL[i]+"</b>&nbsp; "+D.fmt(D.cur[i])+" &nbsp;<span class='dim'>vs "+D.fmt(D.prev[i])+"</span> &nbsp;<b>"+pct(D.cur[i],D.prev[i])+"</b></span>";
 }
 var area=$("area");
 area.addEventListener("mouseover",function(e){var g=e.target.closest(".g");if(g)readout(+g.dataset.i)});
@@ -534,8 +543,8 @@ $("f").addEventListener("submit",function(e){
   e.preventDefault();if(!check()){$("who").focus();return}
   var items=[],tot=0;qty.forEach(function(n,i){if(n){items.push((n>1?n+"x ":"")+MENU[i][0]);tot+=n*MENU[i][1]}});
   var t=type(),w=$("who").value.trim(),o={id:nextId++,type:t,who:t==="Dine-in"?"Table "+w:w,items:items.join(", "),s:0,m:0,t:tot};
-  orders.unshift(o);added++;addedTotal+=tot;dlg.close();figs();render();
-  toast("Order "+o.id+" sent to the kitchen",function(){orders=orders.filter(function(x){return x!==o});added--;addedTotal-=tot;figs();render()});
+  orders.unshift(o);added++;addedTotal+=tot;dlg.close();figs();chart();render();
+  toast("Order "+o.id+" sent to the kitchen",function(){orders=orders.filter(function(x){return x!==o});added--;addedTotal-=tot;figs();chart();render()});
 });
 
 /* offline */

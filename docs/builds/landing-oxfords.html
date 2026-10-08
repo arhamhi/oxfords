@@ -3,543 +3,443 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ledgerly: invoices that chase late payers for you</title>
-<meta name="description" content="Ledgerly sends your invoices, reminds late payers on a schedule you set, and shows who owes you what. Free tier and one paid plan.">
+<title>Ledgerly: invoices that get paid without you chasing</title>
+<meta name="description" content="Ledgerly sends your invoices, reminds late payers on a schedule you set, and shows who still owes what. For freelancers and small studios.">
 <style>
+/* Arcade (palettes.md), roles swapped: pink lead, plum support, green pop, on a white page.
+   Why: a tool for people chasing money should look awake, not corporate. Pink carries the
+   action and the overdue figure, plum carries one flooded section, green marks what is paid.
+   System font stack, because the page loads no external files. */
 :root{
-  --white:#FFFFFF; --raised:#F4F4F5; --line:#E5E5E5; --quiet:#6B6B6B; --text:#111111; --black:#0A0A0A;
-  --lead:#6162A3; --support:#D1D127; --pop:#E6E6F4; --late:#C62828;
-  --err:#C62828;
-  --font:system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --r:8px; --r-lg:12px;
+  --page:#FFFFFF; --raised:#F4F4F5; --line:#E5E5E5; --quiet:#6B6B6B; --text:#111111;
+  --lead:#FE1C66; --support:#3E283D; --pop:#28B467;
+  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--white);color:var(--text);font:400 16px/1.5 var(--font);-webkit-font-smoothing:antialiased}
-::selection{background:var(--lead);color:#fff}
-input{caret-color:var(--lead);accent-color:var(--lead)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--page);color:var(--text);font:16px/1.5 var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+::selection{background:var(--lead);color:#111}
 a{color:inherit}
-:focus-visible{outline:3px solid var(--text);outline-offset:3px}
-.flood-lead :focus-visible{outline-color:#fff}
-.flood-lead .mail :focus-visible,.flood-support :focus-visible{outline-color:var(--text)}
-footer :focus-visible{outline-color:var(--white)}
-.wrap{max-width:1200px;margin:0 auto;padding:0 32px}
-.num{font-variant-numeric:tabular-nums}
-h1,h2,h3,p{margin:0}
-h1{font-size:clamp(40px,5.2vw,68px);line-height:1.04;letter-spacing:-0.035em;font-weight:760}
-h2{font-size:clamp(30px,3.6vw,46px);line-height:1.1;letter-spacing:-0.03em;font-weight:740}
-h3{font-size:19px;line-height:1.3;font-weight:660;letter-spacing:-0.01em}
-.lede{font-size:20px;line-height:1.5;max-width:34em}
-.quiet{color:var(--quiet)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em;line-height:1.1}
+h2{font-size:32px;margin-bottom:12px}
+.lede{font-size:18px;color:var(--quiet);max-width:52ch}
+.mute{color:var(--quiet)}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:6px;border:0;font:600 16px/1 var(--font);text-decoration:none;cursor:pointer;white-space:nowrap;transition:background-color 120ms ease-out,transform 100ms ease-out}
+.btn:active{transform:translateY(1px)}
+.btn-lead{background:var(--lead);color:#111}
+.btn-lead:hover{background:#E5125A}
+.btn-dark{background:var(--text);color:#fff}
+.btn-dark:hover{background:#333}
+.btn-ghost{background:transparent;color:var(--text);text-decoration:underline;text-underline-offset:4px;padding:0 8px}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn-sm{height:36px;padding:0 14px;font-size:14px}
 
-/* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:var(--r);border:2px solid var(--text);font:600 16px/1 var(--font);text-decoration:none;cursor:pointer;transition:background-color .12s ease-out,color .12s ease-out}
-.btn-primary{background:var(--lead);color:#fff}
-.btn-primary:hover{background:var(--text);color:var(--white)}
-.btn-primary:active{background:#000;color:var(--white)}
-.btn-secondary{background:transparent;color:var(--text)}
-.btn-secondary:hover{background:var(--text);color:var(--white)}
-.btn-secondary:active{background:#000;color:var(--white)}
-.btn[disabled]{background:var(--raised);border-color:var(--line);color:var(--quiet);cursor:not-allowed}
-.btn-dark{background:var(--text);color:var(--white)}
-.btn-dark:hover{background:var(--white);color:var(--text)}
-.btn-dark:active{background:var(--raised);color:var(--text)}
-.btn-white{background:var(--white);color:var(--text)}
-.btn-white:hover{background:var(--text);color:var(--white)}
+/* Nav */
+nav{border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:32px;height:64px}
+.brand{font-weight:700;font-size:18px;letter-spacing:-0.01em;text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand i{width:12px;height:12px;background:var(--lead);display:inline-block}
+nav ul{list-style:none;display:flex;gap:24px;margin-left:auto}
+nav ul a{text-decoration:none;color:var(--quiet)}
+nav ul a:hover{color:var(--text)}
 
-/* nav */
-.nav{border-bottom:1px solid var(--line);background:var(--white)}
-.nav .wrap{display:flex;align-items:center;gap:32px;height:72px}
-.logo{display:inline-flex;align-items:center;gap:10px;font-weight:780;font-size:21px;letter-spacing:-0.03em;text-decoration:none}
-.logo-mark{width:26px;height:26px;display:block}
-.nav-links{display:flex;gap:4px;margin-left:auto}
-.nav-links a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:var(--r);text-decoration:none;font-weight:540;transition:background-color .12s ease-out}
-.nav-links a:hover{background:var(--raised)}
-.nav .btn{min-height:44px;padding:0 20px}
-
-/* hero */
+/* Hero */
 .hero{padding:88px 0 112px}
-.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:64px;align-items:center}
-.hero h1{max-width:11.5em}
-.hero .lede{margin-top:24px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
+.hero .wrap{display:grid;grid-template-columns:5fr 7fr;gap:64px;align-items:center}
+h1{font-size:56px;margin-bottom:20px}
+h1 span{color:var(--quiet)}
+.hero .lede{margin-bottom:40px}
+form.start{display:flex;flex-direction:column;gap:6px;max-width:420px}
+form.start label{font-size:14px;font-weight:600}
+form.start .row{display:flex;gap:8px}
+form.start input{flex:1;min-width:0;height:48px;padding:0 14px;font:16px var(--font);border:1px solid #767676;border-radius:6px;background:#fff;color:var(--text)}
+form.start input:focus-visible{outline:2px solid var(--text);outline-offset:1px;border-color:var(--text)}
+form.start input[aria-invalid="true"]{border-color:#B3261E}
+.hint{font-size:14px;color:var(--quiet)}
+.err{font-size:14px;color:#B3261E;display:none}
+form.start.is-error .err{display:block}
+form.start.is-done .err,form.start.is-done .hint{display:none}
+.ok{font-size:14px;display:none}
+form.start.is-done .ok{display:block}
+.truth{margin-top:24px;font-size:14px;color:var(--quiet);max-width:48ch}
 
-/* the real ledger */
-.ledger{border:1px solid var(--text);border-radius:var(--r-lg);background:var(--white);overflow:hidden;box-shadow:0 18px 40px -24px rgba(17,17,17,.35)}
-.ledger-head{padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
-.ledger-head .big{font-size:34px;line-height:1;font-weight:760;letter-spacing:-0.03em}
-.ledger-head .small{font-size:14px;color:var(--quiet);margin-top:6px}
-.ledger-head .late{font-size:14px;text-align:right}
-.ledger-head .late b{font-size:18px;display:block;letter-spacing:-0.01em}
-.chips{display:flex;flex-wrap:wrap;gap:8px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--raised)}
-.chip{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #bdbdbd;background:var(--white);font:560 14px/1 var(--font);color:var(--text);cursor:pointer;transition:background-color .12s ease-out}
-.chip:hover{background:var(--line)}
-.chip[aria-pressed="true"]{background:var(--text);color:var(--white);border-color:var(--text)}
-.rows{list-style:none;margin:0;padding:0}
-.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 16px;padding:14px 24px;border-bottom:1px solid var(--line);align-items:center}
-.row:last-child{border-bottom:0}
-.row .who{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .meta{font-size:14px;color:var(--quiet)}
-.row .amt{font-weight:650;text-align:right;font-variant-numeric:tabular-nums}
-.row .st{font-size:14px;text-align:right;display:inline-flex;gap:8px;align-items:center;justify-content:flex-end}
-.mark{width:10px;height:10px;border-radius:2px;background:var(--late);display:inline-block;flex:none}
-.row.paid{background:var(--pop)}
-.row.paid .meta{color:#3b3f45}
-.row[hidden]{display:none}
-.ledger-foot{padding:14px 24px;background:var(--raised);border-top:1px solid var(--line);font-size:14px;color:var(--quiet);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* Who owes what panel (working) */
+.panel{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:20px 20px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-head h3{font-size:14px;font-weight:600;color:var(--quiet);margin-bottom:4px;letter-spacing:0}
+.fig{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1}
+.fig.late{color:var(--lead)}
+.fig-pair{display:flex;gap:32px}
+.chips{display:flex;gap:4px;padding:12px 20px;border-bottom:1px solid var(--line)}
+.chip{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font:500 14px var(--font);color:var(--text);cursor:pointer;transition:background-color 120ms ease-out}
+.chip:hover{background:var(--raised)}
+.chip[aria-pressed="true"]{background:var(--text);color:#fff;border-color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--quiet);padding:10px 12px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{padding-left:20px}
+th:last-child,td:last-child{padding-right:20px}
+th.num,td.num{text-align:right}
+th button{all:unset;cursor:pointer;color:inherit}
+th button:hover{color:var(--text)}
+th button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr[hidden]{display:none}
+.client{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.ref{color:var(--quiet)}
+.st{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--line);flex:none}
+.st.late::before{background:var(--lead)}
+.st.paid::before{background:var(--pop)}
+.st.paid{color:var(--quiet)}
+.empty{padding:32px 20px;text-align:center;color:var(--quiet);font-size:14px}
+.empty[hidden]{display:none}
+.panel-foot{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--line);font-size:14px;color:var(--quiet)}
 
-/* flood: lead */
-.flood-lead{background:var(--lead);color:#fff;padding:128px 0}
-.flood-lead .top{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:64px;align-items:end}
-.flood-lead .top p{font-size:20px;max-width:30em}
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:64px}
-.mail{color:var(--text);background:var(--white);border:1px solid var(--text);border-radius:var(--r-lg);padding:24px;display:flex;flex-direction:column;gap:14px}
-.mail .when{font-weight:700;font-size:15px;display:flex;justify-content:space-between;gap:12px}
-.mail .when span{font-weight:500;color:var(--quiet)}
-.mail .subj{font-weight:660;font-size:17px;line-height:1.3}
-.mail p{font-size:15px;color:#333;line-height:1.55}
-.mail .sig{font-size:14px;color:var(--quiet);margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
-.tone{font-size:14px;font-weight:600;background:var(--text);color:var(--white);padding:4px 10px;border-radius:999px;align-self:flex-start}
-.stop{margin-top:28px;font-weight:600;font-size:18px}
+/* Reminders: flooded in plum */
+.reminders{background:var(--support);color:#fff;padding:112px 0}
+.reminders h2{color:#fff}
+.reminders .lede{color:rgba(255,255,255,.72)}
+.reminders .cols{display:grid;grid-template-columns:7fr 5fr;gap:64px;margin-top:48px;align-items:start}
+.email{background:#fff;color:var(--text);border-radius:10px;overflow:hidden}
+.email-meta{padding:16px 24px;border-bottom:1px solid var(--line);font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px}
+.email-meta dt{color:var(--quiet)}
+.email-meta dd{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.email-body{padding:24px}
+.email-body p{margin-bottom:16px;max-width:60ch}
+.email-body p:last-child{margin-bottom:0}
+.email-foot{padding:12px 24px;border-top:1px solid var(--line);font-size:14px;color:var(--quiet)}
+.sched{list-style:none;display:flex;flex-direction:column}
+.sched li{display:grid;grid-template-columns:20px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.18)}
+.sched li:last-child{border-bottom:0}
+.sched i{width:12px;height:12px;border-radius:3px;border:1.5px solid rgba(255,255,255,.6);margin-top:5px;display:block}
+.sched li.sent i{background:var(--pop);border-color:var(--pop)}
+.sched li.now i{background:var(--lead);border-color:var(--lead)}
+.sched strong{display:block;font-weight:600}
+.sched span{color:rgba(255,255,255,.72);font-size:14px}
+.sched .when{color:#fff;font-size:14px}
+.reminders .note{margin-top:24px;font-size:14px;color:rgba(255,255,255,.72);max-width:44ch}
 
-/* features: neutral */
-.features{padding:128px 0;background:var(--white)}
-.feat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:80px;align-items:center}
-.feat + .feat{margin-top:128px}
-.feat.flip{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
-.feat.flip .copy{order:2}
-.copy h2{margin-bottom:20px}
-.copy p{font-size:18px;max-width:28em}
-.panel{border:1px solid var(--text);border-radius:var(--r-lg);background:var(--raised);padding:28px}
-.field{display:block;margin-bottom:16px}
-.field > span{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
-.field input{width:100%;min-height:48px;padding:0 14px;border:1.5px solid #767676;border-radius:var(--r);background:var(--white);font:400 16px/1 var(--font);color:var(--text);transition:border-color .12s ease-out}
-.field input:hover{border-color:var(--text)}
-.field input:focus-visible{outline:3px solid var(--text);outline-offset:2px;border-color:var(--text)}
-.field .hint{font-size:14px;color:var(--quiet);margin-top:6px;display:block}
-.field .err{font-size:14px;color:var(--err);font-weight:600;margin-top:6px;display:none}
-.field.bad input{border-color:var(--err)}
-.field.bad .err{display:block}
-.lines{display:grid;grid-template-columns:minmax(0,1fr) 72px 104px;gap:8px 12px;align-items:center;margin-bottom:6px}
-.lines .h{font-size:14px;font-weight:600}
-.lines .h.r{text-align:right}
-.lines input{min-height:44px}
-.lines input.r{text-align:right}
-.lines input{min-width:0;font-size:16px;padding:0 10px}
-.total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--text);padding-top:16px;margin-top:18px}
-.total b{font-size:30px;letter-spacing:-0.03em}
-.panel .btn{margin-top:18px;width:100%}
-.note{font-size:14px;color:var(--quiet);margin-top:10px}
+/* Invoice: grey band */
+.invoice{background:var(--raised);padding:112px 0}
+.invoice .cols{display:grid;grid-template-columns:7fr 5fr;gap:64px;align-items:center}
+.paper{background:#fff;border:1px solid var(--line);padding:40px}
+.paper-head{display:flex;justify-content:space-between;gap:24px;margin-bottom:40px;flex-wrap:wrap}
+.paper-head .from{font-size:14px;line-height:1.45}
+.paper-head .from b{display:block;font-size:18px;margin-bottom:4px}
+.paper-head .no{text-align:right;font-size:14px}
+.paper-head .no b{display:block;font-size:22px;letter-spacing:-0.01em}
+.paper .to{display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:14px;margin-bottom:32px;line-height:1.45}
+.paper .to b{display:block;color:var(--quiet);font-weight:500;margin-bottom:4px}
+.paper table{font-size:14px}
+.paper th{padding:8px 0;border-bottom:1px solid var(--text);color:var(--quiet)}
+.paper td{padding:10px 0}
+.paper th:first-child,.paper td:first-child{padding-left:0}
+.paper th:last-child,.paper td:last-child{padding-right:0}
+.paper .tot td{border-top:1px solid var(--text);border-bottom:0;font-weight:700;font-size:18px;padding-top:12px}
+.paper .pay{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:32px;padding-top:24px;border-top:1px solid var(--line);flex-wrap:wrap;font-size:14px;color:var(--quiet)}
+.lines{list-style:none;margin-top:32px;font-size:16px}
+.lines li{padding:16px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr;gap:4px}
+.lines li:last-child{border-bottom:1px solid var(--line)}
+.lines b{font-weight:600}
+.lines span{color:var(--quiet)}
 
-/* chart */
-.chart{background:var(--white);border:1px solid var(--text);border-radius:var(--r-lg);padding:28px}
-.chart-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-.chart-top b{font-size:18px}
-.seg{display:inline-flex;border:1.5px solid var(--text);border-radius:var(--r);overflow:hidden}
-.seg button{min-height:40px;padding:0 14px;border:0;background:var(--white);font:560 14px/1 var(--font);cursor:pointer;transition:background-color .12s ease-out}
-.seg button + button{border-left:1.5px solid var(--text)}
-.seg button[aria-pressed="true"]{background:var(--text);color:var(--white)}
-.seg button:hover:not([aria-pressed="true"]){background:var(--raised)}
-.plot{display:grid;grid-template-columns:56px minmax(0,1fr);gap:0 8px}
-.yax{display:flex;flex-direction:column-reverse;justify-content:space-between;height:240px;font-size:13px;color:var(--quiet);text-align:right;font-variant-numeric:tabular-nums}
-.bars{position:relative;height:240px;border-left:1px solid var(--text);border-bottom:1px solid var(--text);display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:0 16px;align-items:end;background:repeating-linear-gradient(to top,transparent 0,transparent 59px,var(--line) 59px,var(--line) 60px)}
-.bar{position:relative;display:flex;align-items:flex-end;height:100%}
-.bar i{display:block;width:100%;background:var(--lead);border-radius:3px 3px 0 0}
-.bar.s i{background:var(--support)}
-.bar.l i{background:var(--late)}
-.bar em{position:absolute;left:0;right:0;font-style:normal;font-size:13px;font-weight:650;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
-.xax{display:grid;grid-template-columns:56px minmax(0,1fr);gap:0 8px;margin-top:8px}
-.xax div{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:0 16px;font-size:13px;text-align:center}
-.legend{font-size:14px;color:var(--quiet);margin-top:16px}
+/* Pricing */
+.pricing{padding:112px 0}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px;max-width:860px}
+.plan{border:1px solid var(--line);border-radius:10px;padding:32px}
+.plan .name{font-size:14px;color:var(--quiet);font-weight:500;margin-bottom:12px}
+.plan .price{font-size:56px;font-weight:700;letter-spacing:-0.03em;line-height:1}
+.plan .price small{font-size:16px;font-weight:500;letter-spacing:0;color:var(--quiet)}
+.plan .alt{font-size:14px;color:var(--quiet);margin:8px 0 24px;min-height:21px}
+.plan .btn{width:100%;margin-bottom:24px}
+.plan dl{font-size:14px}
+.plan dl div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line)}
+.plan dd{text-align:right;white-space:nowrap}
+.plan dd.no{color:var(--quiet)}
+.pricing .fine{margin-top:24px;font-size:14px;color:var(--quiet)}
 
-/* flood: support (pricing) */
-.flood-support{background:var(--support);color:var(--text);padding:128px 0}
-.flood-support .head{max-width:40em}
-.flood-support .head p{font-size:20px;margin-top:20px;max-width:28em}
-.billing{margin-top:40px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.billing .seg button{background:var(--support)}
-.billing .seg button[aria-pressed="true"]{background:var(--text);color:var(--white)}
-.billing .seg button:hover:not([aria-pressed="true"]){background:#E2E26A}
-.save{background:var(--pop);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:650;border:1px solid var(--text)}
-.plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:32px}
-.plan{background:var(--white);border:1px solid var(--text);border-radius:var(--r-lg);padding:32px;display:flex;flex-direction:column}
-.plan .name{font-size:16px;font-weight:600;color:var(--quiet)}
-.plan .price{font-size:64px;font-weight:780;letter-spacing:-0.045em;line-height:1;margin:12px 0 4px;font-variant-numeric:tabular-nums}
-.plan .price small{font-size:17px;font-weight:500;letter-spacing:0;color:var(--quiet)}
-.plan .bill{font-size:14px;color:var(--quiet);min-height:21px}
-.plan ul{list-style:none;margin:28px 0;padding:0;border-top:1px solid var(--line)}
-.plan li{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
-.plan li .v{font-weight:600;display:inline-flex;gap:8px;align-items:center;text-align:right}
-.plan li .v.no{color:var(--quiet);font-weight:500}
-.plan li svg{width:16px;height:16px;flex:none}
-.plan .btn{margin-top:auto}
+/* Footer */
+footer{border-top:1px solid var(--line);padding:48px 0 56px;font-size:14px;color:var(--quiet)}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+footer ul{list-style:none;display:flex;gap:24px;flex-wrap:wrap}
+footer a{text-decoration:none}
+footer a:hover{color:var(--text);text-decoration:underline}
 
-/* closing + faq: neutral */
-.close{padding:128px 0;background:var(--white)}
-.close .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:80px;align-items:start}
-.close h2{margin-bottom:20px}
-.signup{max-width:460px}
-.signup .row2{display:flex;gap:12px;align-items:flex-start}
-.signup .row2 .field{flex:1;margin-bottom:0}
-.signup .row2 .btn{margin-top:26px;flex:none}
-.signup .row2 .btn[disabled]{margin-top:26px}
-.signup .done{display:none;margin-top:16px;padding:14px 16px;background:var(--pop);border:1px solid var(--text);border-radius:var(--r);font-weight:600}
-.signup.sent .done{display:block}
-details{border-top:1px solid var(--text)}
-details:last-of-type{border-bottom:1px solid var(--text)}
-summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:56px;padding:12px 0;font-weight:640;font-size:18px}
-summary::-webkit-details-marker{display:none}
-summary::after{content:"+";font-size:26px;font-weight:400;line-height:1;flex:none}
-details[open] summary::after{content:"\2212"}
-details p{padding:0 0 20px;max-width:34em;color:#333}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
 
-footer{background:var(--black);color:var(--white);padding:72px 0 48px}
-footer .wrap{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:40px}
-footer .logo{color:var(--white)}
-footer p{color:#A3A3A3;font-size:15px;margin-top:14px;max-width:22em}
-footer h3{font-size:15px;color:#A3A3A3;font-weight:560;margin-bottom:10px}
-footer ul{list-style:none;margin:0;padding:0}
-footer li a{display:inline-flex;align-items:center;min-height:36px;color:var(--white);text-decoration:none}
-footer li a:hover{text-decoration:underline}
-.legal{grid-column:1/-1;border-top:1px solid #2A2A2A;padding-top:24px;font-size:14px;color:#A3A3A3;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-
-@media (max-width:980px){
-  .hero .wrap,.flood-lead .top,.feat,.feat.flip,.close .wrap{grid-template-columns:minmax(0,1fr);gap:40px}
-  .feat.flip .copy{order:0}
-  .steps{grid-template-columns:minmax(0,1fr)}
-  footer .wrap{grid-template-columns:repeat(2,minmax(0,1fr))}
-  footer .wrap > div:first-child{grid-column:1/-1}
-}
-@media (max-width:640px){
-  .wrap{padding:0 16px}
-  .nav .wrap{gap:12px;height:64px}
-  .nav-links{display:none}
-  .nav .btn{margin-left:auto}
+@media (max-width:900px){
+  h1{font-size:40px}
+  h2{font-size:28px}
   .hero{padding:48px 0 72px}
-  .lede{font-size:18px}
-  .hero-actions .btn{flex:1 1 100%}
-  .flood-lead,.flood-support,.features,.close{padding:72px 0}
-  .feat + .feat{margin-top:72px}
-  .ledger-head,.chips,.row,.ledger-foot{padding-left:16px;padding-right:16px}
-  .ledger-head .big{font-size:28px}
-  .ledger-head .late{text-align:left}
-  .panel,.chart,.plan{padding:20px}
-  .lines{grid-template-columns:minmax(0,1fr) 56px 88px}
-  .plans{grid-template-columns:minmax(0,1fr)}
-  .plan .price{font-size:52px}
-  .plot,.xax{grid-template-columns:44px minmax(0,1fr)}
-  .bars,.xax div{gap:8px;padding:0 8px}
-  .signup .row2{flex-direction:column}
-  .signup .row2 .field{width:100%}
-  .signup .row2 .btn,.signup .row2 .btn[disabled]{margin-top:12px;width:100%}
-  footer .wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px 16px}
+  .hero .wrap,.reminders .cols,.invoice .cols{grid-template-columns:1fr;gap:40px}
+  .invoice .cols .paper{order:2}
+  .reminders,.invoice,.pricing{padding:72px 0}
+  .plans{grid-template-columns:1fr}
+  nav ul li.hide-sm{display:none}
+  nav .wrap{gap:16px}
 }
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *{transition-duration:.01ms !important}
+@media (max-width:480px){
+  .wrap{padding:0 16px}
+  .fig{font-size:28px}
+  .fig-pair{gap:20px}
+  th.hide-xs,td.hide-xs{display:none}
+  .client{max-width:112px}
+  td,th{padding-left:8px;padding-right:8px}
+  .panel-foot{flex-direction:column;align-items:flex-start;gap:4px}
+  .chips{overflow-x:auto;padding:12px 16px}
+  th:first-child,td:first-child{padding-left:16px}
+  th:last-child,td:last-child{padding-right:16px}
+  .paper{padding:24px}
+  .paper .to{grid-template-columns:1fr}
+  .email-meta{grid-template-columns:1fr;gap:2px}
+  .email-meta dt{display:none}
+  .email-body,.email-meta,.email-foot{padding-left:16px;padding-right:16px}
+  .plan{padding:24px}
+  .plan .price{font-size:40px}
+  form.start .row{flex-direction:column}
 }
 </style>
 </head>
 <body>
 
-<header class="nav">
+<nav aria-label="Main">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="Ledgerly home">
-      <svg class="logo-mark" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#111"/><path d="M8 6v11.5h10" fill="none" stroke="#D1D127" stroke-width="3.2" stroke-linecap="square"/></svg>
-      Ledgerly
-    </a>
-    <nav class="nav-links" aria-label="Main">
-      <a href="#reminders">Reminders</a>
-      <a href="#features">Invoicing</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#questions">Questions</a>
-    </nav>
-    <a class="btn btn-dark" href="#signup">Start free</a>
+    <a class="brand" href="#top"><i aria-hidden="true"></i>Ledgerly</a>
+    <ul>
+      <li class="hide-sm"><a href="#reminders">Reminders</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li class="hide-sm"><a href="#start">Sign in</a></li>
+      <li><a class="btn btn-dark btn-sm" href="#start">Start for free</a></li>
+    </ul>
   </div>
-</header>
+</nav>
 
 <main id="top">
-
-<!-- hero: neutral -->
 <section class="hero">
   <div class="wrap">
     <div>
-      <h1><span style="color:var(--quiet)">Stop chasing clients</span> for money you are owed</h1>
-      <p class="lede">Ledgerly sends your invoices, reminds late payers on a schedule you set, and shows who owes you what. Built for freelancers and small studios.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#signup">Start free</a>
-        <a class="btn btn-secondary" href="#pricing">See pricing</a>
-      </div>
+      <h1>Get paid <span>without chasing anyone.</span></h1>
+      <p class="lede">Ledgerly sends your invoices, reminds late payers on a schedule you set, and shows who still owes what. For freelancers and studios of one to ten.</p>
+      <form class="start" id="start" novalidate>
+        <label for="email">Work email</label>
+        <div class="row">
+          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="email-hint email-err">
+          <button class="btn btn-lead" type="submit">Start for free</button>
+        </div>
+        <p class="hint" id="email-hint">Free plan, no card. We send one email to confirm it is you.</p>
+        <p class="err" id="email-err" role="alert"></p>
+        <p class="ok" id="email-ok" role="status"></p>
+      </form>
+      <p class="truth">Built by two people in Leeds who were tired of writing "just following up" emails. It replaces the spreadsheet, the reminders app and the awkward message.</p>
     </div>
 
-    <div class="ledger" aria-label="Ledgerly invoice list, interactive example">
-      <div class="ledger-head">
-        <div>
-          <div class="big num">$15,198.25</div>
-          <div class="small">owed to Lindqvist Design across 5 open invoices</div>
+    <div class="panel" aria-label="Who owes what, example account">
+      <div class="panel-head">
+        <div class="fig-pair">
+          <div><h3>Overdue</h3><div class="fig late" id="fig-late">£6,920.00</div></div>
+          <div><h3>Outstanding</h3><div class="fig" id="fig-out">£8,017.50</div></div>
         </div>
-        <div class="late"><b class="num">$11,878.25</b><span class="quiet">of it late</span></div>
+        <div class="mute" style="font-size:14px">Mara Lindqvist Studio, as of 8 Oct</div>
       </div>
       <div class="chips" role="group" aria-label="Filter invoices">
-        <button class="chip" type="button" data-f="all" aria-pressed="true">All 6</button>
-        <button class="chip" type="button" data-f="late" aria-pressed="false">Late 3</button>
-        <button class="chip" type="button" data-f="soon" aria-pressed="false">Not yet due 2</button>
-        <button class="chip" type="button" data-f="paid" aria-pressed="false">Paid 1</button>
+        <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-f="late" aria-pressed="false">Late</button>
+        <button class="chip" type="button" data-f="due" aria-pressed="false">Due soon</button>
+        <button class="chip" type="button" data-f="paid" aria-pressed="false">Paid</button>
       </div>
-      <ul class="rows" id="rows">
-        <li class="row" data-s="late"><span class="who">Bellwether Press</span><span class="amt">$6,305.75</span><span class="meta">INV-0149 · reminder 3 sent Tuesday</span><span class="st"><i class="mark"></i>41 days late</span></li>
-        <li class="row" data-s="late"><span class="who">Harrow &amp; Pike Architects</span><span class="amt">$4,860.00</span><span class="meta">INV-0147 · next reminder tomorrow</span><span class="st"><i class="mark"></i>23 days late</span></li>
-        <li class="row" data-s="late"><span class="who">Mina Okafor Studio</span><span class="amt">$712.50</span><span class="meta">INV-0152 · reminder 1 sent</span><span class="st"><i class="mark"></i>9 days late</span></li>
-        <li class="row" data-s="soon"><span class="who">Tidewater Coffee Co.</span><span class="amt">$2,140.00</span><span class="meta">INV-0155 · opened twice</span><span class="st">Due Friday</span></li>
-        <li class="row" data-s="soon"><span class="who">Juniper &amp; Sons Landscaping</span><span class="amt">$1,180.00</span><span class="meta">INV-0158 · sent this morning</span><span class="st">Due 24 Oct</span></li>
-        <li class="row paid" data-s="paid"><span class="who">Oduya Legal</span><span class="amt">$1,950.00</span><span class="meta">INV-0143 · paid by card</span><span class="st">Paid today</span></li>
-      </ul>
-      <div class="ledger-foot"><span>Try the filters. This is the real list view.</span><span>Updated 9:41</span></div>
+      <table id="owed">
+        <thead><tr>
+          <th>Client</th>
+          <th class="hide-xs">Invoice</th>
+          <th>Status</th>
+          <th class="num"><button type="button" id="sort-amt" aria-label="Sort by amount">Amount</button></th>
+        </tr></thead>
+        <tbody>
+          <tr data-s="late" data-amt="4120"><td><div class="client" title="Bluestone Dental Group (Northfield practice, formerly Lam &amp; Associates)">Bluestone Dental Group (Northfield practice, formerly Lam &amp; Associates)</div></td><td class="hide-xs ref">0236</td><td><span class="st late">7 days late</span></td><td class="num">£4,120.00</td></tr>
+          <tr data-s="late" data-amt="2340"><td><div class="client">Harrow &amp; Finch Architects</div></td><td class="hide-xs ref">0231</td><td><span class="st late">20 days late</span></td><td class="num">£2,340.00</td></tr>
+          <tr data-s="late" data-amt="460"><td><div class="client">Tom Sadler Photography</div></td><td class="hide-xs ref">0233</td><td><span class="st late">13 days late</span></td><td class="num">£460.00</td></tr>
+          <tr data-s="due" data-amt="785.5"><td><div class="client">Kestrel Brewing Co.</div></td><td class="hide-xs ref">0238</td><td><span class="st">Due 12 Oct</span></td><td class="num">£785.50</td></tr>
+          <tr data-s="due" data-amt="312"><td><div class="client">Oakhurst Primary PTA</div></td><td class="hide-xs ref">0239</td><td><span class="st">Due 24 Oct</span></td><td class="num">£312.00</td></tr>
+          <tr data-s="paid" data-amt="1675"><td><div class="client">Mireille Okafor</div></td><td class="hide-xs ref">0229</td><td><span class="st paid">Paid 30 Sep</span></td><td class="num">£1,675.00</td></tr>
+          <tr data-s="paid" data-amt="1188.5"><td><div class="client">Priya Venkataraman</div></td><td class="hide-xs ref">0227</td><td><span class="st paid">Paid 22 Sep</span></td><td class="num">£1,188.50</td></tr>
+        </tbody>
+      </table>
+      <div class="empty" id="empty" hidden>Nothing matches. <button class="chip" type="button" data-f="all">Show all</button></div>
+      <div class="panel-foot"><span id="count">7 invoices</span><span>Next reminder goes to Harrow &amp; Finch tomorrow, 9:00</span></div>
     </div>
   </div>
 </section>
 
-<!-- flood: lead -->
-<section class="flood-lead" id="reminders">
+<section class="reminders" id="reminders">
   <div class="wrap">
-    <div class="top">
-      <h2>You never write the awkward email again</h2>
-      <p>Pick when reminders go out and how firm they sound. Ledgerly sends them from your address, with your name on the bottom, and stops the moment the client pays.</p>
-    </div>
-    <div class="steps">
-      <article class="mail">
-        <div class="when">On the due date <span>Day 0</span></div>
-        <span class="tone">Friendly</span>
-        <div class="subj">Invoice 0155 is due today</div>
-        <p>Hi Tomás, a quick heads-up that invoice 0155 for $2,140.00 is due today. The pay link is below, card or bank transfer.</p>
-        <div class="sig">Sent for Maya Lindqvist</div>
-      </article>
-      <article class="mail">
-        <div class="when">One week late <span>Day 7</span></div>
-        <span class="tone">Direct</span>
-        <div class="subj">Invoice 0147 was due last week</div>
-        <p>Hi Harriet, invoice 0147 for $4,860.00 is still open. If it got buried, the pay link is below. Reply if something needs fixing on my side.</p>
-        <div class="sig">Sent for Maya Lindqvist</div>
-      </article>
-      <article class="mail">
-        <div class="when">Three weeks late <span>Day 21</span></div>
-        <span class="tone">Firm</span>
-        <div class="subj">Final reminder: invoice 0149</div>
-        <p>Hi Dennis, invoice 0149 for $6,305.75 is 21 days past due. Please pay by Friday 17 October, or call me to agree a date.</p>
-        <div class="sig">Sent for Maya Lindqvist</div>
-      </article>
-    </div>
-    <p class="stop">Pays on day 2? Days 7 and 21 never go out.</p>
-  </div>
-</section>
-
-<!-- features: neutral -->
-<section class="features" id="features">
-  <div class="wrap">
-    <div class="feat">
-      <div class="copy">
-        <h2>An invoice out the door in a minute</h2>
-        <p>Add the lines, check the total, send. Your client gets a page with a pay button, and you get a notice when they open it.</p>
-      </div>
-      <form class="panel" id="composer" novalidate aria-label="New invoice">
-        <label class="field" id="f-client"><span>Client</span>
-          <input type="text" id="client" value="Tidewater Coffee Co." autocomplete="off">
-          <small class="err" id="client-err">Add a client name so the invoice has someone to go to.</small>
-        </label>
-        <div class="lines" aria-label="Invoice lines">
-          <span class="h">Description</span><span class="h r">Hours</span><span class="h r">Rate</span>
-          <input type="text" value="Menu redesign" aria-label="Line 1 description">
-          <input type="number" inputmode="decimal" min="0" step="0.5" value="14" class="q r" aria-label="Line 1 hours">
-          <input type="number" inputmode="decimal" min="0" step="1" value="85" class="p r" aria-label="Line 1 rate">
-          <input type="text" value="Packaging labels" aria-label="Line 2 description">
-          <input type="number" inputmode="decimal" min="0" step="0.5" value="9.5" class="q r" aria-label="Line 2 hours">
-          <input type="number" inputmode="decimal" min="0" step="1" value="85" class="p r" aria-label="Line 2 rate">
+    <h2>Late payers hear from Ledgerly, not from you.</h2>
+    <p class="lede">You set the schedule once. Every invoice follows it until it is paid, and you see each message before it goes out.</p>
+    <div class="cols">
+      <article class="email" aria-label="Example reminder email">
+        <dl class="email-meta">
+          <dt>From</dt><dd>Mara Lindqvist Studio via Ledgerly</dd>
+          <dt>To</dt><dd>accounts@harrowfinch.co.uk</dd>
+          <dt>Subject</dt><dd>Invoice 0231 for £2,340.00 was due 18 September</dd>
+        </dl>
+        <div class="email-body">
+          <p>Hello Daniel,</p>
+          <p>Invoice 0231 for the Mill Lane extension drawings was due on 18 September and is 20 days late. The amount is £2,340.00.</p>
+          <p>You can pay by card or bank transfer from the invoice page. If it has already been sent, reply here and we will mark it off.</p>
+          <p><a class="btn btn-lead" href="#invoice">Pay £2,340.00</a></p>
+          <p>Thanks,<br>Mara</p>
         </div>
-        <div class="total"><span>Total, due in 14 days</span><b class="num" id="total">$1,997.50</b></div>
-        <button class="btn btn-dark" type="submit" id="send">Send invoice</button>
-        <p class="note" id="sendnote" role="status" aria-live="polite">Goes to the client with a pay link and a reminder schedule.</p>
-      </form>
-    </div>
-
-    <div class="feat flip">
-      <div class="chart" role="group" aria-label="Money owed by age">
-        <div class="chart-top">
-          <div><b>Owed by age</b><div class="quiet" style="font-size:14px">Lindqvist Design, as of 8 Oct</div></div>
-          <div class="seg" role="group" aria-label="Metric">
-            <button type="button" data-m="amt" aria-pressed="true">Amount</button>
-            <button type="button" data-m="cnt" aria-pressed="false">Invoices</button>
-          </div>
-        </div>
-        <div class="plot">
-          <div class="yax" id="yax" aria-hidden="true"></div>
-          <div class="bars" id="bars"></div>
-        </div>
-        <div class="xax"><span></span><div><span>Not due</span><span>1 to 14 days</span><span>15 to 30 days</span><span>Over 30 days</span></div></div>
-        <p class="legend">Periwinkle is not yet due, yellow is up to 30 days late, red is over 30.</p>
-      </div>
-      <div class="copy">
-        <h2>See who owes you, and for how long</h2>
-        <p>One list sorted by what needs you today. The oldest money sits at the top, with the next reminder and whether the client opened the email.</p>
+        <div class="email-foot">Sent by Ledgerly for Mara Lindqvist Studio. Replies go to mara@lindqvist.studio.</div>
+      </article>
+      <div>
+        <ol class="sched" aria-label="Reminder schedule for invoice 0231">
+          <li class="sent"><i aria-hidden="true"></i><div><strong>3 days before due</strong><span class="when">15 Sep, sent</span><br><span>A short note with the invoice attached again.</span></div></li>
+          <li class="sent"><i aria-hidden="true"></i><div><strong>On the due date</strong><span class="when">18 Sep, sent</span><br><span>Payment details and the amount.</span></div></li>
+          <li class="sent"><i aria-hidden="true"></i><div><strong>7 days late</strong><span class="when">25 Sep, sent</span><br><span>Plainer wording. Still from you.</span></div></li>
+          <li class="now"><i aria-hidden="true"></i><div><strong>20 days late</strong><span class="when">Tomorrow, 9:00</span><br><span>The email on the left. You can edit or skip it.</span></div></li>
+          <li><i aria-hidden="true"></i><div><strong>30 days late</strong><span class="when">18 Oct</span><br><span>Reminders stop and the invoice comes back to you.</span></div></li>
+        </ol>
+        <p class="note">Every message is written in plain English and signed with your name. Change the wording or the days for all invoices or for one client.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- flood: support -->
-<section class="flood-support" id="pricing">
+<section class="invoice" id="invoice">
   <div class="wrap">
-    <div class="head">
-      <h2>Free until you have real invoices to chase</h2>
-      <p>One free plan and one paid plan. No per-client fees and no cut of what you collect.</p>
-    </div>
-    <div class="billing">
-      <div class="seg" role="group" aria-label="Billing period">
-        <button type="button" data-b="m" aria-pressed="true">Monthly</button>
-        <button type="button" data-b="y" aria-pressed="false">Yearly</button>
+    <div class="cols">
+      <article class="paper" aria-label="Example invoice">
+        <div class="paper-head">
+          <div class="from"><b>Mara Lindqvist Studio</b>14 Calls Wharf, Leeds LS2 7EW<br>VAT GB 318 4409 21</div>
+          <div class="no"><b>Invoice 0231</b>Issued 4 Sep 2026<br>Due 18 Sep 2026</div>
+        </div>
+        <div class="to">
+          <div><b>Billed to</b>Harrow &amp; Finch Architects<br>Daniel Harrow<br>accounts@harrowfinch.co.uk</div>
+          <div><b>Project</b>Mill Lane extension<br>Planning drawings, rev. B</div>
+        </div>
+        <table>
+          <thead><tr><th>Item</th><th class="num hide-xs">Qty</th><th class="num">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Site survey and measured drawings</td><td class="num hide-xs">1</td><td class="num">£650.00</td></tr>
+            <tr><td>Planning drawings, revisions A and B</td><td class="num hide-xs">22.5 h</td><td class="num">£1,237.50</td></tr>
+            <tr><td>Printing, 6 sets A1</td><td class="num hide-xs">6</td><td class="num">£62.50</td></tr>
+            <tr><td class="mute">VAT at 20%</td><td class="hide-xs"></td><td class="num">£390.00</td></tr>
+            <tr class="tot"><td>Total due</td><td class="hide-xs"></td><td class="num">£2,340.00</td></tr>
+          </tbody>
+        </table>
+        <div class="pay"><span>Card, or bank transfer to Lindqvist Studio, 40-21-08, 71190432. Reference 0231.</span><a class="btn btn-dark btn-sm" href="#start">Pay £2,340.00</a></div>
+      </article>
+      <div>
+        <h2>The invoice your client opens.</h2>
+        <p class="lede">A page with the amount, a pay button and your bank details. No account for them to make.</p>
+        <ul class="lines">
+          <li><b>Your name, numbering and terms</b><span>Ledgerly stays in the footer. The invoice looks like it came from you.</span></li>
+          <li><b>Card or bank transfer from the page</b><span>Card payments land the same day. Transfers are matched to the invoice by reference.</span></li>
+          <li><b>Part-payments and credit notes</b><span>A client who pays half sees the half that is left, and so do you.</span></li>
+        </ul>
       </div>
-      <span class="save">Yearly is $140, which saves $28</span>
     </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <h2>Two plans.</h2>
+    <p class="lede">Free is enough for a quiet month. Studio is for when invoicing is part of every week.</p>
     <div class="plans">
-      <article class="plan">
+      <div class="plan">
         <div class="name">Free</div>
-        <div class="price num">$0<small> forever</small></div>
-        <div class="bill">For trying it on a few clients</div>
-        <ul>
-          <li><span>Invoices a month</span><span class="v">5</span></li>
-          <li><span>Automatic reminders</span><span class="v">1 per invoice</span></li>
-          <li><span>Who-owes-what list</span><span class="v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="#111" stroke-width="2"/></svg>Included</span></li>
-          <li><span>Card and bank payments</span><span class="v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="#111" stroke-width="2"/></svg>Included</span></li>
-          <li><span>Your logo on invoices</span><span class="v no"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" stroke="#6B6B6B" stroke-width="2"/></svg>Not included</span></li>
-          <li><span>Recurring invoices</span><span class="v no"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" stroke="#6B6B6B" stroke-width="2"/></svg>Not included</span></li>
-        </ul>
-        <a class="btn btn-secondary" href="#signup">Start free</a>
-      </article>
-      <article class="plan">
+        <div class="price">£0</div>
+        <div class="alt">For as long as you like.</div>
+        <a class="btn btn-dark" href="#start">Start for free</a>
+        <dl>
+          <div><dt>Invoices a month</dt><dd>10</dd></div>
+          <div><dt>Clients</dt><dd>5</dd></div>
+          <div><dt>Automatic reminders</dt><dd>Included</dd></div>
+          <div><dt>Card and bank payments</dt><dd>Included</dd></div>
+          <div><dt>Your own logo and numbering</dt><dd class="no">Not included</dd></div>
+          <div><dt>Recurring invoices</dt><dd class="no">Not included</dd></div>
+          <div><dt>Part-payments and credit notes</dt><dd class="no">Not included</dd></div>
+          <div><dt>People on the account</dt><dd>1</dd></div>
+        </dl>
+      </div>
+      <div class="plan">
         <div class="name">Studio</div>
-        <div class="price num"><span id="studio-price">$14</span><small id="studio-per"> a month</small></div>
-        <div class="bill" id="studio-bill">Billed monthly, cancel any time</div>
-        <ul>
-          <li><span>Invoices a month</span><span class="v">Unlimited</span></li>
-          <li><span>Automatic reminders</span><span class="v">Full schedule</span></li>
-          <li><span>Who-owes-what list</span><span class="v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="#111" stroke-width="2"/></svg>Included</span></li>
-          <li><span>Card and bank payments</span><span class="v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="#111" stroke-width="2"/></svg>Included</span></li>
-          <li><span>Your logo on invoices</span><span class="v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="#111" stroke-width="2"/></svg>Included</span></li>
-          <li><span>Recurring invoices</span><span class="v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8" fill="none" stroke="#111" stroke-width="2"/></svg>Included</span></li>
-        </ul>
-        <a class="btn btn-dark" href="#signup">Start the Studio plan</a>
-      </article>
+        <div class="price">£12 <small>a month</small></div>
+        <div class="alt">Or £120 a year, which is two months free.</div>
+        <a class="btn btn-lead" href="#start">Start a 30-day trial</a>
+        <dl>
+          <div><dt>Invoices a month</dt><dd>Unlimited</dd></div>
+          <div><dt>Clients</dt><dd>Unlimited</dd></div>
+          <div><dt>Automatic reminders</dt><dd>Included</dd></div>
+          <div><dt>Card and bank payments</dt><dd>Included</dd></div>
+          <div><dt>Your own logo and numbering</dt><dd>Included</dd></div>
+          <div><dt>Recurring invoices</dt><dd>Included</dd></div>
+          <div><dt>Part-payments and credit notes</dt><dd>Included</dd></div>
+          <div><dt>People on the account</dt><dd>Up to 5</dd></div>
+        </dl>
+      </div>
     </div>
+    <p class="fine">Card payments cost 1.4% plus 20p on both plans. Bank transfers are free. Prices exclude VAT.</p>
   </div>
 </section>
-
-<!-- close + faq: neutral -->
-<section class="close" id="signup">
-  <div class="wrap">
-    <div>
-      <h2>Send your first invoice today</h2>
-      <p class="lede" style="margin-bottom:32px">Ledgerly is new, so there is no wall of logos here. What we can say is true: it costs nothing to try, and your invoices are yours to export.</p>
-      <form class="signup" id="signup-form" novalidate>
-        <div class="row2">
-          <label class="field" id="f-email"><span>Work email</span>
-            <input type="email" id="email" inputmode="email" autocomplete="email" placeholder="maya@lindqvist.design">
-            <small class="hint" id="email-hint">We email a sign-in link. No card needed.</small>
-            <small class="err" id="email-err">That email looks incomplete. It needs an @ and a domain, like maya@lindqvist.design.</small>
-          </label>
-          <button class="btn btn-primary" type="submit" id="email-btn">Start free</button>
-        </div>
-        <div class="done" id="done" role="status">Link sent. Check your inbox and open it on this device.</div>
-      </form>
-    </div>
-    <div id="questions">
-      <h3 style="margin-bottom:16px;font-size:24px;letter-spacing:-0.02em">Questions</h3>
-      <details><summary>Who do the reminders come from?</summary><p>From your own email address, signed with your name. Clients reply straight to you, not to us.</p></details>
-      <details><summary>What if a client says they already paid?</summary><p>Mark the invoice paid in one tap and every remaining reminder is cancelled. Nothing goes out after that.</p></details>
-      <details><summary>How do clients pay me?</summary><p>By card or bank transfer from the pay page. The money goes to your account, and we do not hold it or take a cut.</p></details>
-      <details><summary>Can I leave?</summary><p>Yes. Export every invoice and client as a spreadsheet at any time, on the free plan too.</p></details>
-    </div>
-  </div>
-</section>
-
 </main>
 
 <footer>
   <div class="wrap">
-    <div>
-      <a class="logo" href="#top"><svg class="logo-mark" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#fff"/><path d="M8 6v11.5h10" fill="none" stroke="#6162A3" stroke-width="3.2" stroke-linecap="square"/></svg>Ledgerly</a>
-      <p>Invoicing and payment chasing for freelancers and small studios.</p>
-    </div>
-    <div><h3>Product</h3><ul><li><a href="#reminders">Reminders</a></li><li><a href="#features">Invoicing</a></li><li><a href="#pricing">Pricing</a></li></ul></div>
-    <div><h3>Help</h3><ul><li><a href="#questions">Questions</a></li><li><a href="#signup">Contact</a></li><li><a href="#signup">Export your data</a></li></ul></div>
-    <div><h3>Company</h3><ul><li><a href="#top">Privacy</a></li><li><a href="#top">Terms</a></li><li><a href="#top">Security</a></li></ul></div>
-    <div class="legal"><span>Ledgerly, 2026</span><span>Prices in US dollars</span></div>
+    <div>Ledgerly Ltd, Leeds. <a href="mailto:hello@ledgerly.co.uk">hello@ledgerly.co.uk</a></div>
+    <ul>
+      <li><a href="#reminders">Reminders</a></li>
+      <li><a href="#invoice">Invoices</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#top">Privacy</a></li>
+      <li><a href="#top">Terms</a></li>
+      <li><a href="#start">Sign in</a></li>
+    </ul>
   </div>
 </footer>
 
 <script>
+// Who-owes-what panel: filter and sort are real.
 (function(){
-  var $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))};
-  var money=function(n){return n.toLocaleString('en-US',{style:'currency',currency:'USD'})};
-
-  // ledger filters
-  $$('.chip').forEach(function(b){b.addEventListener('click',function(){
-    $$('.chip').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
-    var f=b.dataset.f;
-    $$('#rows .row').forEach(function(r){r.hidden=!(f==='all'||r.dataset.s===f)});
-  })});
-
-  // composer total
-  function total(){
-    var q=$$('#composer .q'),p=$$('#composer .p'),t=0;
-    q.forEach(function(el,i){t+=(parseFloat(el.value)||0)*(parseFloat(p[i].value)||0)});
-    $('#total').textContent=money(t);
-    return t;
+  var rows=[].slice.call(document.querySelectorAll('#owed tbody tr'));
+  var chips=[].slice.call(document.querySelectorAll('.chip[data-f]'));
+  var empty=document.getElementById('empty'), count=document.getElementById('count');
+  var gbp=function(n){return '£'+n.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  function filter(f){
+    var n=0;
+    rows.forEach(function(r){var show=f==='all'||r.dataset.s===f;r.hidden=!show;if(show)n++;});
+    chips.forEach(function(c){c.setAttribute('aria-pressed',String(c.dataset.f===f));});
+    empty.hidden=n>0;
+    count.textContent=n+(n===1?' invoice':' invoices')+(f==='all'?'':' shown');
   }
-  $$('#composer input').forEach(function(i){i.addEventListener('input',function(){total();$('#f-client').classList.remove('bad')})});
-  $('#composer').addEventListener('submit',function(e){
-    e.preventDefault();
-    var c=$('#client').value.trim(),n=$('#sendnote');
-    if(!c){$('#f-client').classList.add('bad');$('#client').focus();return}
-    n.textContent='Invoice to '+c+' for '+money(total())+' queued. Undo within 10 seconds from the sent list.';
+  chips.forEach(function(c){c.addEventListener('click',function(){filter(c.dataset.f);});});
+  var desc=true;
+  document.getElementById('sort-amt').addEventListener('click',function(){
+    desc=!desc;var tb=rows[0].parentNode;
+    rows.sort(function(a,b){return (desc?1:-1)*(b.dataset.amt-a.dataset.amt);}).forEach(function(r){tb.appendChild(r);});
+    this.setAttribute('aria-label','Sort by amount, '+(desc?'largest first':'smallest first'));
   });
-
-  // chart
-  var data={amt:{v:[3320,3500,4860,6305.75],max:8000,fmt:function(n){return '$'+n.toLocaleString('en-US')},ticks:[0,2000,4000,6000,8000]},
-            cnt:{v:[2,1,1,1],max:4,fmt:function(n){return String(n)},ticks:[0,1,2,3,4]}};
-  var cls=['','s','s','l'];
-  function chart(m){
-    var d=data[m];
-    $('#yax').innerHTML=d.ticks.map(function(t){return '<span>'+d.fmt(t)+'</span>'}).join('');
-    $('#bars').innerHTML=d.v.map(function(v,i){
-      var h=v/d.max*100;
-      return '<div class="bar '+cls[i]+'"><i style="height:'+h+'%"></i><em style="bottom:calc('+h+'% + 4px)">'+(m==='amt'?money(v).replace('.00',''):v)+'</em></div>';
-    }).join('');
+  var late=0,out=0;rows.forEach(function(r){var a=+r.dataset.amt;if(r.dataset.s!=='paid')out+=a;if(r.dataset.s==='late')late+=a;});
+  document.getElementById('fig-late').textContent=gbp(late);document.getElementById('fig-out').textContent=gbp(out);
+})();
+// Start form: validate on leaving the field, error under it, input kept.
+(function(){
+  var f=document.getElementById('start'),i=document.getElementById('email'),e=document.getElementById('email-err'),ok=document.getElementById('email-ok'),b=f.querySelector('button');
+  function check(){
+    var v=i.value.trim(),msg='';
+    if(!v)msg='Enter your email so we can send the confirmation.';
+    else if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))msg='That does not look like an email address. Check for a missing @ or dot.';
+    f.classList.toggle('is-error',!!msg);i.setAttribute('aria-invalid',msg?'true':'false');e.textContent=msg;return !msg;
   }
-  chart('amt');
-  $$('.seg [data-m]').forEach(function(b){b.addEventListener('click',function(){
-    $$('.seg [data-m]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
-    chart(b.dataset.m);
-  })});
-
-  // billing toggle
-  $$('[data-b]').forEach(function(b){b.addEventListener('click',function(){
-    $$('[data-b]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
-    var y=b.dataset.b==='y';
-    $('#studio-price').textContent=y?'$140':'$14';
-    $('#studio-per').textContent=y?' a year':' a month';
-    $('#studio-bill').textContent=y?'Billed once a year, two months free':'Billed monthly, cancel any time';
-  })});
-
-  // signup
-  var form=$('#signup-form'),em=$('#email');
-  function valid(){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em.value.trim())}
-  em.addEventListener('blur',function(){if(em.value&&!valid())$('#f-email').classList.add('bad')});
-  em.addEventListener('input',function(){if(valid())$('#f-email').classList.remove('bad')});
-  form.addEventListener('submit',function(e){
-    e.preventDefault();
-    if(!valid()){$('#f-email').classList.add('bad');em.focus();return}
-    var b=$('#email-btn');b.disabled=true;b.textContent='Sending link';
-    setTimeout(function(){b.textContent='Link sent';form.classList.add('sent')},500);
+  i.addEventListener('blur',function(){if(i.value)check();});
+  i.addEventListener('input',function(){if(f.classList.contains('is-error'))check();});
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();if(!check()){i.focus();return;}
+    b.disabled=true;b.textContent='Sending';
+    setTimeout(function(){f.classList.add('is-done');ok.textContent='Check '+i.value.trim()+' for the confirmation link.';b.textContent='Sent';},600);
   });
 })();
 </script>

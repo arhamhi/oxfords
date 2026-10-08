@@ -8,7 +8,7 @@ grid more strictly, and has less room for expression. Calm is the goal.
 - Choose the shell from the work. A product with many destinations gets a sidebar. A product
   with four screens gets a top bar. A single working surface (an editor, a canvas, an inbox)
   gets neither by default.
-- When there is a sidebar, it is the spine: workspace or account switcher at the top, one
+- When there is a sidebar, it is neutral, and it is the spine: workspace or account switcher at the top, one
   icon and a short title per link, links grouped by relevance, settings and help at the
   bottom. It takes roughly a sixth of the width.
 - Show where the user is with a full-row fill behind the active link. Not a coloured bar on
@@ -127,10 +127,12 @@ This is for a web app opened on a phone. For a native app, read `mobile.md`.
 
 - The page is white, black or grey, and so are the table, the text and the lines. See
   `palettes.md` for the neutral steps.
-- Choose a palette and place it on top. The lead colour goes on the primary action, the
-  selected item and the chart's main series.
-- Give the palette at least one solid block so it is more than a button: the sidebar, the
-  top bar, or one panel in the lead or support colour.
+- Choose a palette and place it on top of content, not chrome. The sidebar, the top bar, the
+  tabs and the buttons stay neutral; the primary button is black or white.
+- Give the palette one solid block of content so it is more than a mark: the chart panel
+  flooded in the lead colour with the plot drawn in white on it, or one key panel.
+- A coloured sidebar or top bar is the fastest way to look like a product people already
+  know. Avoid it.
 - The support colour takes a second series or a secondary block. The pop marks the one thing
   that needs attention.
 - Quiet chips, secondary text and dividers are neutral greys.

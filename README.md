@@ -31,7 +31,7 @@ made it.
   <img src="docs/dashboard.gif" alt="The same dashboard brief built without Oxfords, then with it" width="100%">
 </p>
 
-<p align="center"><sub>Same model, same one-paragraph brief. First with no skill, then with Oxfords.</sub></p>
+<p align="center"><sub>Same one-paragraph brief. First with no skill, then with Oxfords.</sub></p>
 
 ## What you get
 
@@ -166,8 +166,7 @@ you can give a reason for.
 
 ## More examples
 
-Same deal as the dashboard up top. Same model, same brief, first with no skill and then with
-Oxfords.
+Same deal as the dashboard up top. Same brief, first with no skill and then with Oxfords.
 
 **A startup landing page**
 
@@ -178,7 +177,7 @@ Oxfords.
 The one without the skill looks fine at first, I'll be honest. But it's the bone background
 again, with a little uppercase label over every section, numbered steps and an italic word in
 the headline. You've seen that page a hundred times. The Oxfords one sits on white, shows the
-actual product, and keeps the colour for two sections and the one button that matters.
+actual product, and keeps the colour for one section, one button and the number you owe.
 
 **A calorie tracking app**
 
@@ -192,23 +191,24 @@ matter get colour.
 
 ## How it was tested
 
-I gave the same model the same one-paragraph brief for each example, once with no skill and
-once with Oxfords. All six builds are in [`docs/builds`](docs/builds) and you can run the
-checker on them yourself:
+Each example got the same one-paragraph brief twice, once with no skill and once with
+Oxfords. All six builds are in [`docs/builds`](docs/builds) and you can run the checker on
+them yourself:
 
 ```text
 dashboard-no-skill.html   1 fail, 3 warn
 landing-no-skill.html     1 fail, 3 warn
 mobile-no-skill.html      2 fail, 3 warn
-the three Oxfords builds  0 fail, 1 warn between them
+the three Oxfords builds  0 fail, 0 warn
 ```
 
-To be straight about it: the no-skill builds are first attempts, and the Oxfords ones aren't.
-I rebuilt them a few times while I was fixing the skill, mostly the colour rules, and for
-these three I told it which palette to use so the examples wouldn't all come out the same.
-So take it as an example of what the skill is going for and not a benchmark. And the checker
-only catches the mechanical stuff. Most of what's different in those GIFs is the part it
-can't see.
+To be straight about it, this isn't a fair fight and I'm not going to pretend it is. The
+no-skill builds are first attempts from Claude Sonnet. The Oxfords ones went through a few
+rounds while I was fixing the skill, mostly the colour rules, and the final dashboard and
+landing page were built by a stronger model with some colours ruled out so the three examples
+wouldn't look alike. So take them as what the skill is going for and not a benchmark. And
+the checker only catches the mechanical stuff. Most of what's different in those GIFs is the
+part it can't see.
 
 <p align="center">
   <img src="art/bands-strip.jpg" alt="" width="100%">

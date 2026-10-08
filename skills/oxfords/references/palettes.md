@@ -35,12 +35,19 @@ Each palette is three colours. They are accents on the neutral base, never the b
 | Role | Job | Rough share |
 |---|---|---|
 | Neutrals | page, surfaces, text, lines | 75-85% |
-| Lead | the action, the selected state, the key figure or series, one solid block | 10-15% |
+| Lead | one solid block of content (a chart panel, a flooded section), the key figure or series | 10-15% |
 | Support | a second solid block, a secondary chart series, a section on a landing page | 5-10% |
 | Pop | one small highlight: a badge, a marker, the thing that needs attention | 1-3% |
 
 - All three get used. A screen that only uses the lead colour on one button has not used the
   palette.
+- Controls and chrome stay neutral: buttons, tabs, inputs, the sidebar, the top bar. The lead
+  goes on content. One coloured button per viewport at most, and only when nothing else on
+  that screen carries the lead.
+- A large block of blue or navy on a white page reads as somebody else's product. Blue is the
+  hardest lead to use well, so it is the last one to reach for.
+- A pale pop colour (a cream, a pale yellow, a pale blue) stays a small mark. It is never a
+  panel.
 - Colour arrives in blocks and marks with clean edges: a filled panel, a sidebar, a chart, a
   chip, a button. It does not arrive as a tint over everything.
 - A pale colour in a palette (a cream, a pale blue, a pale yellow) is a block or a highlight
@@ -49,7 +56,11 @@ Each palette is three colours. They are accents on the neutral base, never the b
   fails on most bright reds, oranges, yellows and greens, so those take near-black text.
 - A colour too light to read as text on the page is a fill only.
 - State colours stay separate from the palette: an error is red with a word and an icon, a
-  success is green with a word.
+  success is green with a word. When the palette already contains a red or a green, let that
+  colour carry the matching state and set other good/bad figures in neutral bold, so nothing
+  is ambiguous.
+- Bright leads (red, pink, yellow, chartreuse, light green) are fills and large figures only.
+  They are never small text or links on white, and the text on them is near-black.
 - Product UI sits at the quiet end of those shares. A landing page sits at the loud end, with
   whole sections flooded in the lead or support colour between neutral ones.
 
@@ -120,8 +131,13 @@ then keep them fixed.
 4. Break the tie without taste. Count the letters in the product's name. Put your shortlist
    in the order it appears in the table and count along it, wrapping round, with the first
    palette as one. Where you stop is the palette.
-5. If you can see what the last project used, never repeat it.
-6. Decide light or dark by who uses it and where. Then write one line:
+5. Apply any constraints before the tie-break, not after: colours the brief rules out, and
+   families already used nearby. If the palette you land on has a lead you cannot use, swap
+   its roles before you swap palettes.
+6. Things made together (several screens, a set of examples) each take a different hue
+   family. Two blues, or a navy and a periwinkle, count as the same.
+7. If you can see what the last project used, never repeat it.
+8. Decide light or dark by who uses it and where. Then write one line:
    "Lemonade on white, because it is a retail tool and the navy carries the actions."
 
 ## On a phone

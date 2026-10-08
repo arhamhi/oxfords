@@ -41,6 +41,7 @@ character than product UI, as long as each choice has a reason.
 - The page itself is white, black or grey. Pick a palette from `palettes.md` and use it at
   full strength on top: one or two whole sections flooded in the lead or support colour,
   with neutral sections between them so the colour has something to stand against.
+- Buttons are black or white. One coloured button per viewport, on the main action.
 
 ## Structure
 
