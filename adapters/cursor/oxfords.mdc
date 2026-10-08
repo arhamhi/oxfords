@@ -1,0 +1,11 @@
+---
+description: Oxfords - polished, plain interfaces with no AI slop. Apply when building, changing or reviewing UI.
+globs: ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte", "**/*.astro", "**/*.html", "**/*.css"]
+alwaysApply: false
+---
+
+Before writing or reviewing interface code, read `skills/oxfords/SKILL.md` and follow it:
+work its Build order, read the reference file it names for this surface, fill its Done gate,
+and run `node skills/oxfords/scripts/check.mjs <path>` on the result.
+
+This project's own design system, tokens and brand rules take priority over Oxfords.

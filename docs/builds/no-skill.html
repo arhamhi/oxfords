@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablewise · Today</title>
+<style>
+:root{
+  --bg:#f6f4ef;--surface:#fff;--ink:#1d1b17;--muted:#6b665c;--line:#e7e3da;
+  --accent:#c2410c;--accent-ink:#fff;--accent-soft:#fdeee4;
+  --ok:#15803d;--ok-soft:#e3f4e8;--warn:#a16207;--warn-soft:#fbf0d2;--info:#1d4ed8;--info-soft:#e4ecfd;--bad:#b91c1c;
+  --r:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#131210;--surface:#1d1b18;--ink:#f1ede4;--muted:#a39d90;--line:#2d2a25;
+  --accent:#f97316;--accent-ink:#1a0e05;--accent-soft:#33200f;
+  --ok:#4ade80;--ok-soft:#14301d;--warn:#facc15;--warn-soft:#352c0b;--info:#93b4ff;--info-soft:#18233f;--bad:#f87171}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--bg);padding:8px 12px;border-radius:8px;z-index:50}
+.skip:focus{left:8px}
+
+/* layout */
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;padding:20px 14px;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;padding:4px 10px 18px}
+.brand i{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:15px}
+nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:500;min-height:44px}
+nav a:hover{background:var(--bg);color:var(--ink)}
+nav a[aria-current=page]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.who{margin-top:auto;padding:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.who b{display:block;color:var(--ink);font-size:14px}
+
+main{padding:28px 32px 48px;max-width:1180px;width:100%}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{margin:0;font-size:26px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin-top:2px}
+.live{display:inline-flex;align-items:center;gap:6px;color:var(--ok);font-weight:600;font-size:13px}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.stat .l{color:var(--muted);font-size:13px}
+.stat .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:4px 0 2px}
+.stat .d{font-size:13px;font-weight:600}
+.up{color:var(--ok)}.down{color:var(--bad)}.flat{color:var(--muted)}
+.stat .d span{color:var(--muted);font-weight:400}
+
+.grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;align-items:start}
+.card h2{margin:0;font-size:16px}
+.card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.hd small{color:var(--muted)}
+
+/* chart */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--muted);font-size:11px}
+.chart .grid{stroke:var(--line)}
+.chart .bar{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1;cursor:pointer;transition:fill .15s}
+.chart .bar.today{fill:var(--accent)}
+.chart .bar:hover,.chart .bar:focus{fill:var(--accent);outline:none}
+.chart-read{min-height:22px;font-weight:600;margin-top:6px}
+
+/* table */
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:600}
+td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right}
+.id{font-weight:700}
+.where{color:var(--muted);font-size:13px}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.s-new{background:var(--info-soft);color:var(--info)}
+.s-prep{background:var(--warn-soft);color:var(--warn)}
+.s-ready{background:var(--accent-soft);color:var(--accent)}
+.s-done{background:var(--ok-soft);color:var(--ok)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+
+/* dialog */
+dialog{border:0;border-radius:16px;padding:0;width:min(480px,calc(100vw - 24px));background:var(--surface);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(20,16,10,.5)}
+dialog form{padding:22px;display:grid;gap:14px}
+dialog h2{margin:0}
+label{display:grid;gap:6px;font-weight:600;font-size:14px}
+input,select{min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);width:100%}
+input[aria-invalid=true]{border-color:var(--bad)}
+.err{color:var(--bad);font-size:13px;font-weight:500;min-height:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:flex;gap:6px}
+.seg label{flex:1;font-weight:600}
+.seg input{position:absolute;opacity:0;width:1px}
+.seg span{display:grid;place-items:center;min-height:44px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--bg)}
+.seg input:checked+span{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.toast.show{opacity:1}
+.fab{display:none}
+
+@media(max-width:1020px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+
+/* mobile */
+@media(max-width:760px){
+  .app{display:block;padding-bottom:72px}
+  nav.side{position:fixed;inset:auto 0 0 0;top:auto;height:auto;z-index:20;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);justify-content:space-around;gap:0}
+  .brand,.who{display:none}
+  nav a{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px;flex:1;min-height:48px;justify-content:center}
+  nav a.extra{display:none}
+  main{padding:18px 16px 32px}
+  h1{font-size:22px}
+  header.top .btn{display:none}
+  .fab{display:inline-flex;position:fixed;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:25;min-height:52px;padding:0 20px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+  .stat .v{font-size:23px}
+  .card{padding:14px}
+  .stats{gap:10px}
+  /* table -> cards */
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block}
+  tr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
+  tr:last-child{border-bottom:0}
+  td{padding:0;border:0}
+  td[data-k=time]{display:none}
+  td[data-k=items]{grid-column:1;color:var(--muted);font-size:13px}
+  td[data-k=total]{grid-row:1;grid-column:2;font-weight:700}
+  td[data-k=status]{grid-row:2;grid-column:2}
+  .row2{grid-template-columns:1fr}
+  dialog{margin:auto auto 0;width:100%;max-width:none;border-radius:16px 16px 0 0}
+  .toast{bottom:150px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div class="brand"><i>T</i>Tablewise</div>
+    <a href="#" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Today</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 3h12l2 4v14H4V7zM4 7h16M9 11h6"/></svg>Orders</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 12h16M12 4v16"/></svg>Tables</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M5 3v8a3 3 0 006 0V3M8 3v18M17 21V3c-2 2-3 5-3 8h3"/></svg>Menu</a>
+    <a href="#" class="extra"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Reports</a>
+    <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Settings</a>
+    <div class="who"><b>Olive &amp; Ember</b>Downtown · Maya (Manager)</div>
+  </nav>
+
+  <main id="main">
+    <header class="top">
+      <div>
+        <h1>Good evening, Maya</h1>
+        <div class="sub">Thursday, 8 October · Dinner service <span class="live">Live</span></div>
+      </div>
+      <button class="btn primary" data-new>+ New order</button>
+    </header>
+
+    <section class="stats" aria-label="Today's numbers">
+      <div class="card stat"><div class="l">Revenue today</div><div class="v">$4,820</div><div class="d up">▲ 12% <span>vs last Thu</span></div></div>
+      <div class="card stat"><div class="l">Orders</div><div class="v">137</div><div class="d up">▲ 8% <span>vs last Thu</span></div></div>
+      <div class="card stat"><div class="l">Avg. ticket</div><div class="v">$35.18</div><div class="d down">▼ 3% <span>vs last Thu</span></div></div>
+      <div class="card stat"><div class="l">Open tables</div><div class="v">9 <small style="font-size:15px;color:var(--muted);font-weight:500">/ 24</small></div><div class="d flat">4 reserved for 8 pm</div></div>
+    </section>
+
+    <div class="grid2">
+      <section class="card" aria-labelledby="ch">
+        <div class="hd"><h2 id="ch">Revenue this week</h2><small>Total $28,460</small></div>
+        <svg class="chart" id="chart" viewBox="0 0 480 240" role="group" aria-label="Bar chart of daily revenue, Friday to Thursday"></svg>
+        <div class="chart-read" id="read" aria-live="polite">Tap or focus a bar for details</div>
+      </section>
+
+      <section class="card" aria-labelledby="oh">
+        <div class="hd"><h2 id="oh">Recent orders</h2>
+          <div class="tools" role="group" aria-label="Filter orders">
+            <button class="chip" aria-pressed="true" data-f="all">All</button>
+            <button class="chip" aria-pressed="false" data-f="active">Active</button>
+            <button class="chip" aria-pressed="false" data-f="done">Done</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Order</th><th>Items</th><th>Time</th><th class="n">Total</th><th>Status</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden>No orders match this filter.</div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<button class="btn primary fab" data-new aria-label="New order">+ New order</button>
+<div class="toast" id="toast" role="status"></div>
+
+<dialog id="dlg" aria-labelledby="dt">
+  <form method="dialog" id="form" novalidate>
+    <h2 id="dt">New order</h2>
+    <div class="seg" role="radiogroup" aria-label="Order type">
+      <label><input type="radio" name="type" value="Dine-in" checked><span>Dine-in</span></label>
+      <label><input type="radio" name="type" value="Takeaway"><span>Takeaway</span></label>
+      <label><input type="radio" name="type" value="Delivery"><span>Delivery</span></label>
+    </div>
+    <label>Table or customer <input name="where" id="where" autocomplete="off" placeholder="e.g. Table 7" required><span class="err" id="e1"></span></label>
+    <label>Items <input name="items" id="items" autocomplete="off" placeholder="e.g. 2 × Margherita, 1 × Tiramisu" required><span class="err" id="e2"></span></label>
+    <div class="row2">
+      <label>Total ($) <input name="total" id="total" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required><span class="err" id="e3"></span></label>
+      <label>Status <select name="status"><option value="new">New</option><option value="prep">Preparing</option></select></label>
+    </div>
+    <div class="actions">
+      <button class="btn" type="button" id="cancel">Cancel</button>
+      <button class="btn primary" type="submit">Add order</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const S={new:["New","s-new"],prep:["Preparing","s-prep"],ready:["Ready","s-ready"],done:["Served","s-done"]};
+const orders=[
+ {id:1042,where:"Table 4",items:"2 × Ribeye, 1 × Caesar",time:"7:42 pm",total:112.5,s:"prep"},
+ {id:1041,where:"Delivery · J. Okafor",items:"Pad thai, spring rolls",time:"7:38 pm",total:38,s:"ready"},
+ {id:1040,where:"Table 11",items:"4 × Margherita, 2 × Lemonade",time:"7:31 pm",total:86.2,s:"prep"},
+ {id:1039,where:"Takeaway · Priya",items:"Lamb curry, naan ×3",time:"7:24 pm",total:41.75,s:"done"},
+ {id:1038,where:"Table 2",items:"Tasting menu ×2",time:"7:10 pm",total:210,s:"done"},
+ {id:1037,where:"Table 8",items:"Burger, fries, shake",time:"7:02 pm",total:29.4,s:"done"}];
+const days=[["Fri",3980],["Sat",5640],["Sun",4720],["Mon",2310],["Tue",2760],["Wed",4230],["Thu",4820]];
+const $=s=>document.querySelector(s),usd=n=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+let filter="all";
+
+function render(){
+  const list=orders.filter(o=>filter==="all"||(filter==="done"?o.s==="done":o.s!=="done"));
+  $("#rows").innerHTML=list.map(o=>`<tr><td class="id" data-k="order">#${o.id}<div class="where">${esc(o.where)}</div></td><td data-k="items">${esc(o.items)}</td><td data-k="time" class="where">${o.time}</td><td class="n" data-k="total">${usd(o.total)}</td><td data-k="status"><span class="pill ${S[o.s][1]}">${S[o.s][0]}</span></td></tr>`).join("");
+  $("#empty").hidden=list.length>0;
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{filter=b.dataset.f;document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b));render()});
+
+// chart
+(function(){
+  const W=480,H=240,L=36,B=26,T=10,max=6000,ph=H-B-T,bw=36,step=(W-L)/7;
+  let h="";
+  [0,2000,4000,6000].forEach(v=>{const y=T+ph-v/max*ph;h+=`<line class="grid" x1="${L}" x2="${W}" y1="${y}" y2="${y}"/><text x="${L-6}" y="${y+4}" text-anchor="end">${v?v/1000+"k":0}</text>`});
+  days.forEach(([d,v],i)=>{const x=L+i*step+(step-bw)/2,bh=v/max*ph,y=T+ph-bh,last=i===6;
+    h+=`<rect class="bar${last?" today":""}" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5" tabindex="0" data-i="${i}" role="img" aria-label="${d}: ${usd(v)}"/><text x="${x+bw/2}" y="${H-8}" text-anchor="middle" ${last?'style="fill:var(--ink);font-weight:700"':""}>${d}</text>`});
+  $("#chart").innerHTML=h;
+  const show=e=>{const r=e.target.closest(".bar");if(r){const [d,v]=days[r.dataset.i];$("#read").textContent=`${d}${r.dataset.i==6?" (today, so far)":""}: ${usd(v)}`}};
+  ["click","focusin","mouseover"].forEach(ev=>$("#chart").addEventListener(ev,show));
+})();
+
+// dialog
+const dlg=$("#dlg"),form=$("#form");
+document.querySelectorAll("[data-new]").forEach(b=>b.onclick=()=>{dlg.showModal();$("#where").focus()});
+$("#cancel").onclick=()=>dlg.close();
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+dlg.addEventListener("close",()=>{form.reset();["e1","e2","e3"].forEach(i=>$("#"+i).textContent="");form.querySelectorAll("[aria-invalid]").forEach(x=>x.removeAttribute("aria-invalid"))});
+form.addEventListener("submit",e=>{
+  e.preventDefault();
+  const f=new FormData(form),w=f.get("where").trim(),it=f.get("items").trim(),t=parseFloat(f.get("total"));
+  const chk=[[w,"where","e1","Add a table or customer name"],[it,"items","e2","Add at least one item"],[t>0,"total","e3","Enter a total above $0"]];
+  let bad=null;
+  chk.forEach(([ok,id,er,msg])=>{const el=$("#"+id);$("#"+er).textContent=ok?"":msg;ok?el.removeAttribute("aria-invalid"):el.setAttribute("aria-invalid","true");if(!ok&&!bad)bad=el});
+  if(bad){bad.focus();return}
+  const type=f.get("type"),id=orders[0].id+1;
+  orders.unshift({id,where:type==="Dine-in"?w:`${type} · ${w}`,items:it,time:new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}).toLowerCase(),total:t,s:f.get("status")});
+  filter="all";document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.f==="all"));
+  render();dlg.close();
+  const tt=$("#toast");tt.textContent=`Order #${id} added · ${usd(t)}`;tt.classList.add("show");setTimeout(()=>tt.classList.remove("show"),2600);
+});
+render();
+</script>
+</body>
+</html>
