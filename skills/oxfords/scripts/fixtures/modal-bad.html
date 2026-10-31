@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clients</title>
+<!-- oxfords fixture: an aria-modal sheet with no focus trap. Must find: faint text inside the
+     sheet, and Tab escaping to the page behind. Must not report the faint text behind the scrim. -->
+<style>
+  body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: #fff; color: #111; }
+  header { display: flex; gap: 8px; padding: 0 16px; border-bottom: 1px solid #e5e5e5; }
+  header a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: #111; }
+  main { padding: 24px 16px; }
+  .behind { color: #bbbbbb; }
+  .scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); }
+  .sheet { position: fixed; left: 16px; right: 16px; top: 120px; max-width: 340px; padding: 24px; border-radius: 12px; background: #fff; }
+  .sheet h2 { font-size: 18px; margin: 0 0 8px; }
+  .sheet .faint { color: #aaaaaa; margin: 0 0 20px; }
+  .sheet button { font: inherit; min-height: 44px; padding: 0 16px; border-radius: 6px; border: 1px solid #767676; background: #fff; color: #111; }
+</style>
+</head>
+<body>
+<header>
+  <a href="#invoices">Invoices</a>
+  <a href="#clients">Clients</a>
+</header>
+<main>
+  <h1>Clients</h1>
+  <p class="behind">Behind the scrim, out of scope</p>
+</main>
+<div class="scrim"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="archive-title">
+  <h2 id="archive-title">Archive Linde Studio?</h2>
+  <p class="faint">Their invoices stay searchable</p>
+  <button type="button">Cancel</button>
+  <button type="button">Archive client</button>
+</div>
+</body>
+</html>

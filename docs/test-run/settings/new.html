@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workspace settings · Shiftboard</title>
+<!-- Icons: Phosphor regular. At 20px its stroke is about 1.25px, the stem width of 14px system text at 400. -->
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+/* Oxfords colour: Tideline (teal world, one ember; weather, travel, data)
+   lead #326E6E, support #CE7D36, pop #C5CFCB
+   light on white: native, nothing moved
+     too light for text on this page: support, pop. Text, links and icons use --support-ink, --pop-ink.
+   dark on near-black: native, nothing moved
+     too dark for text on this page: lead. Text, links and icons use --lead-ink.
+   notes:
+     pop is a tint or a grey: a block with dark text, or a mark on a lead or support block, never a mark on the page. The chart series skip it.
+     support sits near warning: warning states use --warning, never --support. Keep --support off controls; pair every state with a word and an icon.
+   regenerate: node scripts/palette.mjs Tideline --mode both */
+
+:root {
+  color-scheme: light;
+  /* neutrals */
+  --page: #FFFFFF; --surface: #FAFAFA; --surface-2: #F3F3F3; --selected: #EBEBEB;
+  --line: #E4E4E4; --line-strong: #909090; --focus: #326E6E; --overlay: #00000066;
+  --text: #161616; --text-2: #484848; --text-3: #6A6A6A; --text-disabled: #A0A0A0;
+  --shadow-1: 0 1px 2px #0000001A, 0 4px 12px #0000000D;
+  --shadow-2: 0 2px 4px #0000001A, 0 12px 32px #0000001F;
+  /* neutral controls */
+  --action: #161616; --action-hover: #222222; --action-pressed: #070707; --on-action: #FFFFFF;
+  --action-disabled: #E4E4E4; --on-action-disabled: #8D8D8D;
+  --control: #EEEEEE; --control-hover: #E1E1E1; --control-pressed: #D4D4D4;
+  /* palette */
+  --lead: #326E6E; --lead-hover: #417D7D; --lead-pressed: #1B5A5A;
+  --on-lead: #FFFFFF; --lead-ink: #326E6E; --lead-tint: #DEF6F5;
+  --support: #CE7D36; --support-hover: #E2904A; --support-pressed: #BA6B1F;
+  --on-support: #111111; --support-ink: #A55900; --support-tint: #FFECDE;
+  --pop: #C5CFCB; --pop-hover: #D5DFDB; --pop-pressed: #AFB9B5;
+  --on-pop: #111111; --pop-ink: #676F6C; --pop-tint: #EDF1EF;
+  /* semantic */
+  --danger: #C31B1F; --danger-hover: #D5322F; --danger-pressed: #A5000F;
+  --on-danger: #FFFFFF; --danger-ink: #C31B1F; --danger-tint: #FFEBE8;
+  --warning: #F5A91F; --warning-hover: #FFBD58; --warning-pressed: #DB9400;
+  --on-warning: #111111; --warning-ink: #946300; --warning-tint: #FEEDD7;
+  --success: #007433; --success-hover: #17843F; --success-pressed: #005E28;
+  --on-success: #FFFFFF; --success-ink: #007433; --success-tint: #E0F7E4;
+  --info: #0065B0; --info-hover: #0074C8; --info-pressed: #00518F;
+  --on-info: #FFFFFF; --info-ink: #0065B0; --info-tint: #E5F2FF;
+  /* chart */
+  --series-1: #326E6E; --series-2: #CE7D36; --series-3: #164242; --series-4: #904C00;
+  --series-5: #4E8989; --series-6: #505050; --series-muted: #909090;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    /* neutrals */
+    --page: #0A0A0A; --surface: #141414; --surface-2: #1E1E1E; --selected: #262626;
+    --line: #2E2E2E; --line-strong: #626262; --focus: #629796; --overlay: #000000A3;
+    --text: #EBEBEB; --text-2: #B1B1B1; --text-3: #8D8D8D; --text-disabled: #545454;
+    --shadow-1: none;
+    --shadow-2: 0 2px 4px #00000066, 0 16px 40px #00000080;
+    /* neutral controls */
+    --action: #F2F2F2; --action-hover: #E4E4E4; --action-pressed: #D7D7D7; --on-action: #111111;
+    --action-disabled: #2E2E2E; --on-action-disabled: #6D6D6D;
+    --control: #292929; --control-hover: #353535; --control-pressed: #181818;
+    /* palette */
+    --lead: #396D6D; --lead-hover: #487C7B; --lead-pressed: #245959;
+    --on-lead: #FFFFFF; --lead-ink: #629796; --lead-tint: #172A2A;
+    --support: #C98043; --support-hover: #D98F53; --support-pressed: #B26B2C;
+    --on-support: #111111; --support-ink: #C98043; --support-tint: #332215;
+    --pop: #C6CFCB; --pop-hover: #D6DFDB; --pop-pressed: #B0B8B5;
+    --on-pop: #111111; --pop-ink: #C6CFCB; --pop-tint: #242726;
+    /* semantic */
+    --danger: #BC2D2A; --danger-hover: #CE3F39; --danger-pressed: #A40B13;
+    --on-danger: #FFFFFF; --danger-ink: #EC5D53; --danger-tint: #36201D;
+    --warning: #F0AC3F; --warning-hover: #FFBD58; --warning-pressed: #D8951F;
+    --on-warning: #111111; --warning-ink: #F0AC3F; --warning-tint: #302412;
+    --success: #157337; --success-hover: #2A8245; --success-pressed: #005E28;
+    --on-success: #FFFFFF; --success-ink: #499F5F; --success-tint: #1A2B1D;
+    --info: #0065B0; --info-hover: #0874C6; --info-pressed: #00518F;
+    --on-info: #FFFFFF; --info-ink: #3591E5; --info-tint: #192837;
+    /* chart */
+    --series-1: #396D6D; --series-2: #C98043; --series-3: #ACD7D7; --series-4: #F2B17F;
+    --series-5: #71AAAA; --series-6: #B4B4B4; --series-muted: #747474;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  /* neutrals */
+  --page: #0A0A0A; --surface: #141414; --surface-2: #1E1E1E; --selected: #262626;
+  --line: #2E2E2E; --line-strong: #626262; --focus: #629796; --overlay: #000000A3;
+  --text: #EBEBEB; --text-2: #B1B1B1; --text-3: #8D8D8D; --text-disabled: #545454;
+  --shadow-1: none;
+  --shadow-2: 0 2px 4px #00000066, 0 16px 40px #00000080;
+  /* neutral controls */
+  --action: #F2F2F2; --action-hover: #E4E4E4; --action-pressed: #D7D7D7; --on-action: #111111;
+  --action-disabled: #2E2E2E; --on-action-disabled: #6D6D6D;
+  --control: #292929; --control-hover: #353535; --control-pressed: #181818;
+  /* palette */
+  --lead: #396D6D; --lead-hover: #487C7B; --lead-pressed: #245959;
+  --on-lead: #FFFFFF; --lead-ink: #629796; --lead-tint: #172A2A;
+  --support: #C98043; --support-hover: #D98F53; --support-pressed: #B26B2C;
+  --on-support: #111111; --support-ink: #C98043; --support-tint: #332215;
+  --pop: #C6CFCB; --pop-hover: #D6DFDB; --pop-pressed: #B0B8B5;
+  --on-pop: #111111; --pop-ink: #C6CFCB; --pop-tint: #242726;
+  /* semantic */
+  --danger: #BC2D2A; --danger-hover: #CE3F39; --danger-pressed: #A40B13;
+  --on-danger: #FFFFFF; --danger-ink: #EC5D53; --danger-tint: #36201D;
+  --warning: #F0AC3F; --warning-hover: #FFBD58; --warning-pressed: #D8951F;
+  --on-warning: #111111; --warning-ink: #F0AC3F; --warning-tint: #302412;
+  --success: #157337; --success-hover: #2A8245; --success-pressed: #005E28;
+  --on-success: #FFFFFF; --success-ink: #499F5F; --success-tint: #1A2B1D;
+  --info: #0065B0; --info-hover: #0874C6; --info-pressed: #00518F;
+  --on-info: #FFFFFF; --info-ink: #3591E5; --info-tint: #192837;
+  /* chart */
+  --series-1: #396D6D; --series-2: #C98043; --series-3: #ACD7D7; --series-4: #F2B17F;
+  --series-5: #71AAAA; --series-6: #B4B4B4; --series-muted: #747474;
+}
+
+/* ---------- scale: type, space, radius, motion (no colour below this line that is not a token) ---------- */
+:root {
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --fs-title: 24px; --fs-h2: 18px; --fs-lg: 16px; --fs-body: 14px; --fs-sm: 13px; --fs-xs: 12px;
+  --fs-figure: 32px;               /* the one hero figure: seats used */
+  --r-sm: 4px; --r-control: 6px; --r-panel: 10px;
+  --sidebar: 240px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --tap: 36px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  background: var(--page); color: var(--text);
+  font: var(--fs-body)/20px var(--font);
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  scrollbar-color: var(--line-strong) transparent;
+}
+body { margin: 0; background: var(--page); color: var(--text); transition: background-color 200ms ease-out, color 200ms ease-out; }
+::selection { background: var(--lead-tint); color: var(--text); }
+input, select, textarea, button { font: inherit; color: inherit; }
+input, textarea { caret-color: var(--lead-ink); }
+input, select { accent-color: var(--action); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+a { color: var(--text); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-color: var(--text); }
+h1, h2, h3, p, ul, dl, dd { margin: 0; }
+.ph { font-size: 20px; line-height: 1; flex: none; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: 8px; top: -48px; z-index: 50; background: var(--action); color: var(--on-action); padding: 8px 16px; border-radius: var(--r-control); text-decoration: none; }
+.skip:focus { top: 8px; }
+.num { font-variant-numeric: tabular-nums; }
+[hidden] { display: none !important; }
+
+/* ---------- shell ---------- */
+.app { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100dvh; }
+.sidebar { background: var(--surface); border-right: 1px solid var(--line); }
+.sidebar-in { position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; gap: 16px; padding: 12px; }
+.switcher, .account {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; padding: 8px 10px;
+  border: 1px solid transparent; border-radius: var(--r-control); background: none; text-align: left; cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+.switcher:hover, .account:hover { background: var(--surface-2); }
+.switcher:active, .account:active { background: var(--selected); }
+.switcher .ws { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.switcher .ph, .account .ph { color: var(--text-3); font-size: 16px; }
+.account .who { flex: 1; min-width: 0; display: grid; }
+.account .who b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account .who span { color: var(--text-3); font-size: var(--fs-xs); line-height: 16px; }
+.nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.nav a {
+  display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: var(--r-control);
+  color: var(--text-2); text-decoration: none; transition: background-color 120ms ease-out;
+}
+.nav a .ph { color: var(--text-3); }
+.nav a:hover { background: var(--surface-2); color: var(--text); }
+.nav a:active { background: var(--selected); }
+.nav a[aria-current="page"] { background: var(--selected); color: var(--text); font-weight: 600; }
+.nav a[aria-current="page"] .ph { color: var(--text); }
+.sidebar-foot { margin-top: auto; display: grid; gap: 8px; }
+.sidebar-foot .account { border-top-color: var(--line); border-radius: 0 0 var(--r-control) var(--r-control); }
+.topbar, .tabbar { display: none; }
+
+main { min-width: 0; padding: 32px 40px 96px; }
+main:focus { outline: none; }
+.wrap { max-width: 1080px; }
+.page-head { margin-bottom: 32px; }
+h1 { font-size: var(--fs-title); line-height: 32px; font-weight: 650; letter-spacing: -0.01em; }
+h2 { font-size: var(--fs-h2); line-height: 24px; font-weight: 600; }
+h3 { font-size: var(--fs-lg); line-height: 24px; font-weight: 600; }
+.desc { margin-top: 4px; color: var(--text-2); max-width: 64ch; }
+
+.banner {
+  display: flex; gap: 10px; align-items: flex-start; margin-bottom: 24px; padding: 12px 16px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-control); background: var(--surface-2); color: var(--text);
+}
+.banner .ph { color: var(--text-2); }
+
+.top { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 48px; align-items: start; }
+.sec + .sec, .top + .sec { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+.sec-body { margin-top: 20px; }
+
+/* ---------- controls ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--tap); padding: 8px 16px; border: 1px solid transparent; border-radius: var(--r-control);
+  font-weight: 500; line-height: 20px; white-space: nowrap; cursor: pointer; text-decoration: none;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.btn .ph { font-size: 18px; }
+.btn-primary { background: var(--action); color: var(--on-action); }
+.btn-primary:hover { background: var(--action-hover); }
+.btn-primary:active { background: var(--action-pressed); }
+.btn-secondary { background: var(--control); color: var(--text); }
+.btn-secondary:hover { background: var(--control-hover); }
+.btn-secondary:active { background: var(--control-pressed); }
+.btn-danger { background: var(--danger); color: var(--on-danger); }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-danger:active { background: var(--danger-pressed); }
+.btn-danger-quiet { background: var(--control); color: var(--danger-ink); }
+.btn-danger-quiet:hover { background: var(--control-hover); }
+.btn-danger-quiet:active { background: var(--control-pressed); }
+.btn-plain { background: none; color: var(--text-2); }
+.btn-plain:hover { background: var(--surface-2); color: var(--text); }
+.btn-plain:active { background: var(--selected); }
+.btn[aria-disabled="true"], .btn:disabled,
+.btn[aria-disabled="true"]:hover, .btn:disabled:hover,
+.btn[aria-disabled="true"]:active, .btn:disabled:active { background: var(--action-disabled); color: var(--on-action-disabled); cursor: not-allowed; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid transparent;
+  border-radius: var(--r-control); background: none; color: var(--text-2); cursor: pointer; transition: background-color 120ms ease-out;
+}
+.icon-btn:hover { background: var(--surface-2); color: var(--text); }
+.icon-btn:active { background: var(--selected); }
+.reason { color: var(--text-3); font-size: var(--fs-sm); }
+
+.field { display: grid; gap: 0; }
+.field + .field { margin-top: 20px; }
+.field > label, .label { font-weight: 500; color: var(--text); }
+.hint { margin-top: 2px; color: var(--text-3); font-size: var(--fs-sm); line-height: 18px; }
+.input, .select {
+  width: 100%; min-height: var(--tap); margin-top: 8px; padding: 7px 12px; border: 1px solid var(--line-strong);
+  border-radius: var(--r-control); background: var(--page); color: var(--text); line-height: 20px;
+  transition: border-color 120ms ease-out;
+}
+.input::placeholder { color: var(--text-3); }
+.input:hover, .select:hover { border-color: var(--text-3); }
+.input:focus-visible, .select:focus-visible { outline-offset: 0; border-color: var(--focus); }
+.input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--danger); }
+.input[readonly] { background: var(--surface-2); color: var(--text-2); }
+.select-wrap { position: relative; display: block; }
+.select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; }
+.select-wrap > .ph { position: absolute; right: 10px; bottom: 10px; font-size: 16px; color: var(--text-2); pointer-events: none; }
+.select:disabled { opacity: 1; cursor: not-allowed; color: var(--text-disabled); background: var(--surface-2); }
+.err { display: flex; gap: 6px; align-items: flex-start; margin-top: 6px; color: var(--danger-ink); font-size: var(--fs-sm); line-height: 18px; }
+.err .ph { font-size: 18px; }
+
+/* ---------- name and timezone ---------- */
+.general form { max-width: 480px; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 24px; }
+
+/* ---------- plan and billing ---------- */
+.plan { margin-top: 20px; padding: 20px; border-radius: var(--r-panel); background: var(--lead); color: var(--on-lead); }
+.plan-line { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.plan-line b { font-size: var(--fs-lg); line-height: 24px; font-weight: 600; }
+.plan-line span { font-size: var(--fs-sm); }
+.seats { margin-top: 16px; display: flex; align-items: baseline; gap: 8px; }
+.seats .fig { font-size: var(--fs-figure); line-height: 36px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.meter { margin-top: 12px; height: 8px; border-radius: var(--r-sm); background: var(--lead-pressed); overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--pop); transform-origin: left center; transition: transform 200ms var(--ease); }
+.plan-note { margin-top: 10px; font-size: var(--fs-sm); line-height: 18px; }
+.facts { margin-top: 8px; }
+.facts > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.facts dt { color: var(--text-2); }
+.facts dd { text-align: right; font-variant-numeric: tabular-nums; }
+.facts dd small { display: block; color: var(--text-3); font-size: var(--fs-sm); }
+.link-row { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 8px; }
+.link-row a { display: inline-flex; align-items: center; min-height: 32px; }
+
+/* ---------- members ---------- */
+.sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 20px; min-height: 36px; }
+.search { position: relative; flex: 0 1 300px; }
+.search .ph { position: absolute; left: 10px; top: 8px; font-size: 18px; color: var(--text-3); pointer-events: none; }
+.search .input { margin: 0; padding-left: 36px; }
+.filter { display: inline-flex; align-items: center; gap: 8px; color: var(--text-2); }
+.filter .select { margin: 0; width: auto; min-width: 150px; }
+.filter .select-wrap > .ph { bottom: 10px; }
+.bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+.bulk .count { font-weight: 600; margin-right: 4px; }
+.toolbar.is-bulk .search, .toolbar.is-bulk .filter { display: none; }
+.toolbar.is-bulk .bulk { margin-left: 0; }
+.bulk .select { margin: 0; width: auto; min-width: 160px; }
+
+.table { width: 100%; margin-top: 16px; border-collapse: collapse; table-layout: fixed; }
+.table th {
+  height: 36px; padding: 0 12px; text-align: left; font-weight: 500; font-size: var(--fs-sm); color: var(--text-2);
+  border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.table td { height: 52px; padding: 0 12px; border-bottom: 1px solid var(--line); vertical-align: middle; transition: background-color 120ms ease-out; }
+.table tbody tr:hover td { background: var(--surface); }
+.table tbody tr.is-selected td { background: var(--selected); }
+.c-cb { width: 44px; padding-right: 0 !important; }
+.c-name { width: 27%; }
+.c-email { width: 23%; }
+.c-role { width: 148px; }
+.c-loc { width: 19%; }
+.c-active { width: 132px; text-align: right !important; }
+.c-menu { width: 48px; padding-left: 0 !important; text-align: right; }
+.no-select .c-cb, .no-select .c-menu { display: none; }
+.sort {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 28px; margin: 0 -6px; padding: 0 6px; border: 1px solid transparent;
+  border-radius: var(--r-sm); background: none; color: inherit; font-weight: inherit; cursor: pointer;
+}
+.sort:hover { background: var(--surface-2); color: var(--text); }
+.sort .ph { font-size: 14px; }
+th[aria-sort="ascending"] .sort, th[aria-sort="descending"] .sort { color: var(--text); }
+.cb { display: inline-grid; place-items: center; width: 32px; height: 32px; margin-left: -6px; cursor: pointer; border-radius: var(--r-control); }
+.cb input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+.trunc { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.name { font-weight: 600; color: var(--text); min-width: 0; }
+.you { color: var(--text-3); font-weight: 400; flex: none; }
+.sub-email { display: none; color: var(--text-3); font-size: var(--fs-sm); line-height: 18px; }
+.c-email, .c-loc { color: var(--text-2); }
+.c-active { color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 1px 8px 1px 6px; border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm); color: var(--text-2); font-size: var(--fs-xs); line-height: 16px; font-weight: 500;
+}
+.chip .ph { font-size: 14px; }
+.role-text { color: var(--text); }
+.c-role .select { margin: 0; min-height: 32px; padding-top: 5px; padding-bottom: 5px; }
+.c-role .select-wrap > .ph { bottom: 8px; }
+.table-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; color: var(--text-3); }
+.state-cell { padding: 32px 12px !important; height: auto !important; }
+.state-cell, .state-cell:hover { background: none !important; border-bottom: 0 !important; }
+.state { display: grid; gap: 12px; justify-items: start; max-width: 56ch; }
+.state p { color: var(--text-2); }
+.state b { color: var(--text); font-weight: 600; }
+.sk { display: block; height: 10px; border-radius: var(--r-sm); background: var(--surface-2); }
+.sk.dark { background: var(--selected); }
+
+/* ---------- delete ---------- */
+.danger-row { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; margin-top: 4px; }
+.danger-row .desc { margin: 0; }
+.danger-act { display: grid; justify-items: end; gap: 6px; flex: none; }
+
+/* ---------- overlays ---------- */
+.menu, .pop {
+  position: fixed; inset: auto; margin: 0; padding: 4px; min-width: 220px; max-width: calc(100vw - 16px);
+  border: 1px solid var(--line); border-radius: var(--r-panel); background: var(--surface); color: var(--text); box-shadow: var(--shadow-2);
+}
+.menu:popover-open, .pop:popover-open { animation: drop 160ms var(--ease); }
+.menu a, .menu button {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 8px 10px; border: 0; border-radius: var(--r-control);
+  background: none; color: var(--text); text-align: left; text-decoration: none; cursor: pointer;
+}
+.menu a:hover, .menu button:hover, .menu a:focus-visible, .menu button:focus-visible { background: var(--surface-2); }
+.menu a:active, .menu button:active { background: var(--selected); }
+.menu .ph { font-size: 18px; color: var(--text-3); }
+.menu .is-danger, .menu .is-danger .ph { color: var(--danger-ink); }
+.menu .check { margin-left: auto; color: var(--text); }
+.menu hr { margin: 4px 0; border: 0; border-top: 1px solid var(--line); }
+.menu .menu-note { padding: 8px 10px 4px; color: var(--text-3); font-size: var(--fs-sm); }
+.pop { width: 460px; padding: 20px; }
+.pop .field + .field { margin-top: 16px; }
+.pop .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.pop .two .field + .field { margin-top: 0; }
+.pop-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+dialog {
+  width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); padding: 24px; border: 1px solid var(--line);
+  border-radius: var(--r-panel); background: var(--surface); color: var(--text); box-shadow: var(--shadow-2);
+}
+dialog[open] { animation: rise 220ms var(--ease); }
+dialog::backdrop { background: var(--overlay); }
+dialog h2 { font-size: var(--fs-h2); }
+dialog .lost { margin: 12px 0 0; padding-left: 20px; color: var(--text-2); display: grid; gap: 4px; }
+dialog p { margin-top: 12px; color: var(--text-2); }
+dialog .field { margin-top: 20px; }
+dialog .field label b { font-weight: 600; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 24px; }
+.dialog-actions .reason { order: -1; margin-right: auto; }
+
+.tip {
+  position: fixed; z-index: 60; padding: 4px 8px; border-radius: var(--r-sm); background: var(--action); color: var(--on-action);
+  font-size: var(--fs-xs); line-height: 16px; pointer-events: none; max-width: 320px; overflow-wrap: anywhere;
+}
+.toasts { position: fixed; right: 24px; bottom: 24px; z-index: 40; display: grid; gap: 8px; justify-items: end; }
+.toast {
+  display: flex; align-items: center; gap: 12px; max-width: 440px; padding: 8px 8px 8px 16px; border-radius: var(--r-panel);
+  background: var(--action); color: var(--on-action); box-shadow: var(--shadow-2); animation: rise 200ms var(--ease);
+}
+.toast p { flex: 1; }
+.toast .undo { min-height: 32px; padding: 4px 12px; border: 1px solid transparent; border-radius: var(--r-control); background: none; color: var(--on-action); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.toast .undo:hover { background: var(--action-hover); }
+.toast .icon-btn { color: var(--on-action); }
+.toast .icon-btn:hover { background: var(--action-hover); }
+.toast :focus-visible { outline-color: var(--on-action); }
+
+.gone { max-width: 56ch; padding-top: 64px; display: grid; gap: 12px; }
+.gone p { color: var(--text-2); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- mid widths: email moves under the name ---------- */
+@media (max-width: 1180px) {
+  :root { --sidebar: 208px; }
+  main { padding-left: 32px; padding-right: 32px; }
+  .top { grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; }
+  .c-email { display: none; }
+  .sub-email { display: block; }
+  .c-name { width: 34%; }
+}
+@media (max-width: 960px) {
+  .top { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .top .billing { padding-top: 32px; border-top: 1px solid var(--line); }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 760px) {
+  :root { --tap: 44px; }
+  html { font-size: 15px; line-height: 22px; }
+  .app { display: block; }
+  .sidebar { display: none; }
+  .topbar {
+    display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 20;
+    padding: calc(4px + env(safe-area-inset-top)) 8px 4px; background: var(--surface); border-bottom: 1px solid var(--line);
+  }
+  .topbar .switcher { width: auto; max-width: 100%; min-height: 44px; }
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line);
+  }
+  .tabbar a, .tabbar button {
+    display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 52px; padding: 4px 2px; border: 1px solid transparent;
+    border-radius: var(--r-control); background: none; color: var(--text-2); font-size: var(--fs-xs); line-height: 16px; text-decoration: none; cursor: pointer;
+  }
+  .tabbar .ph { font-size: 22px; color: var(--text-3); }
+  .tabbar [aria-current="page"] { background: var(--selected); color: var(--text); font-weight: 600; }
+  .tabbar [aria-current="page"] .ph { color: var(--text); }
+  main { padding: 20px 16px calc(96px + env(safe-area-inset-bottom)); }
+  .page-head { margin-bottom: 24px; }
+  .input, .select { font-size: 16px; line-height: 22px; padding-top: 10px; padding-bottom: 10px; }
+  .select-wrap > .ph { bottom: 13px; }
+  .general form { max-width: none; }
+  .form-actions .btn { flex: 1 1 auto; }
+  .form-actions .reason { flex-basis: 100%; }
+  .link-row a { min-height: 44px; }
+  .sec-head > .btn { width: 100%; }
+  .toolbar { gap: 12px; }
+  .search { flex: 1 1 100%; }
+  .search .ph { top: 13px; }
+  .filter { flex: 1 1 calc(50% - 6px); display: grid; gap: 4px; min-width: 0; }
+  .filter .select { width: 100%; min-width: 0; }
+  .filter .select-wrap > .ph { bottom: 13px; }
+  .bulk { flex: 1 1 100%; margin: 0; padding: 8px; border-radius: var(--r-panel); background: var(--surface-2); }
+  .bulk .select { flex: 1 1 150px; min-width: 0; }
+  .icon-btn { width: 44px; height: 44px; }
+  .cb { width: 44px; height: 44px; margin-left: -10px; }
+  .sort { min-height: 44px; }
+
+  /* the table becomes a list of stacked rows */
+  .table, .table tbody { display: block; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table tbody tr {
+    display: grid; grid-template-columns: 36px minmax(0, 1fr) auto 44px; column-gap: 8px;
+    grid-template-areas: "cb name name menu" ". email email email" ". loc active active" ". role role role";
+    padding: 8px 0 14px; border-bottom: 1px solid var(--line);
+  }
+  .table td { display: block; height: auto; padding: 0; border: 0; background: none !important; }
+  .table tbody tr.is-selected { background: var(--selected); }
+  .table tbody tr:hover { background: none; }
+  .table tbody tr.is-selected:hover { background: var(--selected); }
+  .c-cb { grid-area: cb; width: auto; }
+  .c-name { grid-area: name; width: auto; align-self: center; }
+  .c-email { grid-area: email; display: block; width: auto; font-size: var(--fs-sm); color: var(--text-3); }
+  .sub-email { display: none; }
+  .c-loc { grid-area: loc; width: auto; margin-top: 2px; font-size: var(--fs-sm); }
+  .c-active { grid-area: active; width: auto; margin-top: 2px; font-size: var(--fs-sm); }
+  .c-role { grid-area: role; width: auto; margin-top: 10px; }
+  .c-role .select { min-height: 44px; }
+  .c-role .select-wrap > .ph { bottom: 13px; }
+  .c-role .role-text { display: inline-block; padding-top: 2px; color: var(--text-2); }
+  .c-menu { grid-area: menu; width: auto; }
+  .no-select tbody tr { grid-template-areas: "name name name menu" "email email email email" "loc loc active active" "role role role role"; }
+  .table tbody tr.state-row, .table tbody tr.sk-row { display: block; padding: 0; }
+  .state-cell { padding: 24px 0 !important; }
+  .sk-row td { padding: 14px 0 !important; }
+  .table-foot .btn { width: 100%; }
+  .danger-row { display: grid; }
+  .danger-act { justify-items: stretch; }
+
+  .menu, .pop {
+    left: 0; right: 0; bottom: 0; top: auto; width: 100%; max-width: none; min-width: 0; max-height: 85dvh; overflow: auto;
+    padding: 8px 8px calc(12px + env(safe-area-inset-bottom)); border-radius: var(--r-panel) var(--r-panel) 0 0; border-bottom: 0;
+  }
+  .pop { padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .menu:popover-open, .pop:popover-open { animation: rise 220ms var(--ease); }
+  .menu a, .menu button { min-height: 48px; }
+  .pop .two { grid-template-columns: 1fr; gap: 16px; }
+  .pop-actions .btn, .dialog-actions .btn { flex: 1 1 auto; }
+  dialog {
+    width: 100%; max-width: none; max-height: 90dvh; margin: auto 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    border-radius: var(--r-panel) var(--r-panel) 0 0; border-bottom: 0;
+  }
+  dialog[open] { animation: rise 260ms var(--ease); }
+  .dialog-actions { flex-direction: column-reverse; align-items: stretch; }
+  .dialog-actions .reason { order: 0; margin: 0; }
+  .toasts { left: 16px; right: 16px; bottom: calc(76px + env(safe-area-inset-bottom)); justify-items: stretch; }
+  .toast { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog[open], .menu:popover-open, .pop:popover-open, .toast { animation: fade 200ms ease-out; }
+  .meter > span { transition: none; }
+}
+@media (prefers-contrast: more) {
+  .btn, .icon-btn, .menu, .pop, dialog, .toast { border-color: currentColor; }
+  .plan { border: 1px solid currentColor; }
+}
+@media (forced-colors: active) {
+  .meter > span { background: CanvasText; }
+  .nav a[aria-current="page"], .tabbar [aria-current="page"] { outline: 2px solid CanvasText; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to settings</a>
+<div class="app">
+  <aside class="sidebar" aria-label="Shiftboard"><div class="sidebar-in">
+    <button class="switcher" type="button" popovertarget="ws-menu" aria-haspopup="menu" aria-label="Workspace: Marlow Kitchen Group. Switch workspace">
+      <span class="ws" data-ws-name>Marlow Kitchen Group</span><i class="ph ph-caret-up-down" aria-hidden="true"></i>
+    </button>
+    <nav aria-label="Main">
+      <ul class="nav">
+        <li><a href="#schedule"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Schedule</a></li>
+        <li><a href="#time-off"><i class="ph ph-airplane-tilt" aria-hidden="true"></i>Time off</a></li>
+        <li><a href="#shift-swaps"><i class="ph ph-arrows-left-right" aria-hidden="true"></i>Shift swaps</a></li>
+        <li><a href="#timesheets"><i class="ph ph-clock" aria-hidden="true"></i>Timesheets</a></li>
+        <li><a href="#reports"><i class="ph ph-chart-bar" aria-hidden="true"></i>Reports</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-foot">
+      <ul class="nav">
+        <li><a href="./" aria-current="page"><i class="ph ph-gear-six" aria-hidden="true"></i>Settings</a></li>
+        <li><a href="#help"><i class="ph ph-question" aria-hidden="true"></i>Help</a></li>
+      </ul>
+      <button class="account" type="button" popovertarget="account-menu" aria-haspopup="menu">
+        <span class="who"><b data-viewer-name>Priya Raman</b><span data-viewer-role>Owner</span></span><i class="ph ph-caret-up-down" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div></aside>
+
+  <header class="topbar">
+    <button class="switcher" type="button" popovertarget="ws-menu" aria-haspopup="menu" aria-label="Workspace: Marlow Kitchen Group. Switch workspace">
+      <span class="ws" data-ws-name>Marlow Kitchen Group</span><i class="ph ph-caret-up-down" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <div class="wrap" id="content">
+      <div class="banner" id="offline" role="status" hidden>
+        <i class="ph ph-wifi-slash" aria-hidden="true"></i>
+        <p><b>You're offline.</b> You can still read these settings. Saving, invites and role changes wait until you're back online.</p>
+      </div>
+
+      <header class="page-head"><h1>Workspace settings</h1></header>
+
+      <div class="top">
+        <section class="general" aria-labelledby="general-h">
+          <h2 id="general-h">Name and timezone</h2>
+          <form id="general" class="sec-body" novalidate>
+            <div class="field">
+              <label for="ws-name">Workspace name</label>
+              <p class="hint" id="ws-name-hint">Staff see it at the top of their schedule and in shift emails. Up to 60 characters.</p>
+              <input class="input" id="ws-name" name="name" type="text" value="Marlow Kitchen Group" autocomplete="organization" aria-describedby="ws-name-hint ws-name-err">
+              <p class="err" id="ws-name-err" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+            </div>
+            <div class="field">
+              <label for="ws-tz">Timezone</label>
+              <p class="hint" id="ws-tz-hint">Shift times, clock-ins and the Sunday schedule email use it.</p>
+              <span class="select-wrap">
+                <select class="select" id="ws-tz" name="tz" aria-invalid="true" aria-describedby="ws-tz-hint ws-tz-err">
+                  <option value="" selected>Choose a timezone</option>
+                  <option value="Europe/London">London (GMT+00:00)</option>
+                  <option value="Europe/Dublin">Dublin (GMT+00:00)</option>
+                  <option value="Europe/Lisbon">Lisbon (GMT+00:00)</option>
+                  <option value="Europe/Amsterdam">Amsterdam (GMT+01:00)</option>
+                  <option value="Europe/Berlin">Berlin (GMT+01:00)</option>
+                  <option value="Europe/Madrid">Madrid (GMT+01:00)</option>
+                  <option value="Europe/Paris">Paris (GMT+01:00)</option>
+                  <option value="Europe/Athens">Athens (GMT+02:00)</option>
+                  <option value="Asia/Dubai">Dubai (GMT+04:00)</option>
+                  <option value="Asia/Singapore">Singapore (GMT+08:00)</option>
+                  <option value="Australia/Sydney">Sydney (GMT+11:00)</option>
+                  <option value="America/New_York">New York (GMT-04:00)</option>
+                  <option value="America/Chicago">Chicago (GMT-05:00)</option>
+                  <option value="America/Los_Angeles">Los Angeles (GMT-07:00)</option>
+                </select>
+                <i class="ph ph-caret-down" aria-hidden="true"></i>
+              </span>
+              <p class="err" id="ws-tz-err"><i class="ph ph-warning-circle" aria-hidden="true"></i><span>Choose a timezone so shift times match on everyone's phone. All 4 locations are in London.</span></p>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="save" type="submit" aria-disabled="true" aria-describedby="save-reason">Save changes</button>
+              <button class="btn btn-secondary" id="discard" type="button" hidden>Discard changes</button>
+              <p class="reason" id="save-reason" aria-live="polite">No changes to save yet.</p>
+            </div>
+          </form>
+        </section>
+
+        <section class="billing" aria-labelledby="billing-h">
+          <h2 id="billing-h">Plan and billing</h2>
+          <div class="plan">
+            <p class="plan-line"><b>Team plan</b><span>£8.50 a seat, monthly</span></p>
+            <p class="seats"><span class="fig" id="seats-used">39</span><span>of <span class="num" id="seats-max">45</span> seats used</span></p>
+            <div class="meter" role="meter" aria-label="Seats used" aria-valuemin="0" aria-valuemax="45" aria-valuenow="39" id="meter"><span id="meter-fill" style="transform: scaleX(0.867)"></span></div>
+            <p class="plan-note" id="seats-note">38 members and 1 pending invite. 6 seats left.</p>
+          </div>
+          <dl class="facts">
+            <div><dt>Next invoice</dt><dd><span id="invoice-amount">£331.50</span> <small>on 14 Nov 2026</small></dd></div>
+            <div><dt>Payment card</dt><dd>Visa ending 4417 <small>expires 08/28</small></dd></div>
+          </dl>
+          <p class="link-row"><a href="#billing/plan">Change plan</a><a href="#billing/card">Update card</a><a href="#billing/invoices">Past invoices</a></p>
+        </section>
+      </div>
+
+      <section class="sec members" aria-labelledby="members-h">
+        <div class="sec-head">
+          <div>
+            <h2 id="members-h">Members</h2>
+            <p class="desc" id="members-desc">38 members and 1 pending invite. Only owners can change roles.</p>
+          </div>
+          <button class="btn btn-secondary" id="invite-btn" type="button" popovertarget="invite" aria-haspopup="dialog"><i class="ph ph-user-plus" aria-hidden="true"></i>Invite member</button>
+        </div>
+
+        <div class="toolbar" id="toolbar">
+          <div class="search">
+            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            <input class="input" id="q" type="search" placeholder="Search by name or email" aria-label="Search members" autocomplete="off" spellcheck="false">
+          </div>
+          <label class="filter"><span>Role</span>
+            <span class="select-wrap"><select class="select" id="f-role">
+              <option value="">All roles</option><option>Owner</option><option>Admin</option><option>Manager</option><option>Staff</option><option value="pending">Pending invites</option>
+            </select><i class="ph ph-caret-down" aria-hidden="true"></i></span>
+          </label>
+          <label class="filter"><span>Location</span>
+            <span class="select-wrap"><select class="select" id="f-loc">
+              <option value="">All locations</option><option>Marlow Bermondsey</option><option>Marlow Hackney</option><option>Little Marlow Deli</option><option>Marlow at Kew Bridge</option>
+            </select><i class="ph ph-caret-down" aria-hidden="true"></i></span>
+          </label>
+          <div class="bulk" id="bulk" hidden>
+            <span class="count" id="bulk-count" aria-live="polite">0 selected</span>
+            <span class="select-wrap"><select class="select" id="bulk-role" aria-label="Change role for selected members">
+              <option value="">Change role to…</option><option>Admin</option><option>Manager</option><option>Staff</option>
+            </select><i class="ph ph-caret-down" aria-hidden="true"></i></span>
+            <button class="btn btn-danger-quiet" id="bulk-remove" type="button">Remove</button>
+            <button class="btn btn-plain" id="bulk-clear" type="button">Clear selection</button>
+          </div>
+        </div>
+
+        <table class="table" id="table">
+          <caption class="sr-only">Workspace members</caption>
+          <thead>
+            <tr>
+              <th class="c-cb" scope="col"><label class="cb"><input type="checkbox" id="cb-all" aria-label="Select all members shown"></label></th>
+              <th class="c-name" scope="col" data-col="name"><button class="sort" type="button" data-sort="name">Name<i class="ph" aria-hidden="true"></i></button></th>
+              <th class="c-email" scope="col">Email</th>
+              <th class="c-role" scope="col" data-col="role"><button class="sort" type="button" data-sort="role">Role<i class="ph" aria-hidden="true"></i></button></th>
+              <th class="c-loc" scope="col">Location</th>
+              <th class="c-active" scope="col" data-col="active"><button class="sort" type="button" data-sort="active">Last active<i class="ph" aria-hidden="true"></i></button></th>
+              <th class="c-menu" scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="table-foot" id="table-foot">
+          <p id="shown" class="num">Showing 10 of 39</p>
+          <button class="btn btn-secondary" id="more" type="button">Show 10 more</button>
+        </div>
+      </section>
+
+      <section class="sec danger" aria-labelledby="delete-h">
+        <h2 id="delete-h">Delete workspace</h2>
+        <div class="danger-row">
+          <p class="desc" id="delete-desc">Deletes <span data-ws-name>Marlow Kitchen Group</span> with its 4 locations, schedules and timesheets, and removes everyone in it. This can't be undone.</p>
+          <div class="danger-act">
+            <button class="btn btn-danger" id="delete-open" type="button" aria-haspopup="dialog">Delete workspace…</button>
+            <p class="reason" id="delete-reason" hidden></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="tabbar" aria-label="Main">
+    <a href="#schedule"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Schedule</a>
+    <a href="#time-off"><i class="ph ph-airplane-tilt" aria-hidden="true"></i>Time off</a>
+    <a href="#shift-swaps"><i class="ph ph-arrows-left-right" aria-hidden="true"></i>Swaps</a>
+    <a href="#timesheets"><i class="ph ph-clock" aria-hidden="true"></i>Timesheets</a>
+    <button type="button" popovertarget="more-menu" aria-haspopup="menu" aria-current="page"><i class="ph ph-dots-three" aria-hidden="true"></i>More</button>
+  </nav>
+</div>
+
+<!-- overlays -->
+<div class="menu" id="ws-menu" popover role="menu" aria-label="Workspaces">
+  <a href="./" role="menuitem" aria-current="true"><span data-ws-name>Marlow Kitchen Group</span><i class="ph ph-check check" aria-hidden="true"></i></a>
+  <hr>
+  <a href="#new-workspace" role="menuitem">Create another workspace</a>
+</div>
+
+<div class="menu" id="account-menu" popover role="menu" aria-label="Your account">
+  <a href="#profile" role="menuitem"><i class="ph ph-user" aria-hidden="true"></i>Your profile</a>
+  <a href="#sign-out" role="menuitem"><i class="ph ph-sign-out" aria-hidden="true"></i>Sign out</a>
+</div>
+
+<div class="menu" id="more-menu" popover role="menu" aria-label="More">
+  <a href="#reports" role="menuitem"><i class="ph ph-chart-bar" aria-hidden="true"></i>Reports</a>
+  <a href="./" role="menuitem" aria-current="page"><i class="ph ph-gear-six" aria-hidden="true"></i>Settings<i class="ph ph-check check" aria-hidden="true"></i></a>
+  <a href="#help" role="menuitem"><i class="ph ph-question" aria-hidden="true"></i>Help</a>
+  <hr>
+  <a href="#profile" role="menuitem"><i class="ph ph-user" aria-hidden="true"></i><span data-viewer-name>Priya Raman</span></a>
+  <a href="#sign-out" role="menuitem"><i class="ph ph-sign-out" aria-hidden="true"></i>Sign out</a>
+</div>
+
+<div class="menu" id="row-menu" popover role="menu" aria-label="Member actions"></div>
+
+<div class="pop" id="invite" popover role="dialog" aria-labelledby="invite-h">
+  <form id="invite-form" novalidate>
+    <h3 id="invite-h">Invite a member</h3>
+    <div class="field" style="margin-top:16px">
+      <label for="inv-email">Email</label>
+      <input class="input" id="inv-email" type="email" inputmode="email" autocomplete="off" spellcheck="false" aria-describedby="inv-email-err">
+      <p class="err" id="inv-email-err" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+    </div>
+    <div class="two">
+      <div class="field">
+        <label for="inv-role">Role</label>
+        <span class="select-wrap"><select class="select" id="inv-role"><option>Staff</option><option>Manager</option><option>Admin</option></select><i class="ph ph-caret-down" aria-hidden="true"></i></span>
+      </div>
+      <div class="field">
+        <label for="inv-loc">Location</label>
+        <span class="select-wrap"><select class="select" id="inv-loc"><option>Marlow Bermondsey</option><option>Marlow Hackney</option><option>Little Marlow Deli</option><option>Marlow at Kew Bridge</option><option>All locations</option></select><i class="ph ph-caret-down" aria-hidden="true"></i></span>
+      </div>
+    </div>
+    <p class="hint" id="inv-note" style="margin-top:12px">Uses 1 of your 6 free seats. They get an email with a link to join.</p>
+    <div class="pop-actions">
+      <button class="btn btn-secondary" type="button" popovertarget="invite" popovertargetaction="hide">Cancel</button>
+      <button class="btn btn-primary" type="submit" id="inv-send">Send invite</button>
+    </div>
+  </form>
+</div>
+
+<dialog id="delete-dialog" aria-labelledby="del-h" aria-describedby="del-desc">
+  <form id="del-form" novalidate>
+    <h2 id="del-h">Delete <span data-ws-name>Marlow Kitchen Group</span>?</h2>
+    <div id="del-desc">
+      <p>This deletes the workspace for everyone, and it can't be undone.</p>
+      <ul class="lost">
+        <li>4 locations, with every schedule, shift swap and timesheet</li>
+        <li><span id="del-people">38 members lose access and 1 pending invite stops working</span></li>
+        <li>The Team plan ends today, so the <span id="del-invoice">£331.50</span> invoice due on 14 Nov isn't charged</li>
+      </ul>
+      <p>Need the hours for payroll? <a href="#timesheets/export">Export timesheets</a> first.</p>
+    </div>
+    <div class="field">
+      <label for="del-confirm">Type <b data-ws-name>Marlow Kitchen Group</b> to confirm</label>
+      <input class="input" id="del-confirm" type="text" autocomplete="off" spellcheck="false" autofocus aria-describedby="del-err">
+      <p class="err" id="del-err" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" id="del-cancel">Cancel</button>
+      <button class="btn btn-danger" type="submit" id="del-go" aria-disabled="true" aria-describedby="del-reason">Delete workspace</button>
+      <p class="reason" id="del-reason">Type the workspace name to delete it.</p>
+    </div>
+  </form>
+</dialog>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="tip" id="tip" role="tooltip" aria-hidden="true" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const P = new URLSearchParams(location.search);
+  const phone = matchMedia('(max-width: 760px)');
+
+  // ---------- data ----------
+  const NOW = Date.UTC(2026, 9, 31, 13, 0);
+  const PRICE = 8.5, SEAT_MAX = 45, PAGE = 10;
+  const ROLE_ORDER = { Owner: 0, Admin: 1, Manager: 2, Staff: 3 };
+  const ALL = 'All locations';
+  const M = (name, email, role, loc, ago, extra = {}) => ({ id: email, name, email, role, loc, ago, ...extra });
+  const SEED = [
+    M('Priya Raman', 'priya@marlowkitchen.co.uk', 'Owner', ALL, 0, { you: true }),
+    M('Tomás Ferreira-Lindqvist', 'tomas.ferreira-lindqvist@marlowkitchen.co.uk', 'Admin', ALL, 128),
+    M('Hannah Oyelaran', 'hannah.o@marlowkitchen.co.uk', 'Admin', ALL, 1410),
+    M('Dee Okafor', 'dee@marlowkitchen.co.uk', 'Manager', 'Marlow Hackney', 18),
+    M('Sam Whitlock', 'sam.whitlock@marlowkitchen.co.uk', 'Manager', 'Marlow Bermondsey', 41),
+    M('Grace Liang', 'grace.liang@marlowkitchen.co.uk', 'Manager', 'Little Marlow Deli', 187),
+    M('Rafael Ostrowski', 'rafael@marlowkitchen.co.uk', 'Manager', 'Marlow at Kew Bridge', 1630),
+    M('Marta Ilić', 'marta.ilic@gmail.com', 'Staff', 'Marlow Hackney', 9),
+    M('Ana Brezovar', 'anabrezovar92@outlook.com', 'Staff', 'Little Marlow Deli', 4390),
+    M('Kofi Mensah-Boateng', 'kofi.mb@gmail.com', 'Staff', 'Marlow at Kew Bridge', 27420),
+    M('Lewis Pratt', 'lewis.pratt@icloud.com', 'Staff', 'Marlow Bermondsey', 2950),
+    M('Chiara Benedetti', 'chiara.benedetti@gmail.com', 'Staff', 'Marlow Hackney', 305),
+    M('Jamal Haddad', 'jamalhaddad@gmail.com', 'Staff', 'Marlow Bermondsey', 66),
+    M('Niamh Gallagher', 'niamh.g@outlook.com', 'Staff', 'Marlow at Kew Bridge', 5820),
+    M('Oskar Nyberg', 'oskar.nyberg@proton.me', 'Staff', 'Little Marlow Deli', 26),
+    M('Femi Adebayo', 'femi.adebayo@gmail.com', 'Staff', 'Marlow Hackney', 1500),
+    M('Bea Castellanos', 'bea.castellanos@gmail.com', 'Staff', 'Marlow Bermondsey', 8700),
+    M('Yusuf Demir', 'yusuf.demir@hotmail.co.uk', 'Staff', 'Marlow at Kew Bridge', 133),
+    M('Ellie Marchetti', 'ellie.marchetti@gmail.com', 'Staff', 'Little Marlow Deli', 57960),
+    M('Tadhg Byrne', 'tadhg.byrne@gmail.com', 'Staff', 'Marlow Hackney', 4470),
+    M('Mei Tanaka', 'mei.tanaka@icloud.com', 'Staff', 'Marlow Bermondsey', 50),
+    M('Callum Reid', 'callumreid@gmail.com', 'Staff', 'Marlow at Kew Bridge', 1390),
+    M('Sofia Andersson', 'sofia.andersson@gmail.com', 'Staff', 'Marlow Hackney', 488),
+    M('Dami Ogunleye', 'dami.ogunleye@outlook.com', 'Staff', 'Little Marlow Deli', 3010),
+    M('Luca Ferrante', 'luca.ferrante@gmail.com', 'Staff', 'Marlow Bermondsey', 15),
+    M('Imogen Ashworth-Clarke', 'imogen.ashworthclarke@gmail.com', 'Staff', 'Marlow at Kew Bridge', 7310),
+    M('Ravi Chandrasekar', 'ravi.c@gmail.com', 'Staff', 'Marlow Hackney', 251),
+    M('Zuzana Kováčová', 'zuzana.kovacova@seznam.cz', 'Staff', 'Little Marlow Deli', 1475),
+    M('Ben Okonkwo', 'ben.okonkwo@gmail.com', 'Staff', 'Marlow Bermondsey', 4380),
+    M('Aoife Kearney', 'aoife.kearney@gmail.com', 'Staff', 'Marlow at Kew Bridge', 72),
+    M('Mateus Rocha', 'mateus.rocha@gmail.com', 'Staff', 'Marlow Hackney', 20330),
+    M('Hana Novak', 'hana.novak@icloud.com', 'Staff', 'Little Marlow Deli', 425),
+    M('Theo Lambert', 'theo.lambert@gmail.com', 'Staff', 'Marlow Bermondsey', 1555),
+    M('Leila Farahani', 'leila.farahani@gmail.com', 'Staff', 'Marlow at Kew Bridge', 2890),
+    M('Jonah Whitfield', 'jonahwhitfield@outlook.com', 'Staff', 'Marlow Hackney', 33),
+    M('Ines Duarte', 'ines.duarte@gmail.com', 'Staff', 'Little Marlow Deli', 362),
+    M('Patrick Mwangi', 'patrick.mwangi@gmail.com', 'Staff', 'Marlow Bermondsey', 5790),
+    M('Rosa Villanueva', 'rosa.villanueva@gmail.com', 'Staff', 'Marlow at Kew Bridge', null),
+    M('Jules Harcourt', 'jules.harcourt@gmail.com', 'Manager', 'Little Marlow Deli', 2880, { pending: true }),
+  ];
+
+  const viewer = P.get('as') === 'manager' ? 'manager' : 'owner';
+  const canEdit = viewer === 'owner';
+  let members = SEED.map(m => ({ ...m }));
+  if (viewer === 'manager') members.forEach(m => { m.you = m.email === 'dee@marlowkitchen.co.uk'; });
+  if (P.get('members') === 'empty') members = members.filter(m => m.you);
+  let membersState = ['loading', 'error'].includes(P.get('members')) ? P.get('members') : 'ok';
+  let offline = P.get('offline') === '1' || navigator.onLine === false;
+
+  const st = {
+    q: P.get('q') || '', role: P.get('role') || '', loc: P.get('loc') || '',
+    sort: ['name', 'role', 'active'].includes(P.get('sort')) ? P.get('sort') : 'role',
+    dir: P.get('dir') === 'desc' ? -1 : 1, shown: PAGE, sel: new Set(),
+  };
+
+  // ---------- formatting ----------
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const money = n => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(n);
+  const absFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
+  const dayFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  function rel(min) {
+    if (min == null) return 'Not signed in yet';
+    if (min < 2) return 'Active now';
+    if (min < 60) return `${min} min ago`;
+    if (min < 1440) return plural(Math.floor(min / 60), 'hour ago', 'hours ago');
+    if (min < 2880) return 'Yesterday';
+    if (min < 10080) return `${Math.floor(min / 1440)} days ago`;
+    return dayFmt.format(new Date(NOW - min * 60000));
+  }
+  const fold = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  // ---------- rows ----------
+  const roleOptions = (m) => (m.pending ? ['Admin', 'Manager', 'Staff'] : ['Owner', 'Admin', 'Manager', 'Staff'])
+    .map(r => `<option${r === m.role ? ' selected' : ''}>${r}</option>`).join('');
+
+  function rowHTML(m) {
+    const when = m.ago == null ? '' : new Date(NOW - m.ago * 60000);
+    const activeText = m.pending ? `Invited ${rel(m.ago).toLowerCase()}` : rel(m.ago);
+    const time = m.ago == null ? `<span>${activeText}</span>`
+      : `<time datetime="${when.toISOString()}" title="${m.pending ? 'Invited ' : ''}${absFmt.format(when)}">${activeText}</time>`;
+    const selectable = canEdit && !m.you;
+    const sel = st.sel.has(m.id);
+    const role = canEdit && !m.you
+      ? `<span class="select-wrap"><select class="select" data-role="${esc(m.id)}" aria-label="Role for ${esc(m.name)}"${offline ? ' disabled' : ''}>${roleOptions(m)}</select><i class="ph ph-caret-down" aria-hidden="true"></i></span>`
+      : `<span class="role-text">${m.role}</span>`;
+    return `<tr data-id="${esc(m.id)}"${sel ? ' class="is-selected"' : ''}>
+      <td class="c-cb">${selectable ? `<label class="cb"><input type="checkbox" data-sel="${esc(m.id)}" aria-label="Select ${esc(m.name)}"${sel ? ' checked' : ''}></label>` : ''}</td>
+      <td class="c-name"><span class="name-line"><span class="name trunc">${esc(m.name)}</span>${m.you ? '<span class="you">(you)</span>' : ''}${m.pending ? '<span class="chip"><i class="ph ph-clock" aria-hidden="true"></i>Invite pending</span>' : ''}</span><span class="sub-email trunc" aria-hidden="true">${esc(m.email)}</span></td>
+      <td class="c-email"><span class="trunc">${esc(m.email)}</span></td>
+      <td class="c-role">${role}</td>
+      <td class="c-loc"><span class="trunc">${esc(m.loc)}</span></td>
+      <td class="c-active">${time}</td>
+      <td class="c-menu">${canEdit && !m.you ? `<button class="icon-btn" type="button" data-menu="${esc(m.id)}" data-tip="More actions" aria-label="More actions for ${esc(m.name)}" aria-haspopup="menu"><i class="ph ph-dots-three" aria-hidden="true"></i></button>` : ''}</td>
+    </tr>`;
+  }
+
+  const skRow = (i) => `<tr class="sk-row" aria-hidden="true"><td class="c-cb"></td>
+    <td class="c-name"><span class="sk dark" style="width:${[62, 48, 70, 55, 66, 44][i]}%"></span></td>
+    <td class="c-email"><span class="sk" style="width:${[74, 60, 82, 68, 58, 77][i]}%"></span></td>
+    <td class="c-role"><span class="sk" style="width:72px"></span></td>
+    <td class="c-loc"><span class="sk" style="width:${[58, 70, 52, 64, 72, 50][i]}%"></span></td>
+    <td class="c-active"><span class="sk" style="width:64px;margin-left:auto"></span></td><td class="c-menu"></td></tr>`;
+
+  function filtered() {
+    const q = fold(st.q.trim());
+    let list = members.filter(m =>
+      (!q || fold(m.name).includes(q) || fold(m.email).includes(q)) &&
+      (!st.role || (st.role === 'pending' ? m.pending : (!m.pending && m.role === st.role))) &&
+      (!st.loc || m.loc === st.loc));
+    const by = {
+      name: (a, b) => a.name.localeCompare(b.name, 'en-GB'),
+      role: (a, b) => (ROLE_ORDER[a.role] - ROLE_ORDER[b.role]) || a.name.localeCompare(b.name, 'en-GB'),
+      active: (a, b) => (a.ago ?? 1e9) - (b.ago ?? 1e9),
+    }[st.sort];
+    list.sort((a, b) => (Number(!!b.pending) - Number(!!a.pending)) || st.dir * by(a, b));
+    return list;
+  }
+
+  const rowsEl = $('#rows');
+  function render() {
+    const counts = { members: members.filter(m => !m.pending).length, pending: members.filter(m => m.pending).length };
+    $('#members-desc').textContent = membersState === 'loading' ? 'Loading members…' : membersState === 'error' ? 'Only owners can change roles.'
+      : `${plural(counts.members, 'member', 'members')}${counts.pending ? ` and ${plural(counts.pending, 'pending invite', 'pending invites')}` : ''}. `
+        + (canEdit ? 'Only owners can change roles.' : 'Only owners can change roles. Ask Priya Raman if one looks wrong.');
+    updateSeats();
+
+    $$('th[data-col]').forEach(th => {
+      const on = th.dataset.col === st.sort;
+      th.setAttribute('aria-sort', on ? (st.dir === 1 ? 'ascending' : 'descending') : 'none');
+      th.querySelector('.ph').className = on ? `ph ${st.dir === 1 ? 'ph-arrow-up' : 'ph-arrow-down'}` : 'ph';
+    });
+
+    const foot = $('#table-foot');
+    if (membersState === 'loading') {
+      rowsEl.innerHTML = [0, 1, 2, 3, 4, 5].map(skRow).join('');
+      foot.hidden = true; syncBulk([]); return;
+    }
+    if (membersState === 'error') {
+      rowsEl.innerHTML = `<tr class="state-row"><td class="state-cell" colspan="7"><div class="state" role="alert">
+        <p><b>Couldn't load members.</b> Shiftboard didn't answer in time. Your other settings on this page are fine.</p>
+        <button class="btn btn-secondary" type="button" id="retry"><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Try again</button></div></td></tr>`;
+      foot.hidden = true; syncBulk([]); return;
+    }
+
+    const list = filtered();
+    const page = list.slice(0, st.shown);
+    let html = page.map(rowHTML).join('');
+    if (!list.length) {
+      const bits = [];
+      if (st.q.trim()) bits.push(`“${esc(st.q.trim())}”`);
+      const where = (st.role ? ` among ${st.role === 'pending' ? 'pending invites' : `${st.role.toLowerCase()}s`}` : '') + (st.loc ? ` at ${esc(st.loc)}` : '');
+      html = `<tr class="state-row"><td class="state-cell" colspan="7"><div class="state">
+        <p><b>No members match ${bits.join('') || 'these filters'}</b>${where}. Check the spelling, or search by email instead.</p>
+        <button class="btn btn-secondary" type="button" id="clear-filters">${st.role || st.loc ? 'Clear search and filters' : 'Clear search'}</button></div></td></tr>`;
+    } else if (members.length === 1 && members[0].you) {
+      html += `<tr class="state-row"><td class="state-cell" colspan="7"><div class="state">
+        <p><b>Only you are here so far.</b> Invite the people who work your shifts so they can see the schedule and swap shifts.</p>
+        <button class="btn btn-primary" type="button" popovertarget="invite"><i class="ph ph-user-plus" aria-hidden="true"></i>Invite member</button></div></td></tr>`;
+    }
+    rowsEl.innerHTML = html;
+    foot.hidden = !list.length || (members.length === 1 && members[0].you);
+    $('#shown').textContent = `Showing ${Math.min(st.shown, list.length)} of ${list.length}`;
+    const left = list.length - st.shown;
+    $('#more').hidden = left <= 0;
+    $('#more').textContent = `Show ${Math.min(PAGE, left)} more`;
+    syncBulk(page);
+    markTruncated();
+  }
+
+  function syncBulk(page) {
+    for (const id of st.sel) if (!members.some(m => m.id === id)) st.sel.delete(id);
+    const n = st.sel.size;
+    $('#bulk').hidden = n === 0;
+    $('#toolbar').classList.toggle('is-bulk', n > 0);
+    $('#bulk-count').textContent = `${n} selected`;
+    const all = $('#cb-all');
+    const selectable = page.filter(m => !m.you);
+    const on = selectable.filter(m => st.sel.has(m.id)).length;
+    all.checked = on > 0 && on === selectable.length;
+    all.indeterminate = on > 0 && on < selectable.length;
+    all.disabled = !canEdit || !selectable.length;
+    $('.c-cb label', $('#table thead')).hidden = !canEdit;
+  }
+
+  function updateSeats() {
+    const used = members.length;
+    const free = SEAT_MAX - used;
+    $('#seats-used').textContent = used;
+    $('#meter').setAttribute('aria-valuenow', used);
+    $('#meter').setAttribute('aria-valuetext', `${used} of ${SEAT_MAX} seats used`);
+    $('#meter-fill').style.transform = `scaleX(${Math.min(1, used / SEAT_MAX).toFixed(3)})`;
+    const nm = members.filter(m => !m.pending).length, np = members.filter(m => m.pending).length;
+    $('#seats-note').textContent = `${plural(nm, 'member', 'members')}${np ? ` and ${plural(np, 'pending invite', 'pending invites')}` : ''}. `
+      + (free > 0 ? `${plural(free, 'seat', 'seats')} left.` : 'No seats left; a new invite adds one at £8.50 a month.');
+    const invoice = money(Math.max(used, 1) * PRICE);
+    $('#invoice-amount').textContent = invoice;
+    $('#del-invoice').textContent = invoice;
+    $('#del-people').textContent = `${plural(nm, 'member loses', 'members lose')} access${np ? ` and ${plural(np, 'pending invite stops', 'pending invites stop')} working` : ''}`;
+    $('#inv-note').textContent = free > 0
+      ? `Uses 1 of your ${plural(free, 'free seat', 'free seats')}. They get an email with a link to join.`
+      : 'Adds a seat at £8.50 a month. They get an email with a link to join.';
+  }
+
+  function markTruncated() {
+    $$('.trunc', rowsEl).forEach(el => {
+      if (el.scrollWidth > el.clientWidth + 1 && el.offsetParent) {
+        el.dataset.tip = el.textContent; el.tabIndex = 0;
+      } else { delete el.dataset.tip; el.removeAttribute('tabindex'); }
+    });
+  }
+
+  function syncURL() {
+    const u = new URL(location.href);
+    const set = (k, v) => v ? u.searchParams.set(k, v) : u.searchParams.delete(k);
+    set('q', st.q.trim()); set('role', st.role); set('loc', st.loc);
+    set('sort', st.sort === 'role' ? '' : st.sort); set('dir', st.dir === -1 ? 'desc' : '');
+    history.replaceState(null, '', u);
+  }
+
+  // ---------- toasts ----------
+  let toastTimer;
+  function toast(msg, undo) {
+    const box = $('#toasts');
+    clearTimeout(toastTimer);
+    box.innerHTML = '';
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<p></p>${undo ? '<button class="undo" type="button">Undo</button>' : ''}<button class="icon-btn" type="button" data-tip="Dismiss" aria-label="Dismiss"><i class="ph ph-x" aria-hidden="true"></i></button>`;
+    t.querySelector('p').textContent = msg;
+    if (undo) t.querySelector('.undo').onclick = () => { undo(); box.innerHTML = ''; hideTip(); };
+    t.querySelector('.icon-btn').onclick = () => { box.innerHTML = ''; hideTip(); };
+    const arm = () => { toastTimer = setTimeout(() => { if (!t.contains(document.activeElement)) t.remove(); }, 7000); };
+    t.addEventListener('focusin', () => clearTimeout(toastTimer));
+    t.addEventListener('mouseenter', () => clearTimeout(toastTimer));
+    t.addEventListener('mouseleave', arm);
+    box.append(t); arm();
+  }
+  const snapshot = () => members.map(m => ({ ...m }));
+  const restore = snap => () => { members = snap; render(); };
+
+  // ---------- members wiring ----------
+  $('#q').value = st.q; $('#f-role').value = st.role; $('#f-loc').value = st.loc;
+  $('#q').addEventListener('input', e => { st.q = e.target.value; st.shown = PAGE; render(); syncURL(); });
+  $('#f-role').addEventListener('change', e => { st.role = e.target.value; st.shown = PAGE; render(); syncURL(); });
+  $('#f-loc').addEventListener('change', e => { st.loc = e.target.value; st.shown = PAGE; render(); syncURL(); });
+  $$('.sort').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.sort;
+    if (st.sort === k) st.dir *= -1; else { st.sort = k; st.dir = 1; }
+    render(); syncURL();
+  }));
+  $('#more').addEventListener('click', () => { st.shown += PAGE; render(); });
+
+  rowsEl.addEventListener('change', e => {
+    const cb = e.target.closest('[data-sel]');
+    if (cb) { cb.checked ? st.sel.add(cb.dataset.sel) : st.sel.delete(cb.dataset.sel); cb.closest('tr').classList.toggle('is-selected', cb.checked); syncBulk(filtered().slice(0, st.shown)); return; }
+    const sel = e.target.closest('[data-role]');
+    if (sel) {
+      const m = members.find(x => x.id === sel.dataset.role);
+      const snap = snapshot();
+      m.role = sel.value;
+      render();
+      toast(`${m.name} is now ${/^[AEIOU]/.test(m.role) ? 'an' : 'a'} ${m.role.toLowerCase()}${m.pending ? ' (when they join)' : ''}.`, restore(snap));
+    }
+  });
+  $('#cb-all').addEventListener('change', e => {
+    filtered().slice(0, st.shown).filter(m => !m.you).forEach(m => e.target.checked ? st.sel.add(m.id) : st.sel.delete(m.id));
+    render();
+  });
+  $('#bulk-clear').addEventListener('click', () => { st.sel.clear(); render(); $('#q').focus(); });
+  $('#bulk-role').addEventListener('change', e => {
+    const role = e.target.value; if (!role) return;
+    const snap = snapshot(); let n = 0;
+    members.forEach(m => { if (st.sel.has(m.id) && m.role !== role) { m.role = role; n++; } });
+    e.target.value = '';
+    st.sel.clear(); render();
+    toast(n ? `${plural(n, 'member is', 'members are')} now ${role.toLowerCase()}s.` : `Everyone selected was already ${/^[AEIOU]/.test(role) ? 'an' : 'a'} ${role.toLowerCase()}. Nothing changed.`, n ? restore(snap) : null);
+    $('#q').focus();
+  });
+  $('#bulk-remove').addEventListener('click', () => {
+    const snap = snapshot(); const n = st.sel.size;
+    members = members.filter(m => !st.sel.has(m.id));
+    st.sel.clear(); render();
+    toast(`Removed ${plural(n, 'member', 'members')} from the workspace.`, restore(snap));
+    $('#q').focus();
+  });
+  document.addEventListener('click', e => {
+    if (e.target.closest('#clear-filters')) {
+      st.q = st.role = st.loc = ''; $('#q').value = ''; $('#f-role').value = ''; $('#f-loc').value = '';
+      render(); syncURL(); $('#q').focus();
+    }
+    if (e.target.closest('#retry')) {
+      const b = e.target.closest('#retry'); b.disabled = true; b.textContent = 'Loading members…';
+      setTimeout(() => { membersState = 'ok'; render(); }, 600);
+    }
+  });
+
+  // row menu
+  const rowMenu = $('#row-menu');
+  let menuFor = null, menuClosedAt = 0, menuClosedFor = null;
+  rowsEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-menu]'); if (!b) return;
+    if (menuClosedFor === b && performance.now() - menuClosedAt < 300) return;
+    const m = members.find(x => x.id === b.dataset.menu);
+    menuFor = m;
+    rowMenu.setAttribute('aria-label', `Actions for ${m.name}`);
+    rowMenu.innerHTML = m.pending
+      ? `<button type="button" role="menuitem" data-act="resend"><i class="ph ph-envelope-simple" aria-hidden="true"></i>Resend invite</button>
+         <button type="button" role="menuitem" data-act="copy"><i class="ph ph-link" aria-hidden="true"></i>Copy invite link</button><hr>
+         <button type="button" role="menuitem" data-act="remove" class="is-danger"><i class="ph ph-x" aria-hidden="true"></i>Revoke invite</button>`
+      : `<a href="#schedule" role="menuitem"><i class="ph ph-calendar-blank" aria-hidden="true"></i>See their shifts</a><hr>
+         <button type="button" role="menuitem" data-act="remove" class="is-danger"><i class="ph ph-trash" aria-hidden="true"></i>Remove from workspace</button>`;
+    rowMenu._invoker = b;
+    rowMenu.showPopover();
+  });
+  rowMenu.addEventListener('click', e => {
+    const a = e.target.closest('[data-act]'); if (!a || !menuFor) return;
+    const m = menuFor; const act = a.dataset.act;
+    rowMenu.hidePopover();
+    if (act === 'remove') {
+      const snap = snapshot();
+      members = members.filter(x => x.id !== m.id); st.sel.delete(m.id); render();
+      toast(m.pending ? `Revoked the invite to ${m.email}.` : `Removed ${m.name} from the workspace.`, restore(snap));
+      $('#q').focus();
+    } else if (act === 'resend') {
+      if (offline) return toast(`You're offline, so the invite to ${m.email} wasn't resent.`);
+      m.ago = 0; render(); toast(`Sent the invite to ${m.email} again.`);
+    } else if (act === 'copy') {
+      navigator.clipboard?.writeText(`https://shiftboard.app/join/marlow-kitchen-group/${btoa(m.email).slice(0, 10)}`).catch(() => {});
+      toast('Invite link copied. It works for 7 days.');
+    }
+  });
+
+  // ---------- invite ----------
+  const inv = $('#invite');
+  $('#invite-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = $('#inv-email'); const v = input.value.trim();
+    const errEl = $('#inv-email-err');
+    let msg = '';
+    if (!v) msg = 'Enter their email address.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) msg = 'Check the email address. It needs an @ and a domain, like sam@marlowkitchen.co.uk.';
+    else if (members.some(m => m.email.toLowerCase() === v.toLowerCase())) msg = `${v} is already in this workspace.`;
+    else if (offline) msg = "You're offline. Send the invite when you're back online.";
+    errEl.hidden = !msg; errEl.querySelector('span').textContent = msg;
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msg) { input.focus(); return; }
+    const snap = snapshot();
+    const local = v.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    members.push({ id: v, name: local, email: v, role: $('#inv-role').value, loc: $('#inv-loc').value, ago: 0, pending: true });
+    input.value = ''; inv.hidePopover();
+    st.shown = Math.max(st.shown, PAGE); render();
+    toast(`Invite sent to ${v}.`, restore(snap));
+  });
+  $('#inv-email').addEventListener('input', e => {
+    const errEl = $('#inv-email-err'); if (errEl.hidden) return;
+    const v = e.target.value.trim();
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { errEl.hidden = true; e.target.setAttribute('aria-invalid', 'false'); }
+  });
+  $('#inv-email').addEventListener('blur', e => {
+    const v = e.target.value.trim(); if (!v) return;
+    const bad = !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+    const errEl = $('#inv-email-err');
+    errEl.hidden = !bad; errEl.querySelector('span').textContent = bad ? 'Check the email address. It needs an @ and a domain, like sam@marlowkitchen.co.uk.' : '';
+    e.target.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  });
+
+  // ---------- name and timezone form ----------
+  const form = $('#general'), nameEl = $('#ws-name'), tzEl = $('#ws-tz'), saveBtn = $('#save'), discard = $('#discard'), reason = $('#save-reason');
+  let saved = { name: nameEl.value, tz: '' };
+  let justSaved = false;
+  const nameError = v => !v.trim() ? 'Enter a workspace name. Staff see it on their schedule.'
+    : v.trim().length > 60 ? `Shorten the name to 60 characters or fewer. It's ${v.trim().length} now.` : '';
+  const tzError = v => v ? '' : canEdit ? "Choose a timezone so shift times match on everyone's phone. All 4 locations are in London."
+    : "No timezone is set, so shift times can differ between phones. Ask Priya Raman to choose one.";
+  function showErr(el, errEl, msg) {
+    errEl.hidden = !msg; errEl.querySelector('span').textContent = msg;
+    el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  }
+  const dirty = () => nameEl.value.trim() !== saved.name || tzEl.value !== saved.tz;
+  function updateSave() {
+    const d = dirty(), nErr = nameError(nameEl.value), tErr = tzError(tzEl.value);
+    let why = '';
+    if (!canEdit) why = 'Only owners and admins can change these.';
+    else if (offline) why = "You're offline. Saving waits until you reconnect.";
+    else if (!d) why = justSaved ? 'Saved just now.' : 'No changes to save yet.';
+    else if (nErr) why = 'Fix the workspace name to save.';
+    else if (tErr) why = 'Choose a timezone to save.';
+    saveBtn.setAttribute('aria-disabled', why ? 'true' : 'false');
+    reason.textContent = why; reason.hidden = !why;
+    discard.hidden = !d || !canEdit;
+  }
+  nameEl.addEventListener('input', () => { justSaved = false; if (!$('#ws-name-err').hidden) showErr(nameEl, $('#ws-name-err'), nameError(nameEl.value)); updateSave(); });
+  nameEl.addEventListener('blur', () => { showErr(nameEl, $('#ws-name-err'), nameError(nameEl.value)); updateSave(); });
+  tzEl.addEventListener('change', () => { justSaved = false; showErr(tzEl, $('#ws-tz-err'), tzError(tzEl.value)); updateSave(); });
+  tzEl.addEventListener('blur', () => { showErr(tzEl, $('#ws-tz-err'), tzError(tzEl.value)); updateSave(); });
+  discard.addEventListener('click', () => {
+    nameEl.value = saved.name; tzEl.value = saved.tz;
+    showErr(nameEl, $('#ws-name-err'), nameError(nameEl.value)); showErr(tzEl, $('#ws-tz-err'), tzError(tzEl.value));
+    updateSave(); nameEl.focus();
+  });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (saveBtn.getAttribute('aria-disabled') === 'true') {
+      const nErr = nameError(nameEl.value), tErr = tzError(tzEl.value);
+      showErr(nameEl, $('#ws-name-err'), nErr); showErr(tzEl, $('#ws-tz-err'), tErr);
+      if (dirty() && nErr) nameEl.focus(); else if (dirty() && tErr) tzEl.focus();
+      return;
+    }
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; reason.hidden = true; discard.hidden = true;
+    setTimeout(() => {
+      saved = { name: nameEl.value.trim(), tz: tzEl.value };
+      nameEl.value = saved.name;
+      $$('[data-ws-name]').forEach(el => { el.textContent = saved.name; });
+      $$('.switcher').forEach(el => el.setAttribute('aria-label', `Workspace: ${saved.name}. Switch workspace`));
+      document.title = 'Workspace settings · Shiftboard';
+      saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; justSaved = true; updateSave();
+      saveBtn.focus();
+    }, 700);
+  });
+  if (!canEdit) { nameEl.readOnly = true; tzEl.disabled = true; showErr(tzEl, $('#ws-tz-err'), tzError(tzEl.value)); }
+
+  // ---------- delete ----------
+  const dlg = $('#delete-dialog'), delInput = $('#del-confirm'), delGo = $('#del-go'), delReason = $('#del-reason'), delOpen = $('#delete-open');
+  const nameMatches = () => delInput.value.trim().replace(/\s+/g, ' ').toLowerCase() === saved.name.toLowerCase();
+  function syncDel() {
+    const ok = nameMatches();
+    delGo.setAttribute('aria-disabled', ok ? 'false' : 'true');
+    delReason.hidden = ok;
+    if (ok) $('#del-err').hidden = true;
+  }
+  function openDelete() {
+    if (delOpen.getAttribute('aria-disabled') === 'true') return;
+    delInput.value = ''; delInput.removeAttribute('aria-invalid'); $('#del-err').hidden = true;
+    delGo.disabled = false; delGo.textContent = 'Delete workspace'; syncDel();
+    dlg.showModal();
+    const u = new URL(location.href); u.searchParams.set('dialog', 'delete'); history.replaceState(null, '', u);
+  }
+  delOpen.addEventListener('click', openDelete);
+  delInput.addEventListener('input', syncDel);
+  $('#del-cancel').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('close', () => {
+    const u = new URL(location.href); u.searchParams.delete('dialog'); history.replaceState(null, '', u);
+    if (document.contains(delOpen)) delOpen.focus();
+  });
+  $('#del-form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!nameMatches()) {
+      const err = $('#del-err'); err.hidden = false;
+      err.querySelector('span').textContent = delInput.value.trim() ? `That doesn't match. Type ${saved.name} exactly as shown.` : `Type ${saved.name} to confirm.`;
+      delInput.setAttribute('aria-invalid', 'true'); delInput.focus(); return;
+    }
+    delGo.disabled = true; delGo.textContent = 'Deleting…';
+    setTimeout(() => {
+      dlg.close();
+      $('#content').innerHTML = `<section class="gone"><h1>${esc(saved.name)} is deleted</h1>
+        <p>Everyone in it has lost access and billing has stopped. A receipt is on its way to priya@marlowkitchen.co.uk.</p>
+        <p><a href="./">Back to Shiftboard</a></p></section>`;
+      $('#main').focus();
+    }, 900);
+  });
+
+  // ---------- popovers: place next to the control that opened them ----------
+  let lastInvoker = null;
+  document.addEventListener('pointerdown', e => { const b = e.target.closest('[popovertarget]'); if (b) lastInvoker = b; }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const b = e.target.closest?.('[popovertarget]'); if (b) lastInvoker = b; } }, true);
+  function place(p) {
+    const inv = p._invoker || lastInvoker;
+    if (phone.matches || !inv) { p.style.left = p.style.top = ''; return; }
+    const r = inv.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+    let left = (r.right - w > 8 && r.left + w > innerWidth - 8) || inv.closest('td, .sec-head') ? r.right - w : r.left;
+    left = Math.max(8, Math.min(left, innerWidth - w - 8));
+    let top = r.bottom + 4;
+    if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 4);
+    p.style.left = `${left}px`; p.style.top = `${top}px`;
+  }
+  $$('[popover]').forEach(p => p.addEventListener('toggle', e => {
+    if (e.newState === 'open') {
+      if (!p._invoker) p._opener = lastInvoker;
+      place(p); hideTip();
+      const first = p.querySelector('input, a[href], button:not([disabled])');
+      if (first && (p !== $('#invite') || !phone.matches)) first.focus({ preventScroll: true });
+    } else {
+      const back = p._invoker || p._opener;
+      if (p === rowMenu) { menuClosedAt = performance.now(); menuClosedFor = p._invoker; }
+      p._invoker = null;
+      if (back && document.contains(back) && (!document.activeElement || document.activeElement === document.body || p.contains(document.activeElement))) back.focus({ preventScroll: true });
+    }
+  }));
+  addEventListener('scroll', () => $$('[popover]').forEach(p => { if (p.matches(':popover-open')) place(p); }), { passive: true });
+  addEventListener('resize', () => { $$('[popover]').forEach(p => { if (p.matches(':popover-open')) place(p); }); markTruncated(); });
+
+  // ---------- tooltip for icon-only controls and truncated values ----------
+  const tip = $('#tip');
+  function showTip(el) {
+    const text = el.dataset.tip; if (!text) return;
+    tip.textContent = text; tip.hidden = false;
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = `${Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8))}px`;
+    tip.style.top = `${r.top - h - 6 < 8 ? r.bottom + 6 : r.top - h - 6}px`;
+  }
+  function hideTip() { tip.hidden = true; }
+  document.addEventListener('mouseover', e => { const el = e.target.closest('[data-tip]'); if (el) showTip(el); });
+  document.addEventListener('mouseout', e => { if (e.target.closest('[data-tip]')) hideTip(); });
+  document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); if (el && el.matches(':focus-visible')) showTip(el); else hideTip(); });
+  document.addEventListener('focusout', hideTip);
+  addEventListener('scroll', hideTip, { passive: true });
+
+  // ---------- offline and permission ----------
+  function applyOffline() {
+    $('#offline').hidden = !offline;
+    $('#invite-btn').toggleAttribute('disabled', false);
+    updateSave(); render();
+  }
+  addEventListener('offline', () => { offline = true; applyOffline(); });
+  addEventListener('online', () => { if (P.get('offline') !== '1') { offline = false; applyOffline(); } });
+  if (!canEdit) {
+    $('#table').classList.add('no-select');
+    $$('[data-viewer-name]').forEach(el => { el.textContent = 'Dee Okafor'; });
+    $$('[data-viewer-role]').forEach(el => { el.textContent = 'Manager'; });
+    $('#invite-btn').hidden = true;
+    delOpen.setAttribute('aria-disabled', 'true');
+    delOpen.setAttribute('aria-describedby', 'delete-reason');
+    $('#delete-reason').hidden = false;
+    $('#delete-reason').textContent = 'Only the owner, Priya Raman, can delete this workspace.';
+    saveBtn.hidden = true;
+  }
+
+  // ---------- start ----------
+  applyOffline();
+  updateSave();
+  if (P.get('dialog') === 'delete' && canEdit) openDelete();
+})();
+</script>
+</body>
+</html>

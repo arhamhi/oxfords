@@ -12,7 +12,7 @@ parameter is enough) so it can be looked at.
 | First run | One sentence on what will appear, and the one action that fills it |
 | Cleared by the user | That it is empty on purpose, and how to bring things back |
 | No results | The query quoted back, a likely fix, a way to clear the filter |
-| Loading | Nothing for the first 300ms, then a skeleton shaped like the result (in a static mock, showing the skeleton state is enough) |
+| Loading | Where data loads: nothing for the first 300ms, then a skeleton shaped like the result (in a static mock, showing the skeleton state is enough). Data already on the page: none |
 | Partial or stale | What arrived, and how old it is |
 | Error | What failed, why if known, how to recover, a retry |
 | Offline | A banner, and what still works |
@@ -32,8 +32,14 @@ parameter is enough) so it can be looked at.
 - Update the interface at once when the server will almost certainly agree, and roll back
   with an explanation if it does not.
 - Disable a button while it submits so it cannot fire twice.
-- A disabled control says why, in text beside it. A tooltip alone does not reach touch or
-  keyboard users.
+- State colours come from the tokens: hover a step lighter, pressed a step darker, disabled
+  grey (`--action-disabled`, `--text-disabled`). Disabled is never shown by opacity alone.
+- A disabled control says why, in visible text next to it. In a row of buttons the reason
+  takes its own line above the row. A tooltip alone does not reach touch or keyboard users.
+- Mark a control that is waiting on the user ("Save" before anything changed) with
+  `aria-disabled="true"`, so it stays focusable and its reason is read out. Use the native
+  `disabled` attribute only while an action is in flight, with the button's label saying so
+  ("Saving…" is the reason).
 - Toasts confirm things that can be undone. They never carry an error that needs action.
   When an action did nothing (everything selected was already done), say so plainly.
 - Keep the user's place and input through a refresh, an error and a tab switch.
@@ -44,14 +50,24 @@ parameter is enough) so it can be looked at.
 - When a confirmation is needed, name the object and the consequence. Label the button with
   the action: "Delete project", never "Yes" or "OK".
 - Keep destructive actions away from the primary action.
+- Destructive buttons use `--danger` with `--on-danger`, even when the brand is red, so a
+  delete never looks like the brand's main action.
 
 ## Forms
 
-- A persistent label above every field. A placeholder is an example, not a label.
+- A persistent label above every field. A placeholder is an example, not a label. The one
+  exception is a table or list toolbar: its search field may use a search icon, a placeholder
+  that names what is searched ("Search orders") and an accessible name, and its filter menus
+  may carry the label inside the control ("Status: All").
 - State the format and the rules before the user submits.
 - Validate when the user leaves a field, not on every keystroke and not only on submit.
-- The error sits under its field and says how to fix it, without blame.
+- Reserve the space an error line needs, so a message appearing on blur never moves the button
+  the pointer is already on its way to.
+- The error sits under its field and says how to fix it, without blame. It is set in
+  `--danger-ink` with an icon, and the field's border turns `--danger`.
 - Never clear the form on an error.
+- A form with unsaved changes offers Discard beside Save, and asks before the page is left
+  with changes still in it.
 - Use the right input type, so the right keyboard appears and the browser can help.
 - Inputs are at least 16px on phones, or the browser zooms on focus.
 - Treat required and optional the same way everywhere.
@@ -82,6 +98,9 @@ Never show an internal code as the main message.
   another.
 - Buttons are a verb and an object when the outcome is not obvious. Label the outcome.
 - Say each thing once. Delete an introduction that repeats its heading.
+- Labels and captions describe the content, never how to operate the screen ("Point at a bar
+  to see its value"). A screen that needs instructions has an unclear control: fix the
+  control.
 - Success messages are short. Add a next step only if the user must now do something.
 - Link text makes sense out of context.
 - Sentence case for labels and headings.
@@ -107,5 +126,14 @@ Never show an internal code as the main message.
 ## The surfaces nobody themes
 
 Text selection, the text cursor, scrollbars, the focus ring, link underlines and number
-alignment all have browser defaults. Setting them from the palette is a small job, and it is
-the difference between a page that was built and one that was assembled.
+alignment all have browser defaults. Setting them from the tokens is a small job, and it is
+the difference between a page that was built and one that was assembled:
+
+- `::selection` in `--lead-tint` with `--text`
+- `caret-color` in `--lead-ink`; `accent-color` in `--action`, so checkboxes and radios stay
+  neutral
+- `scrollbar-color: var(--line-strong) transparent` (colour the native scrollbar, do not
+  rebuild it)
+- the focus ring in `--focus`
+- link underlines with `text-underline-offset` set
+- tabular figures where digits line up

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices</title>
+<!-- oxfords fixture: a small, plain page with a real dark theme. shoot.mjs must find no FAIL.
+     Palette: Tideline (teal lead, ember support, sage pop) on a neutral base. -->
+<style>
+  :root {
+    color-scheme: light dark;
+    --page: #ffffff; --raised: #fafafa; --line: #e5e5e5; --quiet: #6b6b6b; --text: #111111;
+    --lead: #326e6e; --on-lead: #ffffff; --support: #ce7d36; --pop: #c5cfcb; --field: #767676;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0a0a0a; --raised: #141414; --line: #2a2a2a; --quiet: #a3a3a3; --text: #f5f5f5;
+      --lead: oklch(80% 0.09 195); --on-lead: #0a0a0a; --support: oklch(72% 0.13 60); --field: #8a8a8a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: var(--page); color: var(--text); }
+  a { color: var(--lead); }
+  :focus-visible { outline: 2px solid var(--lead); outline-offset: 2px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 600; }
+  nav { display: flex; gap: 4px; }
+  nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: var(--text); text-decoration: none; }
+  nav a[aria-current] { font-weight: 600; text-decoration: underline; text-underline-offset: 6px; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 24px; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; }
+  .quiet { color: var(--quiet); }
+
+  .figure { font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; margin: 16px 0 4px; }
+  .meter { display: flex; height: 12px; background: var(--raised); border: 1px solid var(--line); }
+  .meter .paid { width: 68%; background: var(--lead); }
+  .meter .late { width: 9%; background: var(--support); }
+
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 600; color: var(--quiet); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .late-mark { display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: var(--support); }
+  .new-mark { display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: var(--pop); }
+
+  form { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+  label { display: block; width: 100%; font-weight: 600; }
+  input { font: inherit; min-height: 44px; padding: 0 12px; width: 260px; max-width: 100%; color: var(--text); background: var(--page); border: 1px solid var(--field); border-radius: 6px; }
+  button { font: inherit; min-height: 44px; padding: 0 20px; border: 0; border-radius: 6px; background: var(--lead); color: var(--on-lead); font-weight: 600; }
+
+  /* Truncated values are focusable so the full value shows on focus. They are not targets. */
+  .trunc { display: block; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .trunc.sub { font-size: 13px; color: var(--quiet); }
+
+  /* Chart bars draw their focus ring with a separate element, placed by script. */
+  .bar { fill: var(--lead); }
+  .bar:focus { outline: none; }
+  .ring { fill: none; stroke: var(--text); stroke-width: 2; display: none; }
+
+  /* Skip link: parked above the page until focused. */
+  .skip { position: absolute; left: 8px; top: -100px; padding: 10px 16px; background: var(--text); color: var(--page); }
+  .skip:focus { top: 8px; }
+
+  details { margin-top: 24px; border-top: 1px solid var(--line); }
+  summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+  footer { padding: 16px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <span class="brand">Tally House</span>
+  <nav aria-label="Main">
+    <a href="#" aria-current="page">Invoices</a>
+    <a href="#clients">Clients</a>
+    <a href="#settings">Settings</a>
+  </nav>
+</header>
+
+<main id="main">
+  <h1>Invoices</h1>
+  <p class="quiet">October, 14 sent. Two are past due; <a href="#reminders">send a reminder</a> from the form below.</p>
+
+  <p class="figure">$18,436.20</p>
+  <p class="quiet">collected of $27,112.75 billed</p>
+  <div class="meter" role="img" aria-label="68% paid, 9% late"><span class="paid"></span><span class="late"></span></div>
+
+  <h2>Recent</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Client</th><th>Due</th><th>Status</th><th class="num">Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Harbour &amp; Pike</td><td>3 Oct</td><td>Paid</td><td class="num">$1,284.50</td></tr>
+        <tr><td><span class="trunc" tabindex="0" title="Okafor Dental and Orthodontics">Okafor Dental and Orthodontics</span><span class="trunc sub" tabindex="0" title="accounts@okafordental.co.uk">accounts@okafordental.co.uk</span></td><td>9 Oct</td><td><span class="late-mark"></span>Late</td><td class="num">$612.00</td></tr>
+        <tr><td>Linde Studio</td><td>12 Oct</td><td>Paid</td><td class="num">$4,390.00</td></tr>
+        <tr><td>Marsh Lane Bakery</td><td>21 Oct</td><td><span class="new-mark"></span>Sent</td><td class="num">$98.75</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="reminders">Reminders</h2>
+  <form onsubmit="return false">
+    <label for="cc">Copy reminders to</label>
+    <input id="cc" type="email" autocomplete="email" value="accounts@tallyhouse.co">
+    <button type="submit">Send 2 reminders</button>
+  </form>
+
+  <details>
+    <summary>How reminders work</summary>
+    <p>Each late client gets one email a week until the invoice is paid.</p>
+  </details>
+
+  <h2>Paid by week</h2>
+  <svg id="weeks" viewBox="0 0 220 110" width="220" height="110" role="group" aria-label="Paid by week, October">
+    <rect class="bar" x="8" y="40" width="36" height="66" tabindex="0" role="img" aria-label="Week 1: $4,210.00"/>
+    <rect class="bar" x="62" y="22" width="36" height="84" tabindex="0" role="img" aria-label="Week 2: $5,388.40"/>
+    <rect class="bar" x="116" y="48" width="36" height="58" tabindex="0" role="img" aria-label="Week 3: $3,702.15"/>
+    <rect class="bar" x="170" y="12" width="36" height="94" tabindex="0" role="img" aria-label="Week 4: $5,135.65"/>
+    <rect class="ring" id="ring" x="0" y="0" width="0" height="0"/>
+  </svg>
+  <p class="quiet" id="read" aria-live="polite">Focus a bar to read its total.</p>
+</main>
+
+<footer class="quiet">Questions about a charge? Write to <a href="mailto:billing@tallyhouse.co">billing@tallyhouse.co</a> and we reply the same day.</footer>
+<script>
+  // The bar's own style never changes on focus; this ring, a sibling, is what the user sees.
+  const weeks = document.getElementById('weeks'), ring = document.getElementById('ring'), read = document.getElementById('read');
+  weeks.addEventListener('focusin', e => {
+    const b = e.target.closest('.bar');
+    if (!b) return;
+    const box = b.getBBox();
+    for (const [k, v] of Object.entries({ x: box.x - 4, y: box.y - 4, width: box.width + 8, height: box.height + 8 })) ring.setAttribute(k, v);
+    ring.style.display = 'inline';
+    read.textContent = b.getAttribute('aria-label');
+  });
+  weeks.addEventListener('focusout', () => { ring.style.display = 'none'; });
+</script>
+</body>
+</html>

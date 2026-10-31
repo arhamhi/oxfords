@@ -35,9 +35,13 @@ grid more strictly, and has less room for expression. Calm is the goal.
 
 ## Key figures
 
+- Only a page whose job is watching numbers gets a strip. Settings, forms and detail pages
+  state a count in a sentence or a meter label ("39 of 50 seats used"), not a figure tile.
 - At most four, in one ruled strip, not four cards.
 - Each carries a comparison (change against the last period, or a target). A bare number with
   an icon says nothing.
+- A change that is good or bad reads in `--success-ink` or `--danger-ink`, with a sign and an
+  arrow so colour is never the only cue. A change with no good or bad side stays `--text-2`.
 - A small trend chart is allowed only when it is drawn from real data and shows something the
   number does not.
 - Show them once, on the page where they matter. Never repeat them down the sidebar or on
@@ -51,16 +55,29 @@ grid more strictly, and has less room for expression. Calm is the goal.
   attention gets a tint. A person is a name,
   with a photo only if it is a real one. Urgent items carry a mark that others do not.
 - Text left, numbers right with tabular figures, the identifying column in the strongest
-  weight, secondary columns quieter.
+  weight, secondary columns quieter. Amounts in one column share their decimals: all two
+  places or all whole.
+- Lead each row with the name people think in (the table, the customer, the job). A reference
+  number and a time go beneath it in `--text-2`.
 - Separate rows with space first. When rows must be tight, use a very pale alternating fill
-  or a single hairline. Never lines and fills and borders together.
-- Truncate long text with an ellipsis and make the full value available on hover and focus.
+  or a single hairline. Pick one separator per table, never lines and fills and borders
+  together. A row that needs attention may also carry its semantic tint as its mark; that
+  is a state, not a separator.
+- Shorten before you truncate. Drop secondary text first, then use the shortest label that
+  stays unique (a surname, a code). Truncate with an ellipsis only what is still too long,
+  never down to a letter or two, and never the value that identifies the row: an email in a
+  members list wraps or takes its own line. The full value is available on hover and focus.
   When a row has a right-aligned value, the text ends before it.
 - One visible action per row. The rest go in a menu, or appear on hover with the same
   actions reachable by keyboard and on touch.
+- A value people can change inside a row (a role, a status) is a menu button: the value as
+  text with a chevron at 3:1, a border only on hover and focus. Ten rows read as a table, not
+  ten forms. A free-text field in a row keeps its border.
 - Rows are selectable by a checkbox (it can replace the row's avatar or icon on hover, or
   simply always be there). Selecting reveals a bulk action in the toolbar that is already
   there. The bulk action does not count against one action per row.
+- Counts by state are the filter. "Available 2 · Late 1" is a row of chips that filter the
+  list, not a summary beside it.
 - Add search, filter or sort. Put filters, tabs and the selected item in the URL so a view
   can be shared and Back works.
 - Show time relative when recent ("12 min ago"), absolute when old, and the absolute value on
@@ -75,7 +92,8 @@ grid more strictly, and has less room for expression. Calm is the goal.
 ## Charts
 
 - Start with a plain line for a trend or plain bars for comparison. No novelty chart types.
-- Always: values on the axis, grid lines, labels, and a control for the range or metric.
+- Always: values on the axis, grid lines and labels. Add a control for the range or metric
+  when the data has more than one; a chart of one week has no range to pick.
 - Bars sit on the baseline with flat tops. Lines are straight segments at full strength.
 - On hover or focus, show the value and dim the others. The same value must be reachable
   without a pointer.
@@ -83,8 +101,14 @@ grid more strictly, and has less room for expression. Calm is the goal.
   headline figures double as the legend.
 - Add a chart only when it shows a pattern the numbers do not. A headline figure may be the
   last point of a chart. What to avoid is the same series shown twice.
-- Colour comes from the data. Encode with lightness, shape or a label as well, never hue
-  alone. Once the charts carry the accent, the primary button goes neutral.
+- Series take `--series-1` onward in order, so the lead comes first and the support second.
+  A previous period or "other" is `--series-muted`. A sequential scale (a heatmap, a ramp of
+  intensity) uses one hue's steps from `palette.mjs --ramps`.
+- To mark one bar or point (today, the selected period), change its weight, not its hue
+  (`colour.md`, Charts), and name it in a label.
+- Up to three series can share a legend. Past three, label each line or bar directly at its
+  end, and never let hue alone tell two series apart: add position, a label or a dash.
+- Once the charts carry the palette, the primary button stays neutral.
 
 ## Overlays
 
@@ -92,6 +116,9 @@ grid more strictly, and has less room for expression. Calm is the goal.
 - Popover for light context the user can click away from.
 - Modal for a complex task that relates to the page behind it. Two columns of fields, advanced
   options collapsed, one action button. Follow it with a toast, because the page was hidden.
+- A dialog's buttons sit on one row at its bottom right, the primary last. A note about them
+  (why one is disabled) takes its own line above that row, never a slot in it. On a phone the
+  buttons stack full width.
 - New page for anything large or permanent, with a back link or breadcrumb.
 - Overlays must not be clipped by a scrolling or hidden-overflow parent. Use the dialog
   element, the popover API or a portal.
@@ -113,7 +140,8 @@ place in this layer, not a new page.
 
 This is for a web app opened on a phone. For a native app, read `mobile.md`.
 
-- Keep the product's own type scale: 14-16px body. Inputs are 16px.
+- Body 14-16px at phone width (one step up from the 13-14px desktop body is fine). Inputs are
+  16px.
 - A sidebar becomes a bottom bar of up to five destinations. Everything else, including
   settings and help, moves into a "More" item or the account menu. Nothing becomes
   unreachable.
@@ -125,17 +153,29 @@ This is for a web app opened on a phone. For a native app, read `mobile.md`.
 
 ## Colour in product UI
 
-- The page is white, black or grey, and so are the table, the text and the lines. See
-  `palettes.md` for the neutral steps.
-- Choose a palette and place it on top of content, not chrome. The sidebar, the top bar, the
-  tabs and the buttons stay neutral; the primary button is black or white.
-- Give the palette one solid block of content so it is more than a mark: the chart panel
-  flooded in the lead colour with the plot drawn in white on it, or one key panel.
+Tokens come from `palette.mjs` (see `colour.md`). In product UI they land like this:
+
+| Thing | Token |
+|---|---|
+| Page, table, text, lines | `--page`, `--text`, `--text-2`, `--text-3`, `--line` |
+| Sidebar and top bar | `--page` or `--surface`, never a palette colour |
+| Active nav item, selected row | `--selected`, a full-row fill |
+| Primary button | `--action` with `--on-action`; its states from `--action-hover`, `--action-pressed`, `--action-disabled` |
+| Secondary button | `--control` with `--text` |
+| Input border, focus ring | `--line-strong`, `--focus` |
+| One key panel, or a single-series chart panel | `--lead` flooded, its plot and text in `--on-lead` |
+| A chart with two or more series | on `--page` or `--surface`, series in `--series-1` onward |
+| Second series or a secondary block | `--support` |
+| A small highlight that is not a state (a "new" marker, the current step, an unread dot) | `--pop`, small |
+| Status chips | quiet by default: `--text-2` with a small mark. Only a state that needs action gets its semantic tint (`--warning-tint`, `--danger-tint`) with the matching ink, a word, and an icon where it helps |
+| Delete, revoke, cancel plan | `--danger` |
+
+- Give the palette one solid block of content so it is more than a mark. Flood the block
+  that answers the screen's main question. When the main work is a table or a list, the
+  flooded block stays smaller than the work (a key panel or the figures strip beside it), so
+  colour never outranks the job.
 - A coloured sidebar or top bar is the fastest way to look like a product people already
-  know. Avoid it.
-- The support colour takes a second series or a secondary block. The pop marks the one thing
-  that needs attention.
-- Quiet chips, secondary text and dividers are neutral greys.
+  know. Keep chrome neutral.
 
 ## Dashboard type and density
 

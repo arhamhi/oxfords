@@ -13,6 +13,9 @@ photographs, no real product, only feature copy. That is what reads as soulless.
 - Never build a fake product screenshot out of boxes and grey bars. A live, working piece of
   the real interface with believable data is not fake: it is the product. Use that, or a
   real image.
+- Show what the customer gets, not a tour of the app: the finished report, the booked job,
+  the one screen they will use most. No tabs, no row of figure tiles, at most one chart. On a
+  phone the hero's visual fits in one screen height.
 - Before launch, with no customers, leave proof out or state one true thing: who built it,
   what it replaces, what it costs. Invent nothing.
 
@@ -34,14 +37,18 @@ character than product UI, as long as each choice has a reason.
   beside or below it at a size that matters.
 - Every section has one thing the eye lands on. A column left empty beside a heading is a
   layout bug: fill it, or use one column.
+- A flooded full-width section carries a full section's content. A single sentence joins the
+  section beside it.
 - One typeface choice you can defend is allowed here, and encouraged when the system font
   would make the page anonymous.
 - Use the full width. A page of narrow text columns separated by large gaps reads as
-  unfinished.
-- The page itself is white, black or grey. Pick a palette from `palettes.md` and use it at
+  unfinished. A table is the exception: keep each label within reach of its value (cap the
+  table near 800px), so the eye never crosses a gap to pair them.
+- The page itself is white, black or grey. Pick a palette with `palette.mjs` (see `colour.md`) and use it at
   full strength on top: one or two whole sections flooded in the lead or support colour,
   with neutral sections between them so the colour has something to stand against.
-- Buttons are black or white. One coloured button per viewport, on the main action.
+- Buttons are `--action` (black or white). The one main call to action may take `--lead`
+  (see `colour.md`); a repeat of it in the navigation stays `--action`.
 
 ## Structure
 
@@ -53,8 +60,12 @@ character than product UI, as long as each choice has a reason.
 - Vary the section layouts. The same image-left, text-right block six times is a template.
 - Social proof goes below the hero, never inside it. Real customers only.
 - Features: one image and one line per feature beats a grid of icon, heading and paragraph.
-- Pricing: make the price large and the plan name small. Show the real discount. List the
+- Pricing: make the price large and the plan name small. If there is a discount, show the real figure. List the
   same features in the same order in every plan, with missing ones marked. Fewer plans.
+- Beside the main action, say what happens after it, in two or three short steps. A service
+  also says what stays the customer's job.
+- Questions show their answers. Up to about eight, leave every answer open; past that, group
+  them and collapse the groups.
 - Navigation fits on one line.
 
 ## What to leave out
@@ -91,12 +102,12 @@ character than product UI, as long as each choice has a reason.
 
 | Slot | Must exist |
 |---|---|
-| Colour | a neutral page; a named palette with a reason; at least one full-colour section; all three colours used |
+| Colour | a neutral page; a named palette with a reason; at least one full-colour section; each colour used has one job |
 | Promise | one heading a customer would say, readable in a glance |
 | Product | the real thing shown, working or photographed, in the first screen |
 | Actions | one label per intent, named for the outcome, same label everywhere |
 | Sections | each has a focal point; no empty columns; layouts vary |
-| Pricing | price large, plan name small, same rows in the same order, real discount |
+| Pricing | price large, plan name small, same rows in the same order, the real discount if there is one |
 | Form | label, hint, error under the field, input kept, all button states |
 | Navigation | one line on desktop; on a phone, the key link and the action stay visible |
 | Footer | present, with the links a person looks for |
@@ -106,6 +117,8 @@ character than product UI, as long as each choice has a reason.
 ## Performance is part of the impression
 
 - Reserve space for images, fonts and embeds so nothing jumps.
-- Load only the font weights in use, with a fallback of matching metrics.
+- Load only the font weights in use, with a fallback of matching metrics: an `@font-face` on
+  a local system font with `size-adjust` and `ascent-override` set so the text does not jump
+  when the web font arrives.
 - Lazy-load below the fold only.
 - Use dynamic viewport units for full-height sections on phones.

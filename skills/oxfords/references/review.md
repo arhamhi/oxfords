@@ -2,10 +2,24 @@
 
 Review in two separate passes so the tool's output does not steer your eye.
 
+## Fresh eyes
+
+The builder is the worst reviewer of a build: they see what they meant, not what is there.
+When you can start a subagent, give the look pass to a fresh one. Give it only:
+
+- the screenshots
+- the brief
+- this file
+
+Keep your reasoning out of it. It reports findings; you fix them. When you cannot start a
+subagent, do the look pass before reading any checker output, and look at the screenshots
+rather than the code.
+
 ## Pass 1: look
 
-Render the screen at a phone width and a desktop width and open every image yourself. Turn
-off entrance animations first so nothing is caught half-revealed. Then answer:
+Render the screen with `node scripts/shoot.mjs <page>`. That gives 390 and 1440 wide, light
+and dark, with animations off so nothing is caught half-revealed. Open every image. Then
+answer:
 
 1. **Squint.** What lands first? Is it the right thing?
 2. **Hunt.** Pick the three questions a user most likely arrives with. How long does each
@@ -15,21 +29,35 @@ off entrance animations first so nothing is caught half-revealed. Then answer:
    edges. More than four or five is mess.
 5. **Emphasis.** Is anything important because of its surroundings, or is everything shouting
    at the same volume?
-6. **Subtract.** Remove each decorative element in your head. Did anything get worse?
-7. **Swap.** Would this pass for a competitor's product with the logo changed?
-8. **Defend.** Pick five values at random (a size, a gap, a colour). Can you say why each is
+6. **Colour.** Answer each:
+   - Is most of the screen neutral?
+   - Does each palette colour do one job?
+   - Are the controls neutral?
+   - Is destructive red, and the brand nowhere near it?
+   - In dark mode, does it look designed (layers lighter as they rise, colour calmer), or
+     inverted?
+7. **Subtract.** Remove each decorative element in your head. Did anything get worse?
+8. **Swap.** Would this pass for a competitor's product with the logo changed?
+9. **Defend.** Pick five values at random (a size, a gap, a colour). Can you say why each is
    that and not the default?
 
-## Pass 2: check
+## Pass 2: measure
 
 ```bash
-node scripts/check.mjs path/to/build
+node scripts/check.mjs path/to/source
+node scripts/shoot.mjs path/to/page.html
 ```
 
-Then check by hand what a script cannot see:
+`check.mjs` reads the source for mechanical tells. `shoot.mjs` measures the rendered page:
 
-- Text clipped, overlapping or running under another element.
-- Sideways scrolling at any width from 320px up.
+- text contrast, including text over images and gradients
+- clipped and overlapping text, and sideways scroll
+- focus on every stop, target size, controls with no name
+- content still hidden by a script
+- the neutral share and the hue families on screen
+
+Neither can see these, so check them by hand:
+
 - Cards inside cards.
 - Controls that do nothing.
 - The same figures in more than one place.
@@ -72,6 +100,9 @@ Count the failures. Two or three is worth fixing. Four or more needs a rethink.
 | P2 | A missing state or an inconsistency | Would a user notice and hesitate? |
 | P3 | Polish | Would only a designer notice? |
 
+Every FAIL from `shoot.mjs` is at least P2. A contrast or focus failure on the main task is
+P1.
+
 Fix in that order: broken tasks, then missing states, then flow and responsive problems,
 then visual polish.
 
@@ -84,10 +115,17 @@ P1  Orders table  no way to find an order  -> add search above the table  -> use
 ```
 
 End with what you could not verify: real device feel, fonts on other systems, a screen
-reader, real data volumes. Do not claim what you did not check.
+reader, real data volumes. When `shoot.mjs` could not run, contrast and layout are on that
+list. Do not claim what you did not check.
 
 ## When fixing
 
 - Change only what the finding names.
 - Keep existing copy, names, navigation labels and identity unless the finding is about them.
-- One round of fixes, one confirming look, then stop. Polishing has no natural end.
+- The review is done when all of these hold:
+  - both checkers show no FAIL
+  - every WARN is fixed or has a reason
+  - no P0 or P1 is open
+  - one confirming look at fresh screenshots shows nothing new
+
+  Then stop. Polishing has no natural end.

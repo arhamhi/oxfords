@@ -21,8 +21,9 @@ question: what is the one job here?
 - New content gets a new screen, not a second layout stacked on this one.
 - Each section extends in one direction: a vertical stack or a horizontal scroll. Never both.
   This is the rule for converting a desktop dashboard.
-- Almost everything is a card, because cards group where white space cannot. Do not put a
-  card inside a card: padding stacks on padding. Group with space instead.
+- On a phone, grouping containers do the job white space does on a desktop: an inset grouped
+  section, or one card per distinct object. That is not a card around everything: one level
+  only, never a card inside a card, and a section that is a single thing gets no container.
 - Not everything is a list. An app that is all lists reads as a settings panel.
 
 ## Navigation
@@ -81,10 +82,18 @@ question: what is the one job here?
 - Targets are 44pt on iOS and 48dp on Android.
 - Respect safe areas at the top and bottom. Leave room so the last item clears a floating bar.
 - Settings use the platform's grouped list. No bespoke stack of cards.
-- The page is pure `#000000` or `#FFFFFF`, surfaces are neutral, and the palette appears
-  as the action, the key figure or progress, and a few filled marks. See `palettes.md`.
+- The page is pure `#000000` or `#FFFFFF` and surfaces are neutral. The palette appears as
+  the key figure or progress, the selected state and a few filled marks; links and toolbar
+  icons take the tint. Generate with `palette.mjs <Name> --mode both --ground white,black`
+  (see `colour.md`).
+- In SwiftUI or UIKit, map the neutral tokens onto the system's semantic colours
+  (`systemBackground`, `secondarySystemBackground`, `label`, `secondaryLabel`, `separator`)
+  so Dynamic Type, increased contrast and dark mode keep working. Set `--lead-ink` as the
+  app's tint; filled buttons stay neutral. Use the generated values only where the system
+  has no matching role.
 - Haptics mark meaningful moments: a selection snapping, a success, an error. Not every tap.
-- Light and dark are both first-class. Dark mode is designed, not inverted.
+- A native app follows the system appearance, so it ships both themes (`--mode both`). Dark
+  mode is designed, not inverted.
 
 ## Liquid Glass
 
@@ -98,7 +107,7 @@ as a current iOS app instead of a web page in a frame.
 - Shape: floating capsules and circles, inset from the screen edges (about 16-20pt at the
   sides, a little above the home indicator). Not a full-width bar glued to the bottom.
 - Content scrolls underneath and shows through, blurred.
-- On the web, approximate it:
+- In an HTML mock of a native screen, approximate it:
   `backdrop-filter: blur(24px) saturate(180%)`, a fill of white at 55-70% on a white ground
   or white at 8-14% on a black ground, a 1px inner highlight (white at 30-50% on the top
   edge), and a soft shadow underneath.

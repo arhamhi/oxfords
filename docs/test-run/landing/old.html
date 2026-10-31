@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFFFFF">
+<title>Tallyroom · Bookkeeping for physio clinics</title>
+<meta name="description" content="Monthly bookkeeping, VAT returns and payroll for independent physiotherapy clinics in the UK with up to 15 staff. From £240 a month.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+/*
+  Colour: Lagoon on white, with the client's #FF8A3D in the lead role. The orange is the brand, so it
+  carries the two blocks a clinic owner looks at (the sample report and the price); Lagoon's teal is the
+  support block for the honest "we are new" statement; its near-white pop marks the sample badge.
+  Font: Schibsted Grotesk, because the page is mostly money figures and it has true tabular lining
+  figures, and its bold gives the type-only wordmark a shape the system stack would not.
+*/
+@font-face {
+  font-family: "Schibsted Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Helvetica");
+  size-adjust: 102.5%;
+  ascent-override: 95.6%;
+  descent-override: 25.4%;
+  line-gap-override: 0%;
+}
+
+:root {
+  --page: #FFFFFF;
+  --raised: #F4F4F5;
+  --line: #E5E5E5;
+  --field-line: #8A8A8A;
+  --quiet: #6B6B6B;
+  --text: #111111;
+
+  --lead: #FF8A3D;
+  --support: #028397;
+  --pop: #F6F9F8;
+
+  --error: #B42318;
+  --success: #1A7F37;
+
+  --font: "Schibsted Grotesk", "Schibsted Fallback", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --gl: max(16px, env(safe-area-inset-left));
+  --gr: max(16px, env(safe-area-inset-right));
+  --section: 72px;
+}
+@media (min-width: 700px) {
+  :root { --gl: max(32px, env(safe-area-inset-left)); --gr: max(32px, env(safe-area-inset-right)); --section: 128px; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 88px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 18px;
+  line-height: 1.5;
+  font-kerning: normal;
+  caret-color: var(--text);
+}
+@media (max-width: 699px) { body { font-size: 16px; } }
+::selection { background: var(--lead); color: var(--text); }
+[hidden] { display: none !important; }
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+h1, h2, h3 { text-wrap: balance; }
+p, li, dd { text-wrap: pretty; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.num .p { font-variant-numeric: lining-nums; }
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.quiet { color: var(--quiet); }
+.ph { font-size: 1.25em; line-height: 1; vertical-align: -0.2em; flex: none; }
+
+.skip { position: absolute; left: var(--gl); top: -100px; z-index: 20; background: var(--text); color: #fff; padding: 12px 16px; border-radius: 8px; text-decoration: none; }
+.skip:focus-visible { top: 8px; }
+
+/* Layout: one grid with full-bleed edges so colour blocks can run to the window edge without vw. */
+.grid {
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(var(--gl), 1fr)
+    [content-start] minmax(0, 600px)
+    [mid] minmax(0, 600px)
+    [content-end] minmax(var(--gr), 1fr)
+    [full-end];
+}
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--gr) 0 var(--gl); box-sizing: content-box; }
+@media (max-width: 999px) {
+  .grid { grid-template-columns: [full-start] var(--gl) [content-start mid] minmax(0, 1fr) [content-end] var(--gr) [full-end]; }
+}
+
+/* Type scale: 14, 16, 18, 24, h2 28-40, h1 and price 32-56 */
+h1 { font-size: clamp(32px, 3.2vw + 14px, 56px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 700; }
+h2 { font-size: clamp(28px, 1.4vw + 20px, 40px); line-height: 1.12; letter-spacing: -0.02em; font-weight: 700; }
+h3 { font-size: 24px; line-height: 1.25; font-weight: 600; letter-spacing: -0.01em; }
+@media (max-width: 699px) { h3 { font-size: 18px; } }
+.meta { font-size: 14px; line-height: 1.45; color: var(--quiet); }
+
+/* Buttons: black or white; colour stays on content */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 12px 24px; border-radius: 8px;
+  border: 1px solid var(--text);
+  font: 600 16px/1.25 var(--font);
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+  transition: background-color 120ms var(--ease), color 120ms var(--ease), border-color 120ms var(--ease), transform 120ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-dark { background: var(--text); color: #FFFFFF; }
+.btn-dark:hover { background: #333333; border-color: #333333; }
+.btn-dark:active { background: #000000; transform: scale(0.97); }
+.btn-light { background: #FFFFFF; color: var(--text); }
+.btn-light:hover { background: var(--raised); }
+.btn-light:active { background: var(--line); transform: scale(0.97); }
+.btn:disabled { cursor: not-allowed; transform: none; }
+.btn:disabled:not([aria-busy="true"]) { background: var(--line); border-color: var(--line); color: var(--quiet); }
+.btn[aria-busy="true"] { cursor: progress; background: #333333; border-color: #333333; }
+.btn-sm { min-height: 44px; padding: 10px 20px; }
+
+/* Navigation */
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .nav { background: #FFFFFF; } }
+@media (prefers-reduced-transparency: reduce) { .nav { background: #FFFFFF; -webkit-backdrop-filter: none; backdrop-filter: none; } }
+.nav-in { display: flex; align-items: center; gap: 24px; min-height: 64px; }
+.wordmark { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1; text-decoration: none; }
+.nav nav { margin-left: auto; }
+.nav-links { display: flex; gap: 24px; }
+.nav-links a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; text-decoration: none; }
+.nav-links a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+.nav-links a[aria-current] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+@media (max-width: 639px) {
+  .hide-sm { display: none; }
+  .nav-in { gap: 16px; min-height: 56px; }
+  .wordmark { font-size: 18px; }
+}
+@media (max-width: 359px) {
+  .nav-in { gap: 12px; }
+  .nav .btn-sm { padding: 10px 12px; font-size: 14px; }
+  .nav-links a { font-size: 14px; }
+}
+
+/* Hero */
+.slab { background: var(--lead); }
+.hero-copy { grid-column: content-start / mid; grid-row: 1; align-self: center; padding: 96px 56px 96px 0; }
+.lead { margin-top: 24px; font-size: 24px; line-height: 1.4; color: var(--quiet); max-width: 30em; }
+.actions { margin-top: 48px; display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-slab { grid-column: mid / full-end; grid-row: 1; }
+.hero-product { grid-column: mid / content-end; grid-row: 1; align-self: center; padding: 56px 0 56px 56px; min-width: 0; }
+@media (max-width: 999px) {
+  .hero-copy { grid-column: content-start / content-end; padding: 40px 0 48px; }
+  .hero-slab { grid-column: full-start / full-end; grid-row: 2; }
+  .hero-product { grid-column: content-start / content-end; grid-row: 2; padding: 24px 0 32px; }
+  .lead { font-size: 18px; }
+}
+
+.badge {
+  display: inline-block; margin-bottom: 16px; padding: 4px 12px; border-radius: 8px;
+  background: var(--pop); color: var(--text); font-size: 14px; font-weight: 600;
+  border: 1px solid transparent;
+}
+
+/* The sample report: the product itself */
+.report { background: #FFFFFF; border-radius: 12px; padding: 24px; border: 1px solid transparent; max-width: 520px; }
+.report-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-bottom: 16px; }
+.report-title { font-size: 24px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+.report-head .meta { margin-top: 4px; }
+.lines { width: 100%; border-collapse: collapse; font-size: 16px; }
+.lines th, .lines td { padding: 8px 0; text-align: left; font-weight: 400; vertical-align: baseline; border-top: 1px solid var(--line); }
+.lines .vat { padding: 8px 12px; font-size: 14px; color: var(--quiet); white-space: nowrap; }
+.lines .num { text-align: right; }
+@media (max-width: 479px) { .report { padding: 20px 16px; } .lines .vat { padding: 8px; } }
+.lines tfoot th, .lines tfoot td { border-top: 1px solid var(--text); font-weight: 600; padding-top: 12px; }
+.r-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 16px 0 12px; border-top: 1px solid var(--line); font-size: 16px; }
+.r-row:first-of-type { margin-top: 16px; }
+.r-label { font-weight: 600; }
+.r-row .num { font-weight: 600; text-align: right; }
+.r-q { padding-top: 16px; border-top: 1px solid var(--line); font-size: 16px; }
+.r-q ol { list-style: decimal; padding-left: 20px; margin-top: 8px; display: grid; gap: 8px; }
+.r-q li::marker { font-variant-numeric: tabular-nums; color: var(--quiet); }
+
+/* Sections */
+.section { padding: var(--section) 0; }
+.month-rail { margin-top: 48px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.month-rail li { border-top: 1px solid var(--text); padding: 24px 40px 0 0; position: relative; }
+.month-rail li::before { content: ""; position: absolute; top: -5px; left: 0; width: 9px; height: 9px; background: var(--text); }
+.month-rail p { margin-top: 12px; max-width: 34em; }
+@media (max-width: 799px) {
+  .month-rail { grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 32px; }
+  .month-rail li { padding-right: 0; }
+}
+
+.band-grey { background: var(--raised); }
+.pieces { margin-top: 48px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+.piece { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 20px; }
+.doc { background: #FFFFFF; border-radius: 12px; padding: 24px; border: 1px solid transparent; font-size: 16px; }
+.doc-title { font-weight: 700; }
+.doc-sub { color: var(--quiet); }
+.doc-rows { margin-top: 16px; }
+.doc-rows > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border-top: 1px solid var(--line); }
+.doc-rows dd { text-align: right; font-weight: 600; }
+.doc-rows dd.plain { white-space: nowrap; }
+.ok { display: inline-flex; align-items: baseline; gap: 4px; }
+.ok .ph { color: var(--success); }
+.piece p.line { max-width: 34em; }
+@media (max-width: 999px) {
+  .pieces { grid-template-columns: minmax(0, 1fr); row-gap: 0; margin-top: 32px; max-width: 560px; }
+  .piece + .piece { margin-top: 40px; }
+}
+
+.band-teal { background: var(--support); color: #FFFFFF; }
+.band-teal h2 { max-width: 22em; }
+.statement-sub { margin-top: 24px; font-size: 24px; line-height: 1.4; max-width: 34em; }
+
+/* Pricing and form */
+.price-slab { grid-column: full-start / mid; grid-row: 1; }
+.price-copy { grid-column: content-start / mid; grid-row: 1; padding: 104px 56px 104px 0; }
+.form-wrap { grid-column: mid / content-end; grid-row: 1; padding: 104px 0 104px 56px; min-width: 0; }
+@media (max-width: 999px) {
+  .price-slab { grid-column: full-start / full-end; grid-row: 1; }
+  .price-copy { grid-column: content-start / content-end; padding: 64px 0; }
+  .form-wrap { grid-column: content-start / content-end; grid-row: 2; padding: 64px 0 var(--section); }
+}
+.plan { font-size: 16px; font-weight: 600; }
+.price { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; }
+.price .amount { font-size: clamp(32px, 3.2vw + 14px, 56px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+.price .from, .price .per { font-size: 24px; }
+.price-note { margin-top: 16px; max-width: 30em; }
+.list-h { margin-top: 40px; font-size: 16px; font-weight: 700; letter-spacing: 0; }
+.incl { margin-top: 8px; }
+.incl li { display: flex; gap: 12px; align-items: baseline; padding: 8px 0; border-top: 1px solid rgba(17, 17, 17, 0.22); }
+.incl li:last-child { border-bottom: 1px solid rgba(17, 17, 17, 0.22); }
+
+.form-intro { margin-top: 16px; color: var(--quiet); }
+.form { margin-top: 32px; display: grid; gap: 24px; max-width: 480px; }
+.field { display: grid; gap: 8px; min-width: 0; }
+.field > label, legend { font-weight: 600; font-size: 16px; }
+.hint { font-size: 14px; line-height: 1.45; color: var(--quiet); margin-top: -4px; }
+input[type="text"], input[type="email"] {
+  font: 400 16px/1.5 var(--font); color: var(--text); background: #FFFFFF;
+  width: 100%; min-height: 48px; padding: 11px 12px; border-radius: 8px;
+  border: 1px solid var(--field-line);
+  transition: border-color 120ms var(--ease);
+}
+input[type="text"]:hover, input[type="email"]:hover { border-color: var(--text); }
+input[type="text"]:focus-visible, input[type="email"]:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; border-color: var(--text); }
+input[aria-invalid="true"] { border-color: var(--error); }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 8px; }
+.choices { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.choice { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; cursor: pointer; }
+.choice input { width: 20px; height: 20px; margin: 0; accent-color: var(--text); }
+.err { display: flex; gap: 8px; align-items: baseline; color: var(--error); font-size: 14px; font-weight: 600; line-height: 1.45; }
+.submit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 8px; }
+.note { display: flex; gap: 8px; align-items: baseline; font-size: 14px; line-height: 1.45; max-width: 26em; }
+.alert { display: flex; gap: 8px; align-items: baseline; color: var(--error); font-size: 16px; font-weight: 600; }
+.sent { margin-top: 32px; max-width: 480px; animation: fade 200ms var(--ease); }
+.sent:focus, .sent:focus-visible { outline: none; }
+.sent-title { display: flex; gap: 8px; align-items: baseline; font-size: 24px; font-weight: 700; }
+.sent-title .ph { color: var(--success); }
+.sent p + p { margin-top: 8px; }
+.sent strong { overflow-wrap: anywhere; }
+.sent .btn { margin-top: 24px; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Questions */
+.faq { margin-top: 48px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 64px; }
+.faq p { margin-top: 12px; max-width: 34em; }
+@media (max-width: 799px) { .faq { grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 32px; } }
+
+/* Footer */
+.foot { border-top: 1px solid var(--line); padding: 56px 0 calc(40px + env(safe-area-inset-bottom)); }
+.foot-in { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 32px; }
+.foot-in p.quiet { margin-top: 12px; max-width: 26em; font-size: 16px; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 0 24px; font-size: 16px; }
+.foot-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.foot-base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 32px; margin-top: 40px; }
+@media (max-width: 639px) { .foot-links { flex-direction: column; } }
+
+/* Settings people turn on */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active, .btn-light:active, .btn-dark:active { transform: none; }
+}
+@media (prefers-contrast: more) {
+  .nav { border-bottom-color: var(--text); }
+  .report, .doc, .badge { border-color: var(--text); }
+  .meta, .hint, .quiet, .lead, .form-intro { color: #3D3D3D; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="wordmark" href="#main" aria-label="Tallyroom, back to top">Tallyroom</a>
+    <nav aria-label="Main">
+      <ul class="nav-links">
+        <li class="hide-sm"><a href="#month">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li class="hide-sm"><a href="#questions">Questions</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-dark btn-sm" href="#get-price">Get your price</a>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<section class="hero grid" aria-labelledby="hero-h">
+  <div class="hero-copy">
+    <h1 id="hero-h">Your clinic’s books, VAT and payroll, done every month.</h1>
+    <p class="lead">Tallyroom is a bookkeeping service for independent physiotherapy clinics in the UK with up to 15 people on payroll. From £240 a month.</p>
+    <div class="actions">
+      <a class="btn btn-dark" href="#get-price">Get your price</a>
+      <a class="btn btn-light" href="#month">How it works</a>
+    </div>
+  </div>
+  <div class="slab hero-slab" aria-hidden="true"></div>
+  <div class="hero-product">
+    <p class="badge">Sample report, not a real clinic</p>
+    <figure class="report" aria-labelledby="report-title">
+      <div class="report-head">
+        <div>
+          <p class="report-title" id="report-title">September 2026</p>
+          <p class="meta">Month-end report for a clinic with 9 people on payroll</p>
+        </div>
+        <p class="meta num">Sent 6 Oct</p>
+      </div>
+      <table class="lines">
+        <caption class="vh">Income for September 2026, by type of sale</caption>
+        <thead class="vh"><tr><th scope="col">Sale</th><th scope="col">VAT</th><th scope="col">Amount</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Treatment, self-pay</th><td class="vat">Exempt</td><td class="num">£24<span class="p">,</span>630<span class="p">.</span>00</td></tr>
+          <tr><th scope="row">Treatment, insurers</th><td class="vat">Exempt</td><td class="num">£10<span class="p">,</span>841<span class="p">.</span>50</td></tr>
+          <tr><th scope="row">Pilates classes</th><td class="vat">20% VAT</td><td class="num">£6<span class="p">,</span>240<span class="p">.</span>00</td></tr>
+          <tr><th scope="row">Supports and taping</th><td class="vat">20% VAT</td><td class="num">£1<span class="p">,</span>427<span class="p">.</span>00</td></tr>
+        </tbody>
+        <tfoot><tr><th scope="row">Income</th><td></td><td class="num">£43<span class="p">,</span>138<span class="p">.</span>50</td></tr></tfoot>
+      </table>
+      <div class="r-row">
+        <div><p class="r-label">VAT return, Jul to Sep</p><p class="meta">Filed 6 Oct. Due 7 Nov.</p></div>
+        <p class="num">£3<span class="p">,</span>281<span class="p">.</span>57</p>
+      </div>
+      <div class="r-row">
+        <div><p class="r-label">Payroll, gross</p><p class="meta">9 people paid 26 Sep. Payslips, RTI and pension sent.</p></div>
+        <p class="num">£21<span class="p">,</span>407<span class="p">.</span>92</p>
+      </div>
+      <div class="r-q">
+        <p class="r-label">2 questions for you</p>
+        <ol>
+          <li>A £65.00 card payment on 14 Sep has no booking. Which patient was it?</li>
+          <li>An insurer paid invoice 2291 £12.50 short. Should we chase it or write it off?</li>
+        </ol>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section id="month" class="section" aria-labelledby="month-h">
+  <div class="wrap">
+    <h2 id="month-h">What happens each month</h2>
+    <ol class="month-rail">
+      <li>
+        <h3>By the 6th</h3>
+        <p>Last month is closed. Every bank, card and insurer payment is matched to a booking, and your report arrives with any questions.</p>
+      </li>
+      <li>
+        <h3>On your payday</h3>
+        <p>Payroll is run. Payslips go to your team, RTI goes to HMRC and contributions go to your pension provider.</p>
+      </li>
+      <li>
+        <h3>Every quarter</h3>
+        <p>Your VAT return is filed through Making Tax Digital. You approve the figure before we file it.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section band-grey" aria-labelledby="clinic-h">
+  <div class="wrap">
+    <h2 id="clinic-h">Made for how physio clinics get paid</h2>
+    <div class="pieces">
+      <article class="piece" aria-label="Insurer payments">
+        <div class="doc">
+          <p class="doc-title">Insurer transfer, 18 Sep</p>
+          <dl class="doc-rows">
+            <div><dt>Paid in</dt><dd class="num">£3<span class="p">,</span>146<span class="p">.</span>00</dd></div>
+            <div><dt>Invoices it covers</dt><dd class="num">52</dd></div>
+            <div><dt>Matched to a patient</dt><dd class="num">52 of 52</dd></div>
+          </dl>
+        </div>
+        <p class="line">Insurers pay dozens of invoices in one transfer. We match each one to the patient and flag any that come in short.</p>
+      </article>
+      <article class="piece" aria-label="Associate invoices">
+        <div class="doc">
+          <p class="doc-title">Associate invoice, September</p>
+          <p class="doc-sub">Priya Natarajan</p>
+          <dl class="doc-rows">
+            <div><dt>Sessions in your diary</dt><dd class="num">96</dd></div>
+            <div><dt>Taken for them</dt><dd class="num">£5<span class="p">,</span>856<span class="p">.</span>00</dd></div>
+            <div><dt>Her share at 65%</dt><dd class="num">£3<span class="p">,</span>806<span class="p">.</span>40</dd></div>
+            <div><dt>Her invoice</dt><dd class="num"><span class="ok"><i class="ph ph-check" aria-hidden="true"></i>Matches</span></dd></div>
+          </dl>
+        </div>
+        <p class="line">Associates on a split send their own invoices. We check each one against the sessions in your diary.</p>
+      </article>
+      <article class="piece" aria-label="VAT on each sale">
+        <div class="doc">
+          <p class="doc-title">How each sale is treated for VAT</p>
+          <dl class="doc-rows">
+            <div><dt>Follow-up with an HCPC physio</dt><dd class="plain">Exempt</dd></div>
+            <div><dt>Sports massage, non-registered therapist</dt><dd class="plain">20%</dd></div>
+            <div><dt>Ankle support sold at the desk</dt><dd class="plain">20%</dd></div>
+            <div><dt>Group rehab class</dt><dd class="plain">We ask once</dd></div>
+          </dl>
+        </div>
+        <p class="line">Treatment by registered physios is usually VAT exempt, but massage, classes and supports often aren’t. We sort every sale so you pay VAT only where it’s due.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section band-teal" aria-labelledby="new-h">
+  <div class="wrap">
+    <h2 id="new-h">Tallyroom is new, so there are no clinic logos on this page.</h2>
+    <p class="statement-sub">We only work with independent physiotherapy clinics in the UK. When we have clients who are happy to be named, you’ll find them here.</p>
+  </div>
+</section>
+
+<section id="questions" class="section" aria-labelledby="q-h">
+  <div class="wrap">
+    <h2 id="q-h">Questions</h2>
+    <div class="faq">
+      <div>
+        <h3>We’re not VAT registered. Is Tallyroom still for us?</h3>
+        <p>Yes. We do the books and payroll, and tell you when your taxable sales get close to the £90,000 registration threshold.</p>
+      </div>
+      <div>
+        <h3>We pay more than 15 people.</h3>
+        <p>Then we’re not the right fit yet. Tallyroom runs payroll for up to 15.</p>
+      </div>
+      <div>
+        <h3>Do you do our year-end accounts?</h3>
+        <p>No. We keep the books ready for your accountant, who prepares the annual accounts and tax returns.</p>
+      </div>
+      <div>
+        <h3>What do you need from us each month?</h3>
+        <p>Read-only access to your bank and clinic diary, and answers to the questions in your report.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="pricing" class="pricing grid">
+  <div class="slab price-slab" aria-hidden="true"></div>
+  <section class="price-copy" aria-labelledby="pricing-h">
+    <h2 id="pricing-h" class="vh">Pricing</h2>
+    <p class="plan">Monthly plan</p>
+    <p class="price"><span class="from">From</span> <span class="amount num">£240</span> <span class="per">a month</span></p>
+    <p class="price-note">The exact figure depends on how many people you pay and how many transactions go through the bank. You’ll have it in writing before you sign.</p>
+    <h3 class="list-h">Included</h3>
+    <ul class="incl">
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Monthly bookkeeping and bank reconciliation</span></li>
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Insurer and card payments matched to patients</span></li>
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Associate invoices checked against the diary</span></li>
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Quarterly VAT returns through Making Tax Digital</span></li>
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Payroll for up to 15 people, with payslips and RTI</span></li>
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Pension auto-enrolment submissions</span></li>
+      <li><i class="ph ph-check" aria-hidden="true"></i><span>Month-end report by the 6th</span></li>
+    </ul>
+    <h3 class="list-h">Not included</h3>
+    <ul class="incl">
+      <li><i class="ph ph-minus" aria-hidden="true"></i><span>Annual accounts and Corporation Tax return</span></li>
+      <li><i class="ph ph-minus" aria-hidden="true"></i><span>Self Assessment returns</span></li>
+    </ul>
+  </section>
+
+  <section class="form-wrap" id="get-price" aria-labelledby="get-price-h">
+    <h2 id="get-price-h">Get your price</h2>
+    <p class="form-intro">Four questions. We’ll email you a fixed monthly price.</p>
+
+    <form class="form" id="price-form" novalidate>
+      <div class="field">
+        <label for="f-name">Your name</label>
+        <input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="err-name">
+        <p class="err" id="err-name" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+      </div>
+      <div class="field">
+        <label for="f-email">Email</label>
+        <p class="hint" id="hint-email">We’ll only use it to send your price.</p>
+        <input id="f-email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" required aria-describedby="hint-email err-email">
+        <p class="err" id="err-email" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+      </div>
+      <div class="field">
+        <label for="f-staff">People on payroll</label>
+        <p class="hint" id="hint-staff">Employees paid through PAYE, including directors. Leave out self-employed associates.</p>
+        <input id="f-staff" name="staff" type="text" inputmode="numeric" autocomplete="off" required aria-describedby="hint-staff err-staff">
+        <p class="err" id="err-staff" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+      </div>
+      <fieldset class="field" aria-describedby="err-vat">
+        <legend>Is the clinic VAT registered?</legend>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="vat" value="yes"> Yes</label>
+          <label class="choice"><input type="radio" name="vat" value="no"> No</label>
+          <label class="choice"><input type="radio" name="vat" value="unsure"> Not sure</label>
+        </div>
+        <p class="err" id="err-vat" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span></span></p>
+      </fieldset>
+
+      <p class="alert" id="form-failed" role="alert" hidden><i class="ph ph-warning-circle" aria-hidden="true"></i><span>We couldn’t send this. Your answers are still here. Try again, or email <a href="mailto:hello@tallyroom.co.uk">hello@tallyroom.co.uk</a>.</span></p>
+
+      <div class="submit-row">
+        <button class="btn btn-dark" type="submit" id="f-submit">Get your price</button>
+        <p class="note" id="form-offline" hidden><i class="ph ph-wifi-slash" aria-hidden="true"></i><span>You’re offline. Your answers are kept, so you can send them when you’re back online.</span></p>
+      </div>
+      <p class="vh" id="form-status" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="sent" id="form-sent" tabindex="-1" hidden>
+      <p class="sent-title"><i class="ph ph-check-circle" aria-hidden="true"></i>Sent</p>
+      <p>We’ll email your monthly price to <strong id="sent-email"></strong>.</p>
+      <button class="btn btn-light" type="button" id="edit-answers">Edit your answers</button>
+    </div>
+  </section>
+</div>
+
+
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div>
+      <a class="wordmark" href="#main">Tallyroom</a>
+      <p class="quiet">Bookkeeping, VAT and payroll for independent physiotherapy clinics in the UK.</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul class="foot-links">
+        <li><a href="#month">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#questions">Questions</a></li>
+        <li><a href="#get-price">Get your price</a></li>
+        <li><a href="mailto:hello@tallyroom.co.uk">hello@tallyroom.co.uk</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap foot-base">
+    <p class="meta">We use what you send through the form only to reply to you.</p>
+    <p class="meta">© 2026 Tallyroom</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const form = document.getElementById('price-form');
+  const btn = document.getElementById('f-submit');
+  const sent = document.getElementById('form-sent');
+  const sentEmail = document.getElementById('sent-email');
+  const failed = document.getElementById('form-failed');
+  const offline = document.getElementById('form-offline');
+  const status = document.getElementById('form-status');
+  const KEY = 'tallyroom-price-form';
+  const params = new URLSearchParams(location.search);
+  const preview = params.get('form'); // errors | sending | sent | failed | offline, for reviewing each state
+  let sending = false;
+  let forceOffline = preview === 'offline';
+
+  const checks = {
+    name: v => v.trim() ? '' : 'Enter your name so we know who to reply to.',
+    email: v => {
+      const t = v.trim();
+      if (!t) return 'Enter your email. The price goes there.';
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(t) ? '' : 'Check the email address. It needs an @ and a domain, like name@clinic.co.uk.';
+    },
+    staff: v => {
+      const t = v.trim();
+      if (!t) return 'Enter how many people you pay, from 0 to 15.';
+      if (!/^\d+$/.test(t)) return 'Use a whole number, like 9.';
+      if (Number(t) > 15) return 'Tallyroom runs payroll for up to 15 people, so we’re not the right fit yet.';
+      return '';
+    },
+    vat: () => form.querySelector('input[name="vat"]:checked') ? '' : 'Choose one. Not sure is fine.'
+  };
+
+  const inputsFor = name => name === 'vat' ? [...form.querySelectorAll('input[name="vat"]')] : [form.elements[name]];
+
+  function showError(name, msg) {
+    const box = document.getElementById('err-' + name);
+    box.querySelector('span').textContent = msg;
+    box.hidden = !msg;
+    inputsFor(name).forEach(el => msg ? el.setAttribute('aria-invalid', 'true') : el.removeAttribute('aria-invalid'));
+  }
+  function validate(name) {
+    const value = name === 'vat' ? '' : form.elements[name].value;
+    const msg = checks[name](value);
+    showError(name, msg);
+    return !msg;
+  }
+  function validateAll() {
+    let first = null;
+    for (const name of Object.keys(checks)) {
+      if (!validate(name) && !first) first = inputsFor(name)[0];
+    }
+    return first;
+  }
+
+  // Validate when a field is left, then keep the message honest while the person fixes it.
+  ['name', 'email', 'staff'].forEach(name => {
+    const el = form.elements[name];
+    el.addEventListener('blur', () => { if (el.value.trim() || el.hasAttribute('aria-invalid')) validate(name); });
+    el.addEventListener('input', () => { if (el.hasAttribute('aria-invalid')) validate(name); save(); });
+  });
+  inputsFor('vat').forEach(el => el.addEventListener('change', () => { validate('vat'); save(); }));
+
+  // Keep answers through a refresh or an error.
+  function save() {
+    try {
+      const data = { name: form.elements.name.value, email: form.elements.email.value, staff: form.elements.staff.value,
+        vat: (form.querySelector('input[name="vat"]:checked') || {}).value || '' };
+      sessionStorage.setItem(KEY, JSON.stringify(data));
+    } catch (e) { /* storage unavailable: answers stay in the fields */ }
+  }
+  function restore() {
+    try {
+      const data = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+      if (!data) return;
+      ['name', 'email', 'staff'].forEach(n => { if (data[n]) form.elements[n].value = data[n]; });
+      if (data.vat) { const r = form.querySelector('input[name="vat"][value="' + data.vat + '"]'); if (r) r.checked = true; }
+    } catch (e) { /* nothing saved */ }
+  }
+
+  function isOffline() { return forceOffline || !navigator.onLine; }
+  function syncOnline() {
+    const off = isOffline();
+    offline.hidden = !off;
+    if (!sending) btn.disabled = off;
+  }
+  window.addEventListener('online', syncOnline);
+  window.addEventListener('offline', syncOnline);
+
+  function setSending(on) {
+    sending = on;
+    if (on) {
+      btn.style.minWidth = btn.offsetWidth + 'px';
+      btn.textContent = 'Sending…';
+      btn.setAttribute('aria-busy', 'true');
+      btn.disabled = true;
+      status.textContent = 'Sending your answers.';
+    } else {
+      btn.textContent = 'Get your price';
+      btn.removeAttribute('aria-busy');
+      btn.style.minWidth = '';
+      syncOnline();
+    }
+  }
+
+  function showSent() {
+    sentEmail.textContent = form.elements.email.value.trim();
+    form.hidden = true;
+    sent.hidden = false;
+    sent.focus();
+    status.textContent = '';
+    try { sessionStorage.removeItem(KEY); } catch (e) {}
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (sending) return;
+    failed.hidden = true;
+    const bad = validateAll();
+    if (bad) { bad.focus(); return; }
+    if (isOffline()) { syncOnline(); return; }
+    setSending(true);
+    // No server in this prototype: the request is simulated so every state can be seen.
+    setTimeout(() => {
+      setSending(false);
+      if (preview === 'failed' || !navigator.onLine) { failed.hidden = false; return; }
+      showSent();
+    }, 900);
+  });
+
+  document.getElementById('edit-answers').addEventListener('click', () => {
+    sent.hidden = true;
+    form.hidden = false;
+    save();
+    form.elements.email.focus();
+  });
+
+  restore();
+  syncOnline();
+
+  // Preview states
+  const sample = () => {
+    form.elements.name.value = form.elements.name.value || 'Siobhan Gallagher';
+    form.elements.email.value = form.elements.email.value || 'siobhan@northfieldphysio.co.uk';
+    form.elements.staff.value = form.elements.staff.value || '9';
+    const r = form.querySelector('input[name="vat"][value="yes"]'); if (!form.querySelector('input[name="vat"]:checked')) r.checked = true;
+  };
+  if (preview === 'errors') {
+    form.elements.email.value = 'siobhan@northfield';
+    form.elements.staff.value = '18';
+    validateAll();
+  } else if (preview === 'sending') { sample(); setSending(true); }
+  else if (preview === 'sent') { sample(); showSent(); }
+  else if (preview === 'failed') { sample(); failed.hidden = false; }
+  else if (preview === 'offline') { sample(); syncOnline(); }
+
+  // Show where the reader is in the main navigation.
+  const links = [...document.querySelectorAll('.nav-links a')];
+  const byId = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        const a = byId.get(en.target.id);
+        if (!a) return;
+        if (en.isIntersecting) { links.forEach(l => l.removeAttribute('aria-current')); a.setAttribute('aria-current', 'location'); }
+        else if (a.hasAttribute('aria-current')) a.removeAttribute('aria-current');
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    byId.forEach((a, id) => { const s = document.getElementById(id); if (s) io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

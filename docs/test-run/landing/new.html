@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tallyroom: bookkeeping, VAT and payroll for physio clinics</title>
+<meta name="description" content="Monthly bookkeeping, VAT returns and payroll for up to 15 staff, for independent physiotherapy clinics in the UK. From £240 a month.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* Oxfords colour: Brand #FF8A3D (built from your own colours)
+   lead #FF8A3D, support #704E00, pop #009EA5
+   light on white: native, nothing moved
+     too light for text on this page: lead, pop. Text, links and icons use --lead-ink, --pop-ink.
+   notes:
+     support: analogous +30 #704E00, the rotation least like a state colour. Also: analogous -30 #9D162A.
+     pop: split +150 #009EA5, because the complement sits near a state colour. Also: complementary #0099CB, split +210 #508CF4.
+     support sits near warning: warning states use --warning, never --support. Keep --support off controls; pair every state with a word and an icon.
+   regenerate: node scripts/palette.mjs --brand "#FF8A3D" --mode light */
+
+:root {
+  color-scheme: light;
+  /* neutrals */
+  --page: #FFFFFF; --surface: #FAFAFA; --surface-2: #F3F3F3; --selected: #EBEBEB;
+  --line: #E4E4E4; --line-strong: #909090; --focus: #B05200; --overlay: #00000066;
+  --text: #161616; --text-2: #484848; --text-3: #6A6A6A; --text-disabled: #A0A0A0;
+  --shadow-1: 0 1px 2px #0000001A, 0 4px 12px #0000000D;
+  --shadow-2: 0 2px 4px #0000001A, 0 12px 32px #0000001F;
+  /* neutral controls */
+  --action: #161616; --action-hover: #222222; --action-pressed: #070707; --on-action: #FFFFFF;
+  --action-disabled: #E4E4E4; --on-action-disabled: #8D8D8D;
+  --control: #EEEEEE; --control-hover: #E1E1E1; --control-pressed: #D4D4D4;
+  /* palette */
+  --lead: #FF8A3D; --lead-hover: #FFA570; --lead-pressed: #E67420;
+  --on-lead: #111111; --lead-ink: #B05200; --lead-tint: #FFECE1;
+  --support: #704E00; --support-hover: #7F5C18; --support-pressed: #583C00;
+  --on-support: #FFFFFF; --support-ink: #704E00; --support-tint: #FDEED6;
+  --pop: #009EA5; --pop-hover: #2EB1B8; --pop-pressed: #008A90;
+  --on-pop: #111111; --pop-ink: #007A80; --pop-tint: #D6F8FA;
+  /* semantic */
+  --danger: #C31B1F; --danger-hover: #D5322F; --danger-pressed: #A5000F;
+  --on-danger: #FFFFFF; --danger-ink: #C31B1F; --danger-tint: #FFEBE8;
+  --warning: #F5A91F; --warning-hover: #FFBD58; --warning-pressed: #DB9400;
+  --on-warning: #111111; --warning-ink: #946300; --warning-tint: #FEEDD7;
+  --success: #007433; --success-hover: #17843F; --success-pressed: #005E28;
+  --on-success: #FFFFFF; --success-ink: #007433; --success-tint: #E0F7E4;
+  --info: #0065B0; --info-hover: #0074C8; --info-pressed: #00518F;
+  --on-info: #FFFFFF; --info-ink: #0065B0; --info-tint: #E5F2FF;
+  /* chart */
+  --series-1: #E3711B; --series-2: #704E00; --series-3: #009EA5; --series-4: #B15300;
+  --series-5: #4E3500; --series-6: #6C6C6C; --series-muted: #909090;
+}
+
+/* Headings: Source Serif 4, because a bookkeeper is trusted on paper and the page should read
+   like a set of accounts, not an app. Everything else, figures included: the system stack. */
+/* Fallback measured against Source Serif 4 600 in Chromium (measure-font.cjs), so nothing jumps
+   when the web font arrives. */
+@font-face {
+  font-family: "Source Serif fallback";
+  src: local("Georgia Bold"), local("Georgia-Bold"), local("Georgia");
+  font-weight: 600;
+  size-adjust: 79.1%;
+  ascent-override: 131.4%;
+  descent-override: 43%;
+  line-gap-override: 0%;
+}
+
+:root {
+  --font-body: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-head: "Source Serif 4", "Source Serif fallback", Georgia, serif;
+  /* type scale: six steps plus the price */
+  --fs-1: 14px; --fs-2: 17px; --fs-3: 20px; --fs-4: 24px; --fs-5: 40px; --fs-6: 56px;
+  --fs-figure: 128px;
+  /* spacing, multiples of 4 */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
+  --s-7: 40px; --s-8: 48px; --s-9: 64px; --s-10: 96px; --s-11: 128px;
+  --gutter: 64px;
+  --content: 1312px;
+  /* radius tiers: controls, objects (the summary, the price block) */
+  --r-control: 8px; --r-object: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 88px;
+  scrollbar-color: var(--line-strong) transparent;
+}
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-2);
+  line-height: 1.55;
+  caret-color: var(--lead-ink);
+  accent-color: var(--action);
+}
+::selection { background: var(--lead-tint); color: var(--text); }
+h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: var(--fs-6); line-height: 1.06; letter-spacing: -0.025em; }
+h2 { font-size: var(--fs-5); line-height: 1.1; letter-spacing: -0.02em; }
+h3 { font-size: var(--fs-4); line-height: 1.25; }
+p, ol, ul, dl, dd, figure { margin: 0; }
+p, li, dd { text-wrap: pretty; }
+ol, ul { padding: 0; list-style: none; }
+a { color: var(--lead-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+svg.i { width: 24px; height: 24px; flex: none; fill: currentColor; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.wrap { max-width: calc(var(--content) + 2 * var(--gutter)); margin: 0 auto; padding: 0 var(--gutter); }
+.section { padding-top: var(--s-11); }
+.lead-text { font-size: var(--fs-3); line-height: 1.5; color: var(--text-2); max-width: 34em; }
+
+.skip {
+  position: absolute; left: var(--s-4); top: -100px; z-index: 20;
+  background: var(--action); color: var(--on-action); padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-control); text-decoration: none;
+}
+.skip:focus { top: var(--s-4); }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: 48px; padding: var(--s-3) var(--s-5);
+  border: 1px solid transparent; border-radius: var(--r-control);
+  font: inherit; font-weight: 600; line-height: 1.2; text-decoration: none; cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out, transform 100ms ease-out;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--action); color: var(--on-action); }
+.btn-primary:hover { background: var(--action-hover); }
+.btn-primary:active { background: var(--action-pressed); }
+.btn-primary:disabled { background: var(--action-disabled); color: var(--on-action-disabled); cursor: default; transform: none; }
+.btn-secondary { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn-secondary:hover { background: var(--surface-2); }
+.btn-secondary:active { background: var(--control-pressed); }
+.btn-light { background: var(--page); color: var(--text); }
+.btn-light:hover { background: var(--surface-2); }
+.btn-light:active { background: var(--selected); }
+.btn-light:focus-visible { outline-color: var(--on-support); }
+
+/* ---------- header ---------- */
+.top { position: sticky; top: 0; z-index: 10; background: var(--page); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: var(--s-4); min-height: 72px; }
+.wordmark {
+  font-family: var(--font-head); font-weight: 600; font-size: var(--fs-4); line-height: 1;
+  letter-spacing: -0.01em; color: var(--text); text-decoration: none;
+  display: inline-flex; align-items: center; min-height: 44px;
+}
+.nav { display: flex; align-items: center; gap: var(--s-1); margin-left: auto; }
+.nav a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s-3);
+  border-radius: var(--r-control); color: var(--text-2); text-decoration: none;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.nav a:hover { color: var(--text); background: var(--surface-2); }
+.nav a[aria-current="true"] { color: var(--text); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.top .btn { margin-left: var(--s-2); }
+
+/* ---------- hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(var(--gutter), 1fr) minmax(0, 560px) var(--s-9) minmax(0, 688px) minmax(var(--gutter), 1fr);
+  padding-top: var(--s-9);
+}
+.hero-copy { grid-column: 2; align-self: center; padding-bottom: var(--s-9); }
+.hero-copy p { margin-top: var(--s-5); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-8); }
+.hero-panel { grid-column: 4 / 6; background: var(--lead); color: var(--on-lead); padding: var(--s-8); }
+.panel-note { margin-top: var(--s-4); font-size: var(--fs-1); max-width: 640px; }
+
+/* the monthly summary */
+.doc {
+  max-width: 640px; background: var(--page); color: var(--text);
+  border-radius: var(--r-object); box-shadow: var(--shadow-1); padding: var(--s-6);
+}
+.doc-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-4); }
+.doc-name { font-weight: 600; line-height: 1.3; }
+.doc-meta { font-size: var(--fs-1); color: var(--text-3); }
+.months { display: inline-flex; gap: var(--s-1); padding: var(--s-1); border: 1px solid var(--line-strong); border-radius: var(--r-control); }
+.months button {
+  min-width: 56px; min-height: 40px; padding: 0 var(--s-3);
+  border: 0; border-radius: var(--s-1); background: transparent; color: var(--text-2);
+  font: inherit; font-size: var(--fs-1); cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.months button:hover { background: var(--surface-2); color: var(--text); }
+.months button:active { background: var(--control-pressed); }
+.months button[aria-pressed="true"] { background: var(--selected); color: var(--text); font-weight: 600; }
+.doc-month { margin-top: var(--s-6); font-size: var(--fs-3); font-weight: 600; line-height: 1.3; }
+
+.figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: var(--s-3); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.fig { padding: var(--s-4) var(--s-4) var(--s-4) 0; }
+.fig + .fig { padding-left: var(--s-4); border-left: 1px solid var(--line); }
+.fig dt { font-size: var(--fs-1); color: var(--text-2); }
+.fig dd { font-size: var(--fs-4); font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums; }
+.fig .cmp { display: block; font-size: var(--fs-1); font-weight: 400; line-height: 1.4; color: var(--text-3); margin-top: var(--s-1); }
+
+.doc-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); margin-top: var(--s-5); }
+.doc-label { font-size: var(--fs-1); color: var(--text-2); margin-bottom: var(--s-2); }
+.split { width: 100%; border-collapse: collapse; font-size: var(--fs-1); }
+.split th { text-align: left; font-weight: 400; }
+.split th, .split td { padding: var(--s-2) 0; border-bottom: 1px solid var(--line); }
+.split tr:last-child th, .split tr:last-child td { border-bottom: 0; }
+
+.bars { display: grid; gap: var(--s-1); font-size: var(--fs-1); }
+.bars li { display: grid; grid-template-columns: 32px minmax(0, 1fr) 64px; align-items: center; gap: var(--s-2); min-height: 24px; color: var(--text-3); }
+.bar-track { height: 12px; }
+.bar { display: block; height: 100%; background: var(--series-muted); transform: scaleX(var(--v)); transform-origin: left center; transition: background-color 150ms ease-out; }
+.bars li.is-current { color: var(--text); font-weight: 600; }
+.bars li.is-current .bar { background: var(--pop); }
+
+.doc-rows { margin-top: var(--s-5); border-top: 1px solid var(--line); font-size: var(--fs-1); line-height: 1.5; }
+.doc-row { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+.doc-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.doc-row dt { font-weight: 600; }
+.doc-row dd li + li { margin-top: var(--s-2); }
+.doc-body { transition: opacity 150ms ease-out; }
+
+/* ---------- what we do ---------- */
+.cadence { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-8); margin-top: var(--s-8); }
+.cadence article { border-top: 2px solid var(--text); padding-top: var(--s-5); }
+.cadence p { margin-top: var(--s-3); max-width: 34em; }
+.cadence .you { margin-top: var(--s-5); padding-top: var(--s-3); border-top: 1px solid var(--line); color: var(--text-2); }
+
+/* ---------- insurer payments: the lead flood ---------- */
+.flood { background: var(--lead); color: var(--on-lead); margin-top: var(--s-11); padding: var(--s-10) 0; }
+.ins-head { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s-9); align-items: end; }
+.ins-head p { font-size: var(--fs-3); line-height: 1.5; }
+.remit { width: 100%; margin-top: var(--s-8); border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; }
+/* the figures sit under the paragraph column of .ins-head: 7fr + gap of a 7/5 split */
+.remit .c-name { width: 60.4%; }
+.remit th, .remit td { padding: var(--s-3) 0; border-bottom: 1px solid var(--on-lead); text-align: left; vertical-align: top; }
+.remit thead th { font-size: var(--fs-1); font-weight: 600; border-bottom-width: 2px; }
+.remit .num { text-align: right; padding-left: var(--s-5); }
+.remit tfoot th, .remit tfoot td { font-weight: 600; border-bottom: 0; padding-top: var(--s-4); }
+.flag { display: block; font-weight: 600; }
+.flood .panel-note { margin-top: var(--s-5); }
+
+/* ---------- price: the support block ---------- */
+.price-block {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s-9);
+  background: var(--support); color: var(--on-support); border-radius: var(--r-object); padding: var(--s-9);
+}
+.plan { font-size: var(--fs-2); font-weight: 600; }
+.price { margin-top: var(--s-3); font-family: var(--font-head); font-weight: 600; letter-spacing: -0.03em; }
+.price .from, .price .per { display: block; font-family: var(--font-body); font-size: var(--fs-3); font-weight: 400; letter-spacing: 0; line-height: 1.3; }
+.price .amount { display: block; font-size: var(--fs-figure); line-height: 1; margin: var(--s-1) 0 var(--s-2); }
+.price-block .btn { margin-top: var(--s-8); }
+.price-fixed { margin-top: var(--s-5); max-width: 24em; }
+.rows h3 { font-size: var(--fs-4); }
+.rows ul { margin-top: var(--s-4); border-top: 1px solid var(--on-support); }
+.rows li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-4); padding: var(--s-4) 0; border-bottom: 1px solid var(--on-support); }
+.rows .state { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: 600; }
+.rows .why { display: block; font-size: var(--fs-1); margin-top: var(--s-1); }
+.rows .after { margin-top: var(--s-5); max-width: 36em; }
+
+/* ---------- questions ---------- */
+.qa { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--s-9); }
+.qa-head p { margin-top: var(--s-4); color: var(--text-2); max-width: 22em; }
+.faq { border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  min-height: 64px; padding: var(--s-4) 0; cursor: pointer; list-style: none;
+  font-size: var(--fs-3); font-weight: 600; line-height: 1.35;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary svg { transition: transform 150ms ease-out; color: var(--text-2); }
+.faq details[open] summary svg { transform: rotate(180deg); }
+.faq summary:hover { color: var(--lead-ink); }
+.faq details p { padding: 0 var(--s-9) var(--s-5) 0; color: var(--text-2); max-width: 40em; }
+
+/* ---------- the form ---------- */
+.band { background: var(--surface); border-top: 1px solid var(--line); margin-top: var(--s-11); padding: var(--s-10) 0 var(--s-11); }
+.form-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: var(--s-10); }
+.form-col .lead-text { margin-top: var(--s-4); }
+form { margin-top: var(--s-8); }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5) var(--s-5); }
+.field label, .field legend { display: block; font-weight: 600; line-height: 1.4; padding: 0; }
+.hint { font-size: var(--fs-1); color: var(--text-3); margin-top: var(--s-1); }
+.field input[type="text"], .field input[type="email"] {
+  display: block; width: 100%; margin-top: var(--s-2); min-height: 48px; padding: var(--s-3) var(--s-3);
+  font: inherit; color: var(--text); background: var(--page);
+  border: 1px solid var(--line-strong); border-radius: var(--r-control);
+  transition: border-color 120ms ease-out;
+}
+.field input:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; border-color: var(--focus); }
+.field input[aria-invalid="true"] { border-color: var(--danger); }
+.field fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.choices { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-5); margin-top: var(--s-1); }
+.choices label { display: inline-flex; align-items: center; gap: var(--s-2); min-height: 44px; font-weight: 400; cursor: pointer; }
+.choices input { width: 20px; height: 20px; margin: 0; }
+.error { display: flex; align-items: flex-start; gap: var(--s-2); margin-top: var(--s-2); font-size: var(--fs-1); color: var(--danger-ink); }
+.error svg.i { width: 20px; height: 20px; }
+.error[hidden] { display: none; }
+.span-2 { grid-column: 1 / -1; }
+.submit-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4); margin-top: var(--s-6); }
+.sent { margin-top: var(--s-8); padding: var(--s-6); background: var(--page); border: 1px solid var(--line); border-radius: var(--r-object); }
+.sent[hidden] { display: none; }
+.sent-title { display: flex; align-items: center; gap: var(--s-2); font-weight: 600; font-size: var(--fs-3); color: var(--success-ink); }
+.sent p { margin-top: var(--s-3); overflow-wrap: anywhere; }
+.sent p + p { color: var(--text-2); }
+.sent button { margin-top: var(--s-5); }
+.next h3 { font-size: var(--fs-4); }
+.next ol { margin-top: var(--s-4); counter-reset: step; border-top: 1px solid var(--line); }
+.next li { counter-increment: step; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: var(--s-2); padding: var(--s-4) 0; border-bottom: 1px solid var(--line); color: var(--text-2); }
+.next li::before { content: counter(step); font-family: var(--font-head); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ---------- footer ---------- */
+.foot { border-top: 1px solid var(--line); padding: var(--s-9) 0 var(--s-8); }
+.foot-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); gap: var(--s-8); }
+.foot p { margin-top: var(--s-3); color: var(--text-2); max-width: 28em; }
+.foot h2 { font-family: var(--font-body); font-size: var(--fs-1); font-weight: 600; letter-spacing: 0; color: var(--text); }
+.foot ul { margin-top: var(--s-2); }
+.foot li a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; color: var(--text-2); }
+.foot li a:hover { color: var(--text); }
+.foot .meta { margin-top: var(--s-8); font-size: var(--fs-1); color: var(--text-3); }
+
+/* ---------- tablet ---------- */
+@media (max-width: 1080px) {
+  :root { --gutter: 40px; --fs-5: 34px; --fs-6: 48px; --fs-figure: 104px; }
+  .hero { grid-template-columns: var(--gutter) minmax(0, 1fr) var(--gutter); }
+  .hero-copy { grid-column: 2; padding-bottom: var(--s-8); }
+  .hero-panel { grid-column: 1 / -1; padding: var(--s-8) var(--gutter); }
+  .cadence { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+  .ins-head, .price-block, .qa, .form-grid, .foot-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+  .remit { table-layout: auto; }
+  .remit .c-name { width: auto; }
+  .price-block { padding: var(--s-8) var(--s-7); }
+  .nav a.extra { display: none; }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 640px) {
+  :root { --gutter: 20px; --fs-3: 18px; --fs-4: 22px; --fs-5: 30px; --fs-6: 36px; --fs-figure: 88px; --s-11: 80px; --s-10: 64px; }
+  .top .wrap { min-height: 64px; gap: var(--s-2); }
+  .wordmark { font-size: var(--fs-4); }
+  .top .btn { min-height: 44px; padding: var(--s-2) var(--s-4); margin-left: 0; }
+  .hero { padding-top: var(--s-8); }
+  .hero-actions { margin-top: var(--s-7); }
+  .hero-panel { padding: var(--s-5) var(--gutter) var(--s-6); }
+  .doc { padding: var(--s-5) var(--s-4); }
+  .months button { min-height: 44px; }
+  .figs { grid-template-columns: minmax(0, 1fr); }
+  .fig, .fig + .fig { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 0 var(--s-4); padding: var(--s-3) 0; border-left: 0; }
+  .fig + .fig { border-top: 1px solid var(--line); }
+  .fig dd { grid-column: 2; grid-row: 1; font-size: var(--fs-3); text-align: right; }
+  .fig .cmp { grid-column: 1 / -1; }
+  .doc-cols { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+  .doc-row { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
+  .flood { padding: var(--s-9) 0; }
+  .remit { font-size: var(--fs-1); }
+  .remit .num { padding-left: var(--s-3); }
+  .price-block { padding: var(--s-6) var(--s-5); }
+  .fields { grid-template-columns: minmax(0, 1fr); }
+  .faq details p { padding-right: 0; }
+  .submit-row .btn { width: 100%; }
+}
+@media (max-width: 360px) {
+  .nav { display: none; }
+  .top .btn { margin-left: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active { transform: none; }
+  .faq summary svg { transition: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" class="visually-hidden" aria-hidden="true" focusable="false">
+  <!-- Phosphor icons, regular weight (MIT), copied from the set's own source -->
+  <symbol id="i-check" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></symbol>
+  <symbol id="i-warning" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 256 256"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></symbol>
+  <symbol id="i-caret" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="wordmark" href="#top">Tallyroom</a>
+    <nav class="nav" aria-label="Main">
+      <a class="extra" href="#work">What we do</a>
+      <a href="#price">Price</a>
+      <a class="extra" href="#questions">Questions</a>
+    </nav>
+    <a class="btn btn-primary" href="#get-price">Get your price</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">Your clinic’s books, VAT and payroll, done every month.</h1>
+      <p class="lead-text">Tallyroom is a bookkeeping service for independent physiotherapy clinics in the UK with up to 15&nbsp;staff. From £240&nbsp;a&nbsp;month.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#get-price">Get your price</a>
+        <a class="btn btn-secondary" href="#price">See what’s included</a>
+      </div>
+    </div>
+
+    <div class="hero-panel">
+      <article class="doc" aria-labelledby="doc-name">
+        <div class="doc-head">
+          <div>
+            <p class="doc-name" id="doc-name">Monthly summary</p>
+            <p class="doc-meta">Sample clinic, 6 treatment rooms</p>
+          </div>
+          <div class="months" role="group" aria-label="Show month">
+            <button type="button" data-m="jul" aria-pressed="false">Jul</button>
+            <button type="button" data-m="aug" aria-pressed="false">Aug</button>
+            <button type="button" data-m="sep" aria-pressed="true">Sep</button>
+          </div>
+        </div>
+
+        <div class="doc-body" id="doc-body">
+          <p class="doc-month" id="doc-month" aria-live="polite">September 2026</p>
+          <dl class="figs">
+            <div class="fig"><dt>Income</dt><dd><span data-f="income">£38,412.60</span><span class="cmp" data-f="incomeCmp">£6,943.70 more than August</span></dd></div>
+            <div class="fig"><dt>Costs</dt><dd><span data-f="costs">£29,870.15</span><span class="cmp" data-f="costsCmp">£1,767.78 more than August</span></dd></div>
+            <div class="fig"><dt>Profit</dt><dd><span data-f="profit">£8,542.45</span><span class="cmp" data-f="profitCmp">£5,175.92 more than August</span></dd></div>
+          </dl>
+
+          <div class="doc-cols">
+            <div>
+              <p class="doc-label" id="split-label">Where the income came from</p>
+              <table class="split" aria-labelledby="split-label">
+                <tbody>
+                  <tr><th scope="row">Self-pay patients</th><td class="num" data-f="selfpay">£21,935.00</td></tr>
+                  <tr><th scope="row">Insurers</th><td class="num" data-f="insurers">£12,511.60</td></tr>
+                  <tr><th scope="row">Classes and kit</th><td class="num" data-f="classes">£3,966.00</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <figure>
+              <figcaption class="doc-label">Income by month</figcaption>
+              <ol class="bars" id="bars">
+                <li data-m="apr"><span>Apr</span><span class="bar-track"><span class="bar" style="--v: 0.848"></span></span><span class="num">£33,904</span></li>
+                <li data-m="may"><span>May</span><span class="bar-track"><span class="bar" style="--v: 0.878"></span></span><span class="num">£35,118</span></li>
+                <li data-m="jun"><span>Jun</span><span class="bar-track"><span class="bar" style="--v: 0.867"></span></span><span class="num">£34,676</span></li>
+                <li data-m="jul"><span>Jul</span><span class="bar-track"><span class="bar" style="--v: 0.905"></span></span><span class="num">£36,207</span></li>
+                <li data-m="aug"><span>Aug</span><span class="bar-track"><span class="bar" style="--v: 0.787"></span></span><span class="num">£31,469</span></li>
+                <li data-m="sep" class="is-current"><span>Sep</span><span class="bar-track"><span class="bar" style="--v: 0.960"></span></span><span class="num">£38,413</span></li>
+              </ol>
+            </figure>
+          </div>
+
+          <dl class="doc-rows">
+            <div class="doc-row"><dt>Payroll</dt><dd data-f="payroll">10 staff paid on 30 Sep. Payslips sent, HMRC updated.</dd></div>
+            <div class="doc-row"><dt>VAT</dt><dd data-f="vat">Return for July to September drafted. Due 7 Nov, waiting for your OK.</dd></div>
+            <div class="doc-row"><dt>Needs you</dt><dd><ul data-f="needs">
+              <li>An insurer paid £312.00 on 22 Sep with no remittance. Which patients was it for?</li>
+              <li>Receipt missing for £86.40 to a physio supplies shop on 11 Sep.</li>
+            </ul></dd></div>
+          </dl>
+        </div>
+      </article>
+      <p class="panel-note">A sample of the summary you get each month. The clinic and its figures are made up.</p>
+    </div>
+  </section>
+
+  <section class="section wrap" id="work" aria-labelledby="work-title">
+    <h2 id="work-title">What we do, and what’s left for you</h2>
+    <div class="cadence">
+      <article>
+        <h3>Every month</h3>
+        <p>We match every payment in your bank, card terminal and clinic software to an invoice or a bill, then send you the summary.</p>
+        <p class="you">Left for you: answer anything we couldn’t match.</p>
+      </article>
+      <article>
+        <h3>Every payday</h3>
+        <p>We run payroll for up to 15 staff, send payslips, work out pension contributions and report to HMRC.</p>
+        <p class="you">Left for you: tell us about starters, leavers and changed hours.</p>
+      </article>
+      <article>
+        <h3>Every VAT quarter</h3>
+        <p>We separate exempt treatment income from taxable sales like classes and kit, prepare the return and file it.</p>
+        <p class="you">Left for you: approve the figures before we file.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="flood" id="insurers" aria-labelledby="ins-title">
+    <div class="wrap">
+      <div class="ins-head">
+        <h2 id="ins-title">We match each insurer payment back to the patients it covers</h2>
+        <p>An insurer can pay £1,184.40 in one go, weeks after treatment, for 11 sessions across 6 patients. We split it to each invoice and flag anything paid short, so you know who to chase.</p>
+      </div>
+      <table class="remit">
+        <caption class="visually-hidden">One insurer payment of £1,184.40 split across six patients</caption>
+        <colgroup><col class="c-name"><col><col><col></colgroup>
+        <thead>
+          <tr><th scope="col">Patient</th><th scope="col" class="num">Sessions</th><th scope="col" class="num">Invoiced</th><th scope="col" class="num">Paid</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>R. Mistry</td><td class="num">3</td><td class="num">£318.00</td><td class="num">£318.00</td></tr>
+          <tr><td>J. Kowalski</td><td class="num">2</td><td class="num">£212.00</td><td class="num">£212.00</td></tr>
+          <tr><td>E. Byrne</td><td class="num">2</td><td class="num">£212.00</td><td class="num">£198.40<span class="flag">£13.60 short</span></td></tr>
+          <tr><td>T. Adeyemi</td><td class="num">1</td><td class="num">£116.00</td><td class="num">£116.00</td></tr>
+          <tr><td>S. Whitfield</td><td class="num">2</td><td class="num">£212.00</td><td class="num">£212.00</td></tr>
+          <tr><td>M. Haddad</td><td class="num">1</td><td class="num">£128.00</td><td class="num">£128.00</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><th scope="row">One payment</th><td class="num">11</td><td class="num">£1,198.00</td><td class="num">£1,184.40</td></tr>
+        </tfoot>
+      </table>
+      <p class="panel-note">An example remittance. The patients and amounts are made up.</p>
+    </div>
+  </section>
+
+  <section class="section wrap" id="price" aria-labelledby="price-title">
+    <div class="price-block">
+      <div>
+        <p class="plan">Monthly plan</p>
+        <h2 class="price" id="price-title"><span class="from">from</span><span class="amount">£240</span><span class="per">a month</span></h2>
+        <p class="price-fixed">One fixed monthly price, agreed before you start.</p>
+        <a class="btn btn-light" href="#get-price">Get your price</a>
+      </div>
+      <div class="rows">
+        <h3>What the plan covers</h3>
+        <ul>
+          <li><span>Monthly bookkeeping</span><span class="state"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Included</span></li>
+          <li><span>The monthly summary</span><span class="state"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Included</span></li>
+          <li><span>VAT returns</span><span class="state"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Included</span></li>
+          <li><span>Payroll for up to 15 staff</span><span class="state"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Included</span></li>
+          <li><span>Year-end accounts and tax return<span class="why">Your accountant prepares these from the books we keep.</span></span><span class="state"><svg class="i" aria-hidden="true"><use href="#i-minus"/></svg>Not included</span></li>
+        </ul>
+        <p class="after">Where your price sits above £240 depends on how many payments go through your books each month. You’ll have the exact figure before you sign.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap qa" id="questions" aria-labelledby="qa-title">
+    <div class="qa-head">
+      <h2 id="qa-title">Questions</h2>
+      <p>Anything else, email <a href="mailto:hello@tallyroom.co.uk">hello@tallyroom.co.uk</a> and a bookkeeper will answer.</p>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Do we have to leave our accountant?<svg class="i" aria-hidden="true"><use href="#i-caret"/></svg></summary>
+        <p>No. Keep them for your year-end accounts and tax return. We send them finished books to work from.</p>
+      </details>
+      <details>
+        <summary>Do we have to change our clinic software?<svg class="i" aria-hidden="true"><use href="#i-caret"/></svg></summary>
+        <p>No. We work from your bank feeds and the payment reports your clinic software already produces.</p>
+      </details>
+      <details>
+        <summary>Isn’t physiotherapy exempt from VAT?<svg class="i" aria-hidden="true"><use href="#i-caret"/></svg></summary>
+        <p>Treatment by a registered physiotherapist usually is. Classes, massage by staff who aren’t registered, and kit sold at reception often aren’t. We work out which of your income is which, and whether you need to register at all.</p>
+      </details>
+      <details>
+        <summary>What if we grow past 15 staff?<svg class="i" aria-hidden="true"><use href="#i-caret"/></svg></summary>
+        <p>Tell us before it happens. We’ll say plainly whether Tallyroom still fits, and help you move payroll if it doesn’t.</p>
+      </details>
+      <details>
+        <summary>How do we start?<svg class="i" aria-hidden="true"><use href="#i-caret"/></svg></summary>
+        <p>Send your details with the form below. We email you a fixed monthly price. If you agree to it, we ask for read-only access to your bank and clinic software and start with the current month.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="band" id="get-price" aria-labelledby="form-title">
+    <div class="wrap form-grid">
+      <div class="form-col">
+        <h2 id="form-title">Get your price</h2>
+        <p class="lead-text">Tell us about your clinic and we’ll email you a fixed monthly price.</p>
+
+        <form id="quote" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="f-name">Your name</label>
+              <input id="f-name" name="name" type="text" autocomplete="name" aria-describedby="e-name">
+              <p class="error" id="e-name" hidden><svg class="i" aria-hidden="true"><use href="#i-warning"/></svg><span></span></p>
+            </div>
+            <div class="field">
+              <label for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="e-email">
+              <p class="error" id="e-email" hidden><svg class="i" aria-hidden="true"><use href="#i-warning"/></svg><span></span></p>
+            </div>
+            <div class="field">
+              <label for="f-clinic">Clinic name</label>
+              <input id="f-clinic" name="clinic" type="text" autocomplete="organization" aria-describedby="e-clinic">
+              <p class="error" id="e-clinic" hidden><svg class="i" aria-hidden="true"><use href="#i-warning"/></svg><span></span></p>
+            </div>
+            <div class="field">
+              <label for="f-staff">Staff on payroll</label>
+              <p class="hint" id="h-staff">Everyone you pay through PAYE, including you if you take a salary. Up to 15.</p>
+              <input id="f-staff" name="staff" type="text" inputmode="numeric" autocomplete="off" aria-describedby="h-staff e-staff">
+              <p class="error" id="e-staff" hidden><svg class="i" aria-hidden="true"><use href="#i-warning"/></svg><span></span></p>
+            </div>
+            <div class="field span-2">
+              <fieldset aria-describedby="e-vat">
+                <legend>Is the clinic VAT registered?</legend>
+                <div class="choices">
+                  <label><input type="radio" name="vat" value="yes">Yes</label>
+                  <label><input type="radio" name="vat" value="no">No</label>
+                  <label><input type="radio" name="vat" value="unsure">Not sure</label>
+                </div>
+              </fieldset>
+              <p class="error" id="e-vat" hidden><svg class="i" aria-hidden="true"><use href="#i-warning"/></svg><span></span></p>
+            </div>
+          </div>
+          <div class="submit-row">
+            <button class="btn btn-primary" type="submit" id="send">Get your price</button>
+          </div>
+          <p class="error" id="e-form" role="alert" hidden><svg class="i" aria-hidden="true"><use href="#i-warning"/></svg><span></span></p>
+        </form>
+
+        <div class="sent" id="sent" tabindex="-1" hidden>
+          <p class="sent-title"><svg class="i" aria-hidden="true"><use href="#i-check-circle"/></svg>Details sent</p>
+          <p id="sent-text"></p>
+          <p>If anything changes before then, edit your details and send them again.</p>
+          <button class="btn btn-secondary" type="button" id="edit">Edit your details</button>
+        </div>
+      </div>
+
+      <aside class="next" aria-labelledby="next-title">
+        <h3 id="next-title">What happens next</h3>
+        <ol>
+          <li>We read your details and check Tallyroom fits your clinic.</li>
+          <li>We email you one fixed monthly price.</li>
+          <li>If you agree to it, we ask for read-only access to your bank and clinic software and start with the current month.</li>
+        </ol>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <a class="wordmark" href="#top">Tallyroom</a>
+      <p>Bookkeeping, VAT and payroll for independent physiotherapy clinics in the UK.</p>
+    </div>
+    <nav aria-labelledby="foot-pages">
+      <h2 id="foot-pages">On this page</h2>
+      <ul>
+        <li><a href="#work">What we do</a></li>
+        <li><a href="#insurers">Insurer payments</a></li>
+        <li><a href="#price">Price</a></li>
+        <li><a href="#questions">Questions</a></li>
+        <li><a href="#get-price">Get your price</a></li>
+      </ul>
+    </nav>
+    <div>
+      <h2>Contact</h2>
+      <ul>
+        <li><a href="mailto:hello@tallyroom.co.uk">hello@tallyroom.co.uk</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap"><p class="meta">© 2026 Tallyroom</p></div>
+</footer>
+
+<script>
+(() => {
+  // ---------- the monthly summary ----------
+  const months = {
+    jul: {
+      title: 'July 2026',
+      income: '£36,207.30', incomeCmp: '£1,531.10 more than June',
+      costs: '£28,944.71', costsCmp: '£634.27 more than June',
+      profit: '£7,262.59', profitCmp: '£896.83 more than June',
+      selfpay: '£20,880.00', insurers: '£11,811.30', classes: '£3,516.00',
+      payroll: '9 staff paid on 31 Jul. Payslips sent, HMRC updated.',
+      vat: 'Return for April to June filed on 4 Aug.',
+      needs: ['Receipt missing for £1,249.00, a treatment couch bought on 3 Jul.']
+    },
+    aug: {
+      title: 'August 2026',
+      income: '£31,468.90', incomeCmp: '£4,738.40 less than July',
+      costs: '£28,102.37', costsCmp: '£842.34 less than July',
+      profit: '£3,366.53', profitCmp: '£3,896.06 less than July',
+      selfpay: '£18,105.00', insurers: '£10,977.90', classes: '£2,386.00',
+      payroll: '10 staff paid on 28 Aug, including one new starter.',
+      vat: 'No return due. Next: July to September, due 7 Nov.',
+      needs: ['Nothing this month.']
+    },
+    sep: {
+      title: 'September 2026',
+      income: '£38,412.60', incomeCmp: '£6,943.70 more than August',
+      costs: '£29,870.15', costsCmp: '£1,767.78 more than August',
+      profit: '£8,542.45', profitCmp: '£5,175.92 more than August',
+      selfpay: '£21,935.00', insurers: '£12,511.60', classes: '£3,966.00',
+      payroll: '10 staff paid on 30 Sep. Payslips sent, HMRC updated.',
+      vat: 'Return for July to September drafted. Due 7 Nov, waiting for your OK.',
+      needs: ['An insurer paid £312.00 on 22 Sep with no remittance. Which patients was it for?',
+              'Receipt missing for £86.40 to a physio supplies shop on 11 Sep.']
+    }
+  };
+  const body = document.getElementById('doc-body');
+  const monthButtons = document.querySelectorAll('.months button');
+  const calm = matchMedia('(prefers-reduced-motion: reduce)');
+
+  function showMonth(key) {
+    const d = months[key];
+    if (!d) return;
+    monthButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === key)));
+    document.getElementById('doc-month').textContent = d.title;
+    body.querySelectorAll('[data-f]').forEach(el => {
+      const v = d[el.dataset.f];
+      if (Array.isArray(v)) {
+        el.replaceChildren(...v.map(t => { const li = document.createElement('li'); li.textContent = t; return li; }));
+      } else if (v != null) el.textContent = v;
+    });
+    document.querySelectorAll('#bars li').forEach(li => li.classList.toggle('is-current', li.dataset.m === key));
+    body.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: calm.matches ? 120 : 160, easing: 'ease-out' });
+  }
+  monthButtons.forEach(b => b.addEventListener('click', () => showMonth(b.dataset.m)));
+
+  // ---------- current section in the nav ----------
+  const navLinks = [...document.querySelectorAll('.nav a')];
+  const watched = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const link = navLinks.find(a => a.getAttribute('href') === '#' + e.target.id);
+        if (!link) return;
+        if (e.isIntersecting) {
+          navLinks.forEach(a => a.removeAttribute('aria-current'));
+          link.setAttribute('aria-current', 'true');
+        } else if (link.hasAttribute('aria-current')) link.removeAttribute('aria-current');
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    watched.forEach(s => io.observe(s));
+  }
+
+  // ---------- the price form ----------
+  const form = document.getElementById('quote');
+  const send = document.getElementById('send');
+  const sent = document.getElementById('sent');
+  const checks = {
+    name: v => v.trim() ? '' : 'Enter your name so we know who to reply to.',
+    email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? '' : 'Enter an email address like name@yourclinic.co.uk.',
+    clinic: v => v.trim() ? '' : 'Enter your clinic’s name.',
+    staff: v => {
+      const t = v.trim();
+      if (!t) return 'Enter how many people you pay, from 1 to 15.';
+      if (!/^\d+$/.test(t) || Number(t) < 1) return 'Enter a whole number from 1 to 15.';
+      if (Number(t) > 15) return 'The plan covers up to 15 staff. Email hello@tallyroom.co.uk and we’ll tell you plainly whether we can help.';
+      return '';
+    },
+    vat: () => form.querySelector('input[name="vat"]:checked') ? '' : 'Choose one. Pick “Not sure” if you don’t know.'
+  };
+
+  function setError(name, msg) {
+    const err = document.getElementById('e-' + name);
+    err.querySelector('span').textContent = msg;
+    err.hidden = !msg;
+    const input = form.elements[name];
+    if (input && input.setAttribute) input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  }
+  function check(name) {
+    const el = form.elements[name];
+    const msg = checks[name](el && el.value != null ? el.value : '');
+    setError(name, msg);
+    return !msg;
+  }
+
+  ['name', 'email', 'clinic', 'staff'].forEach(n => {
+    const el = form.elements[n];
+    el.addEventListener('blur', () => { if (el.value.trim() || el.getAttribute('aria-invalid') === 'true') check(n); });
+    el.addEventListener('input', () => { if (el.getAttribute('aria-invalid') === 'true') check(n); });
+  });
+  form.querySelectorAll('input[name="vat"]').forEach(r => r.addEventListener('change', () => check('vat')));
+
+  const formError = document.getElementById('e-form');
+  function setFormError(msg) { formError.querySelector('span').textContent = msg; formError.hidden = !msg; }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    setFormError('');
+    const order = ['name', 'email', 'clinic', 'staff', 'vat'];
+    const bad = order.filter(n => !check(n));
+    if (bad.length) {
+      const first = bad[0] === 'vat' ? form.querySelector('input[name="vat"]') : form.elements[bad[0]];
+      first.focus();
+      return;
+    }
+    if (!navigator.onLine) {
+      setFormError('You’re offline, so this wasn’t sent. Your answers are still here: send them again when you’re back online.');
+      return;
+    }
+    send.disabled = true;
+    send.textContent = 'Sending…';
+    setTimeout(() => {
+      send.disabled = false;
+      send.textContent = 'Get your price';
+      const first = form.elements.name.value.trim().split(/\s+/)[0];
+      document.getElementById('sent-text').textContent =
+        `Thanks, ${first}. We’ll email ${form.elements.email.value.trim()} with a fixed monthly price for ${form.elements.clinic.value.trim()}.`;
+      form.hidden = true;
+      sent.hidden = false;
+      sent.focus();
+    }, 700);
+  });
+
+  document.getElementById('edit').addEventListener('click', () => {
+    sent.hidden = true;
+    form.hidden = false;
+    form.elements.name.focus();
+  });
+})();
+</script>
+</body>
+</html>

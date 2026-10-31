@@ -1,0 +1,31 @@
+{
+  "about": "Oxfords palettes. The single source of truth for palette hex values. Each colour is a role (lead, support, pop), never a page. Generate tokens with: node scripts/palette.mjs <Name>. A `was` field keeps a value that was nudged, with the reason in `why`.",
+  "palettes": [
+    { "name": "Orchard", "lead": "#E14543", "support": "#665244", "pop": "#FEEEC3", "character": "warm, food, print" },
+    { "name": "Breeze", "lead": "#4F404C", "support": "#B6CCDD", "pop": "#F9E7C9", "character": "calm, soft, editorial" },
+    { "name": "Poppy", "lead": "#075431", "support": "#F63434", "pop": "#FCF4D2", "character": "fresh, market, confident" },
+    { "name": "Olive Bar", "lead": "#3C3F8C", "support": "#76202D", "pop": "#F8DFC1", "character": "rich, grown-up, hospitality" },
+    { "name": "Citron", "lead": "#6162A3", "support": "#D1D127", "pop": "#FCF4D2", "character": "playful, creative tools" },
+    { "name": "Kite", "lead": "#DE2C1D", "support": "#BCD8F1", "pop": "#F7EB49", "character": "loud, optimistic, consumer" },
+    { "name": "Lemonade", "lead": "#2A3F73", "support": "#D82D32", "pop": "#FEEFA7", "character": "bold, summer, retail" },
+    { "name": "Blueprint", "lead": "#224D95", "support": "#D93D7F", "pop": "#EDEBDE", "character": "technical with a spark" },
+    { "name": "Signal", "lead": "#001B8C", "support": "#FFF002", "pop": "#F9C9DA", "was": { "pop": "#F5F5F5" }, "why": "the pop was the grey page colour and could not mark anything; a pale pink keeps the poster trio and stays clear of danger", "character": "stark, graphic, events" },
+    { "name": "Lagoon", "lead": "#028397", "support": "#DC6665", "pop": "#F4E2B8", "was": { "pop": "#F6F9F8" }, "why": "the pop was the white page colour and could not mark anything; a pale sand keeps the travel character", "character": "clean, health, travel" },
+    { "name": "Rosewood", "lead": "#715445", "support": "#DE5276", "pop": "#D8DBD8", "character": "soft, beauty, lifestyle" },
+    { "name": "Meadow", "lead": "#F64830", "support": "#B9B965", "pop": "#D5E3FC", "character": "light, outdoors, friendly" },
+    { "name": "Regatta", "lead": "#0F6FDC", "support": "#FEFD15", "pop": "#9BB9C1", "character": "sporty, energetic" },
+    { "name": "Saddle", "lead": "#FF5305", "support": "#4A2A1C", "pop": "#B4A49A", "character": "earthy, craft, western" },
+    { "name": "Harbour", "lead": "#4EA3CB", "support": "#CA391A", "pop": "#00232E", "character": "deep, maritime, serious" },
+    { "name": "Greenhouse", "lead": "#7EA288", "support": "#FA0201", "pop": "#482E22", "character": "plants, cafe, wood" },
+    { "name": "Orchid", "lead": "#D8B54C", "support": "#8B2E47", "pop": "#3A0E14", "character": "luxurious, evening" },
+    { "name": "Nightshift", "lead": "#7778DE", "support": "#F44631", "pop": "#342E35", "character": "modern, media, tools" },
+    { "name": "Arcade", "lead": "#28B467", "support": "#FE1C66", "pop": "#3E283D", "character": "loud, games, nightlife" },
+    { "name": "Tideline", "lead": "#326E6E", "support": "#CE7D36", "pop": "#C5CFCB", "character": "teal world, one ember; weather, travel, data" },
+    { "name": "Conservatory", "lead": "#293D25", "support": "#4A91BF", "pop": "#A97F62", "character": "deep green, sky, clay; calm, premium, slow" },
+    { "name": "Fresco", "lead": "#4288C3", "support": "#925B38", "pop": "#D9DAD4", "character": "sky blue and sienna; humane, legal, learning" },
+    { "name": "Regent", "lead": "#067BCE", "support": "#033263", "pop": "#DE2C1D", "character": "bright blue, navy, one red; bold, family, play" },
+    { "name": "Cellar", "lead": "#983219", "support": "#3E3428", "pop": "#C1BB97", "character": "rust on near-black; bars, food, evening" },
+    { "name": "Aurora", "lead": "#74A897", "support": "#244030", "pop": "#D3EDE0", "character": "soft greens on black; science, wellness, AI" },
+    { "name": "Mono", "lead": "#111111", "support": "#6B6B6B", "pop": "#FFFFFF", "character": "no hue at all; needs photography, texture or strong data to carry it" }
+  ]
+}

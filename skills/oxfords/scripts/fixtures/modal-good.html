@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices</title>
+<!-- oxfords fixture: a native modal dialog, open on load. Only the dialog is measured, so no FAIL.
+     The "Search" label sits on a gradient behind the scrim: measured on pixels through the scrim
+     it would fail, which is the false positive this fixture guards against. -->
+<style>
+  body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: #fff; color: #111; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: linear-gradient(#fafafa, #efefef); border-bottom: 1px solid #e5e5e5; }
+  header label { color: #595959; font-weight: 600; }
+  header input { font: inherit; min-height: 44px; padding: 0 12px; border: 1px solid #767676; border-radius: 6px; }
+  main { padding: 24px 16px; }
+  :focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+
+  dialog { border: 0; border-radius: 12px; padding: 24px; max-width: 340px; background: #fff; color: #111; }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+  dialog h2 { font-size: 18px; margin: 0 0 8px; }
+  dialog p { color: #595959; margin: 0 0 20px; }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .actions button { font: inherit; min-height: 44px; padding: 0 16px; border-radius: 6px; border: 1px solid #767676; background: #fff; color: #111; }
+  .actions .danger { background: #b42318; border-color: #b42318; color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <label for="q">Search</label>
+  <input id="q" type="search" value="Okafor">
+</header>
+<main>
+  <h1>Invoices</h1>
+  <p>Three selected: Okafor Dental, Linde Studio, Marsh Lane Bakery.</p>
+</main>
+<dialog id="delete" aria-labelledby="delete-title" aria-describedby="delete-desc">
+  <h2 id="delete-title">Delete 3 invoices?</h2>
+  <p id="delete-desc">They stay in the bin for 30 days, then they are gone.</p>
+  <div class="actions">
+    <button type="button">Keep them</button>
+    <button type="button" class="danger">Delete 3 invoices</button>
+  </div>
+</dialog>
+<script>document.getElementById('delete').showModal();</script>
+</body>
+</html>

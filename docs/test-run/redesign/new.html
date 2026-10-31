@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Tablewise · Today</title>
+<style>
+/* Oxfords colour: Brand #C2410C (built from your own colours)
+   regenerate: node scripts/palette.mjs --brand "#c2410c" --mode both
+   lead = the Tablewise orange, flooded on the revenue panel and the logo mark
+   support = wine, the "reserved" tables in the open-tables meter
+   pop = cyan, today's bar only
+   lead and support sit near danger: neither goes on a control or a state. */
+:root {
+  color-scheme: light;
+  /* neutrals */
+  --page: #FFFFFF; --surface: #FAFAFA; --surface-2: #F3F3F3; --selected: #EBEBEB;
+  --line: #E4E4E4; --line-strong: #909090; --focus: #BF3E06; --overlay: #00000066;
+  --text: #161616; --text-2: #484848; --text-3: #6A6A6A; --text-disabled: #A0A0A0;
+  --shadow-1: 0 1px 2px #0000001A, 0 4px 12px #0000000D;
+  --shadow-2: 0 2px 4px #0000001A, 0 12px 32px #0000001F;
+  /* neutral controls */
+  --action: #161616; --action-hover: #222222; --action-pressed: #070707; --on-action: #FFFFFF;
+  --action-disabled: #E4E4E4; --on-action-disabled: #8D8D8D;
+  --control: #EEEEEE; --control-hover: #E1E1E1; --control-pressed: #D4D4D4;
+  /* palette */
+  --lead: #BF3E06; --lead-hover: #CD4B1C; --lead-pressed: #9B2F00;
+  --on-lead: #FFFFFF; --lead-ink: #BF3E06; --lead-tint: #FFEBE5;
+  --support: #5A0022; --support-hover: #6A132E; --support-pressed: #3D0014;
+  --on-support: #FFFFFF; --support-ink: #5A0022; --support-tint: #FFEAED;
+  --pop: #00CCF3; --pop-hover: #4DDBFF; --pop-pressed: #00B4D7;
+  --on-pop: #111111; --pop-ink: #007891; --pop-tint: #D9F6FF;
+  /* semantic */
+  --danger: #C31B1F; --danger-hover: #D5322F; --danger-pressed: #A5000F;
+  --on-danger: #FFFFFF; --danger-ink: #C31B1F; --danger-tint: #FFEBE8;
+  --warning: #F5A91F; --warning-hover: #FFBD58; --warning-pressed: #DB9400;
+  --on-warning: #111111; --warning-ink: #946300; --warning-tint: #FEEDD7;
+  --success: #007433; --success-hover: #17843F; --success-pressed: #005E28;
+  --on-success: #FFFFFF; --success-ink: #007433; --success-tint: #E0F7E4;
+  --info: #0065B0; --info-hover: #0074C8; --info-pressed: #00518F;
+  --on-info: #FFFFFF; --info-ink: #0065B0; --info-tint: #E5F2FF;
+  /* chart */
+  --series-1: #C2410C; --series-2: #5A0022; --series-3: #009EBD; --series-4: #872800;
+  --series-5: #D37487; --series-6: #636363; --series-muted: #909090;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    /* neutrals */
+    --page: #0A0A0A; --surface: #141414; --surface-2: #1E1E1E; --selected: #262626;
+    --line: #2E2E2E; --line-strong: #626262; --focus: #DE6943; --overlay: #000000A3;
+    --text: #EBEBEB; --text-2: #B1B1B1; --text-3: #8D8D8D; --text-disabled: #545454;
+    --shadow-1: none;
+    --shadow-2: 0 2px 4px #00000066, 0 16px 40px #00000080;
+    /* neutral controls */
+    --action: #F2F2F2; --action-hover: #E4E4E4; --action-pressed: #D7D7D7; --on-action: #111111;
+    --action-disabled: #2E2E2E; --on-action-disabled: #6D6D6D;
+    --control: #292929; --control-hover: #353535; --control-pressed: #181818;
+    /* palette */
+    --lead: #B8461E; --lead-hover: #C6522C; --lead-pressed: #9B2F00;
+    --on-lead: #FFFFFF; --lead-ink: #DE6943; --lead-tint: #35201A;
+    --support: #560A23; --support-hover: #661A30; --support-pressed: #3D0014;
+    --on-support: #FFFFFF; --support-ink: #C77383; --support-tint: #351F23;
+    --pop: #3BCAED; --pop-hover: #51DBFE; --pop-pressed: #0CB4D6;
+    --on-pop: #111111; --pop-ink: #3BCAED; --pop-tint: #102B32;
+    /* semantic */
+    --danger: #BC2D2A; --danger-hover: #CE3F39; --danger-pressed: #A40B13;
+    --on-danger: #FFFFFF; --danger-ink: #EC5D53; --danger-tint: #36201D;
+    --warning: #F0AC3F; --warning-hover: #FFBD58; --warning-pressed: #D8951F;
+    --on-warning: #111111; --warning-ink: #F0AC3F; --warning-tint: #302412;
+    --success: #157337; --success-hover: #2A8245; --success-pressed: #005E28;
+    --on-success: #FFFFFF; --success-ink: #499F5F; --success-tint: #1A2B1D;
+    --info: #0065B0; --info-hover: #0874C6; --info-pressed: #00518F;
+    --on-info: #FFFFFF; --info-ink: #3591E5; --info-tint: #192837;
+    /* chart */
+    --series-1: #BB4921; --series-2: #99495A; --series-3: #3BCAED; --series-4: #FFA285;
+    --series-5: #CD7888; --series-6: #CECECE; --series-muted: #626262;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  /* neutrals */
+  --page: #0A0A0A; --surface: #141414; --surface-2: #1E1E1E; --selected: #262626;
+  --line: #2E2E2E; --line-strong: #626262; --focus: #DE6943; --overlay: #000000A3;
+  --text: #EBEBEB; --text-2: #B1B1B1; --text-3: #8D8D8D; --text-disabled: #545454;
+  --shadow-1: none;
+  --shadow-2: 0 2px 4px #00000066, 0 16px 40px #00000080;
+  /* neutral controls */
+  --action: #F2F2F2; --action-hover: #E4E4E4; --action-pressed: #D7D7D7; --on-action: #111111;
+  --action-disabled: #2E2E2E; --on-action-disabled: #6D6D6D;
+  --control: #292929; --control-hover: #353535; --control-pressed: #181818;
+  /* palette */
+  --lead: #B8461E; --lead-hover: #C6522C; --lead-pressed: #9B2F00;
+  --on-lead: #FFFFFF; --lead-ink: #DE6943; --lead-tint: #35201A;
+  --support: #560A23; --support-hover: #661A30; --support-pressed: #3D0014;
+  --on-support: #FFFFFF; --support-ink: #C77383; --support-tint: #351F23;
+  --pop: #3BCAED; --pop-hover: #51DBFE; --pop-pressed: #0CB4D6;
+  --on-pop: #111111; --pop-ink: #3BCAED; --pop-tint: #102B32;
+  /* semantic */
+  --danger: #BC2D2A; --danger-hover: #CE3F39; --danger-pressed: #A40B13;
+  --on-danger: #FFFFFF; --danger-ink: #EC5D53; --danger-tint: #36201D;
+  --warning: #F0AC3F; --warning-hover: #FFBD58; --warning-pressed: #D8951F;
+  --on-warning: #111111; --warning-ink: #F0AC3F; --warning-tint: #302412;
+  --success: #157337; --success-hover: #2A8245; --success-pressed: #005E28;
+  --on-success: #FFFFFF; --success-ink: #499F5F; --success-tint: #1A2B1D;
+  --info: #0065B0; --info-hover: #0874C6; --info-pressed: #00518F;
+  --on-info: #FFFFFF; --info-ink: #3591E5; --info-tint: #192837;
+  /* chart */
+  --series-1: #BB4921; --series-2: #99495A; --series-3: #3BCAED; --series-4: #FFA285;
+  --series-5: #CD7888; --series-6: #CECECE; --series-muted: #626262;
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  -webkit-text-size-adjust: 100%;
+  accent-color: var(--action);
+  caret-color: var(--lead-ink);
+  scrollbar-color: var(--line-strong) transparent;
+}
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+::selection { background: var(--lead-tint); color: var(--text); }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, p { margin: 0; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 50; padding: 8px 12px; border-radius: 8px; background: var(--action); color: var(--on-action); }
+.skip:focus { left: 8px; }
+.ic { width: 16px; height: 16px; flex: none; fill: currentColor; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid transparent;
+  background: var(--control); color: var(--text); font-weight: 600; font-size: 14px;
+  white-space: nowrap; cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out, transform 120ms ease-out;
+}
+.btn:hover { background: var(--control-hover); }
+.btn:active { background: var(--control-pressed); transform: scale(.97); }
+.btn-primary { background: var(--action); color: var(--on-action); }
+.btn-primary:hover { background: var(--action-hover); }
+.btn-primary:active { background: var(--action-pressed); }
+.btn[aria-disabled="true"], .btn:disabled {
+  background: var(--action-disabled); color: var(--on-action-disabled); cursor: not-allowed; transform: none;
+}
+.btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.btn-quiet { background: transparent; }
+.btn-quiet:hover { background: var(--surface-2); }
+
+/* ---------- shell ---------- */
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100dvh; }
+.side {
+  position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column;
+  padding: 16px 12px; background: var(--surface); border-right: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 16px; font-weight: 700; }
+.logo {
+  display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px;
+  background: var(--lead); color: var(--on-lead); font-size: 13px; font-weight: 700;
+}
+.place { display: grid; gap: 2px; padding: 12px 8px 16px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+.place b { font-size: 14px; font-weight: 600; }
+.place span { font-size: 13px; color: var(--text-2); }
+.nav-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.nav-list a, .nav-more {
+  display: flex; align-items: center; gap: 12px; height: 36px; padding: 0 8px; border-radius: 8px;
+  color: var(--text-2); text-decoration: none; font-size: 14px; font-weight: 500;
+  border: 0; background: transparent; cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.nav-list a:hover, .nav-more:hover { background: var(--surface-2); color: var(--text); }
+.nav-list a[aria-current="page"] { background: var(--selected); color: var(--text); font-weight: 600; }
+.nav-list .ic, .nav-more .ic { width: 18px; height: 18px; }
+.nav-foot { margin-top: auto; }
+.nav-more { display: none; }
+
+main { min-width: 0; max-width: 1280px; padding: 24px 32px 48px; }
+
+/* ---------- page header ---------- */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+h1 { font-size: 20px; font-weight: 600; line-height: 1.2; }
+.sub { margin-top: 4px; color: var(--text-2); }
+.live { color: var(--success-ink); font-weight: 600; }
+.live::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 1px; }
+.sub .unit { white-space: nowrap; }
+.is-offline .live { color: var(--text-2); }
+.is-offline .live::before { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+.top-act { display: flex; align-items: center; gap: 12px; }
+.why { font-size: 13px; color: var(--text-2); }
+
+.banner {
+  display: flex; align-items: flex-start; gap: 12px; margin-top: 16px; padding: 12px 16px;
+  border-radius: 8px; background: var(--warning-tint); color: var(--text);
+}
+.banner .ic { width: 20px; height: 20px; color: var(--warning-ink); margin-top: 1px; }
+
+/* ---------- figures strip ---------- */
+.figures {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 24px 0 32px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.fig { padding: 16px 20px; border-left: 1px solid var(--line); min-width: 0; }
+.fig:first-child { border-left: 0; padding-left: 0; }
+.fig-l { font-size: 13px; color: var(--text-2); }
+.fig-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fig-v { margin: 4px 0; font-size: 24px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.fig-v .of { font-size: 14px; font-weight: 500; color: var(--text-3); }
+.fig-d { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-2); }
+.fig-d b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fig-d .ic { width: 14px; height: 14px; }
+.meter { display: grid; grid-template-columns: repeat(12, 8px); gap: 2px; flex: none; }
+.meter i { display: block; height: 8px; border-radius: 1px; }
+.m-seat { background: var(--series-muted); }
+.m-res { background: var(--series-2); }
+.m-free { box-shadow: inset 0 0 0 1px var(--line-strong); }
+.key { display: inline-block; width: 8px; height: 8px; margin-right: 2px; border-radius: 1px; background: var(--series-2); }
+.lock { display: flex; gap: 12px; align-items: flex-start; padding: 16px 0; color: var(--text-2); }
+.lock .ic { width: 20px; height: 20px; color: var(--text-2); }
+.lock b { display: block; color: var(--text); font-weight: 600; }
+
+/* ---------- work area ---------- */
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: 32px; align-items: start; }
+.work:has(> #revenue[hidden]) { grid-template-columns: minmax(0, 1fr); }
+h2 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search { position: relative; }
+.search .ic { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+input, select {
+  width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--page); color: var(--text); font-size: 14px;
+}
+input::placeholder { color: var(--text-3); }
+.search input { width: 200px; padding-left: 32px; }
+input[aria-invalid="true"] { border-color: var(--danger); }
+.seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; }
+.chip {
+  height: 30px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--text-2); font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.chip:hover { background: var(--surface-2); color: var(--text); }
+.chip[aria-pressed="true"] { background: var(--selected); color: var(--text); font-weight: 600; }
+.bulk { display: flex; align-items: center; gap: 8px; }
+.bulk-n { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* orders table */
+.otable { width: 100%; border-collapse: collapse; }
+.otable th {
+  padding: 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+}
+.otable td { padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.otable tbody tr { transition: background-color 120ms ease-out; }
+.otable tbody tr:hover { background: var(--surface); }
+.otable tbody tr.is-sel { background: var(--selected); }
+.otable tr.is-sel .btn { background: var(--page); }
+.otable tr.is-sel .btn:hover { background: var(--surface-2); }
+.otable .c-sel { width: 40px; padding-left: 0; padding-right: 0; }
+.hit { display: grid; place-items: center; width: 32px; height: 32px; cursor: pointer; }
+.hit input { width: 16px; height: 16px; margin: 0; }
+.c-order { width: 160px; }
+.oid { display: block; font-weight: 600; font-variant-numeric: tabular-nums; }
+.where { display: block; max-width: 152px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--text-2); }
+.items { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.otable .r { text-align: right; }
+.c-time { color: var(--text-2); }
+.c-total { font-weight: 600; }
+.c-status { width: 120px; white-space: nowrap; }
+.c-act { width: 1%; text-align: right; white-space: nowrap; }
+.st { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
+.st-ready { margin-left: -8px; padding: 2px 8px; border-radius: 6px; background: var(--warning-tint); color: var(--warning-ink); font-weight: 600; }
+.is-offline [data-advance] { display: none; }
+.sk { display: block; height: 12px; border-radius: 4px; background: var(--surface-2); }
+.ostate { padding: 24px 0 8px; }
+.ostate p { max-width: 52ch; color: var(--text-2); }
+.ostate .t { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--text); font-weight: 600; }
+.ostate .t .ic { width: 18px; height: 18px; }
+.ostate .t.bad .ic { color: var(--danger-ink); }
+.ostate .btn { margin-top: 12px; }
+.more-row { display: flex; align-items: center; gap: 12px; padding-top: 12px; font-size: 13px; color: var(--text-3); }
+
+/* revenue panel: the one flooded block, lead with on-lead */
+.panel-lead { --focus: var(--on-lead); padding: 20px; border-radius: 12px; background: var(--lead); color: var(--on-lead); }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.panel-lead h2 { font-size: 14px; }
+.total { font-size: 13px; font-variant-numeric: tabular-nums; }
+.readout { min-height: 30px; margin: 4px 0 16px; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.plot { position: relative; height: 176px; margin-left: 28px; }
+.tick { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--lead-pressed); }
+.tick span { position: absolute; right: 100%; margin-right: 6px; transform: translateY(-50%); font-size: 12px; font-variant-numeric: tabular-nums; }
+.bars { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.col { display: flex; align-items: flex-end; justify-content: center; }
+.bar { width: 100%; max-width: 28px; background: var(--on-lead); cursor: pointer; transition: background-color 120ms ease-out; }
+.bar.is-today { background: var(--pop); border: 2px solid var(--on-lead); }
+.bars:has(.bar:hover, .bar:focus) .bar:not(:hover):not(:focus) { background: var(--lead-pressed); border-color: var(--lead-pressed); }
+.xlab { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 8px 0 0 28px; font-size: 12px; text-align: center; }
+.xlab .is-today { font-weight: 700; }
+
+/* ---------- dialogs ---------- */
+dialog {
+  width: min(480px, calc(100vw - 32px)); padding: 0; border: 0; border-radius: 12px;
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-2);
+  outline: 1px solid transparent;
+}
+dialog::backdrop { background: var(--overlay); }
+dialog[open] { animation: rise 220ms ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+.dlg-body { display: grid; gap: 16px; padding: 24px; }
+.field { display: grid; align-content: start; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.field > label, .field > legend { padding: 0; font-size: 13px; font-weight: 600; }
+.field > legend { margin-bottom: 6px; }
+.hint { font-size: 13px; color: var(--text-3); }
+.err { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--danger-ink); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.radios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.radios label { position: relative; }
+.radios input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.radios span {
+  display: grid; place-items: center; height: 36px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--page); font-weight: 500; transition: background-color 120ms ease-out;
+}
+.radios input:hover + span { background: var(--surface-2); }
+.radios input:checked + span { background: var(--selected); border-color: var(--text); font-weight: 600; }
+.radios input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.sheet-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.sheet-list a {
+  display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 12px; border-radius: 8px;
+  color: var(--text); text-decoration: none; font-size: 15px;
+}
+.sheet-list a:hover { background: var(--surface-2); }
+.sheet-list .ic { width: 20px; height: 20px; color: var(--text-2); }
+
+/* ---------- toast slot: bottom right ---------- */
+.toast {
+  position: fixed; right: 24px; bottom: 24px; z-index: 60; display: flex; align-items: center; gap: 12px;
+  max-width: min(420px, calc(100vw - 32px)); padding: 8px 8px 8px 16px; border-radius: 10px;
+  background: var(--surface-2); color: var(--text); box-shadow: var(--shadow-2); outline: 1px solid transparent;
+  opacity: 0; transform: translateY(8px); transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+.toast.show { opacity: 1; transform: none; transition-duration: 200ms; }
+.toast-msg { font-weight: 500; }
+
+/* ---------- narrower laptops ---------- */
+@media (max-width: 1180px) {
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .panel-lead { max-width: 560px; }
+}
+@media (max-width: 1020px) {
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fig:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .fig:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 760px) {
+  body { font-size: 15px; }
+  .app { display: block; }
+  main { padding: 16px 16px calc(96px + env(safe-area-inset-bottom)); }
+  .side {
+    position: fixed; inset: auto 0 0 0; z-index: 20; height: auto; flex-direction: row;
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); border-right: 0; border-top: 1px solid var(--line);
+  }
+  .brand, .side .place, .nav-rare, .nav-foot { display: none; }
+  .nav-main { display: flex; flex: 4; gap: 0; }
+  .nav-main li { flex: 1; }
+  .nav-list a, .nav-more {
+    flex-direction: column; justify-content: center; gap: 2px; height: 52px; padding: 0 2px; font-size: 12px;
+  }
+  .nav-more { display: flex; flex: 1; }
+  .nav-list .ic, .nav-more .ic { width: 20px; height: 20px; }
+
+  h1 { font-size: 20px; }
+  .top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 8px 16px; }
+  .top-act { display: contents; }
+  .top-act .btn { grid-column: 2; grid-row: 1; }
+  .why { grid-column: 1 / -1; }
+  .btn { height: 44px; }
+  .btn-sm { height: 44px; padding: 0 14px; }
+  input, select { height: 44px; font-size: 16px; }
+
+  .figures { margin: 16px 0 24px; }
+  .fig { padding: 12px 0 12px 16px; }
+  .fig-row { flex-wrap: wrap; gap: 4px 12px; }
+
+  .sec-head { display: grid; justify-content: stretch; gap: 12px; }
+  .toolbar { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .search input { width: 100%; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .chip { height: 44px; font-size: 14px; }
+  .bulk { flex-wrap: wrap; }
+
+  .otable thead { display: none; }
+  .otable, .otable tbody { display: block; }
+  .otable tr {
+    display: grid; grid-template-columns: 48px auto minmax(0, 1fr) auto;
+    grid-template-areas: "sel order order total" "sel items items time" "sel status act act";
+    column-gap: 8px; row-gap: 4px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line);
+  }
+  .otable td { display: block; padding: 0; border: 0; width: auto; }
+  .otable .c-sel { grid-area: sel; align-self: start; margin: -12px 0 0 -4px; }
+  .hit { width: 48px; height: 48px; }
+  .otable .c-order { grid-area: order; display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .where { max-width: none; min-width: 0; font-size: 15px; color: var(--text); }
+  .c-total { grid-area: total; text-align: right; }
+  .c-items { grid-area: items; color: var(--text-2); }
+  .c-status { grid-area: status; }
+  .otable .c-time { grid-area: time; font-size: 13px; }
+  .otable .c-act { grid-area: act; justify-self: end; }
+  .st { font-size: 14px; }
+  .st-ready { margin-left: 0; }
+
+  dialog { width: 100%; max-width: none; margin: auto 0 0; border-radius: 12px 12px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+  .dlg-body { padding: 20px 16px; }
+  .radios span { height: 44px; }
+  .toast { left: 16px; right: 16px; bottom: calc(76px + env(safe-area-inset-bottom)); max-width: none; }
+}
+
+@media (prefers-contrast: more) {
+  :root { --line: var(--line-strong); }
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog[open] { animation: fade 200ms ease-out; }
+  @keyframes fade { from { opacity: 0; } }
+  .toast, .toast.show { transform: none; }
+  .btn:active { transform: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Phosphor Icons, regular weight (MIT), copied from @phosphor-icons/core 2.1.1 -->
+  <symbol id="i-today" viewBox="0 0 256 256"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"/></symbol>
+  <symbol id="i-orders" viewBox="0 0 256 256"><path d="M72,104a8,8,0,0,1,8-8h96a8,8,0,0,1,0,16H80A8,8,0,0,1,72,104Zm8,40h96a8,8,0,0,0,0-16H80a8,8,0,0,0,0,16ZM232,56V208a8,8,0,0,1-11.58,7.15L192,200.94l-28.42,14.21a8,8,0,0,1-7.16,0L128,200.94,99.58,215.15a8,8,0,0,1-7.16,0L64,200.94,35.58,215.15A8,8,0,0,1,24,208V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56Zm-16,0H40V195.06l20.42-10.22a8,8,0,0,1,7.16,0L96,199.06l28.42-14.22a8,8,0,0,1,7.16,0L160,199.06l28.42-14.22a8,8,0,0,1,7.16,0L216,195.06Z"/></symbol>
+  <symbol id="i-tables" viewBox="0 0 256 256"><path d="M208,136H176V104h16a16,16,0,0,0,16-16V40a16,16,0,0,0-16-16H64A16,16,0,0,0,48,40V88a16,16,0,0,0,16,16H80v32H48a16,16,0,0,0-16,16v16a16,16,0,0,0,16,16h8v40a8,8,0,0,0,16,0V184H184v40a8,8,0,0,0,16,0V184h8a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136ZM64,40H192V88H64Zm32,64h64v32H96Zm112,64H48V152H208v16Z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 256 256"><path d="M72,88V40a8,8,0,0,1,16,0V88a8,8,0,0,1-16,0ZM216,40V224a8,8,0,0,1-16,0V176H152a8,8,0,0,1-8-8,268.75,268.75,0,0,1,7.22-56.88c9.78-40.49,28.32-67.63,53.63-78.47A8,8,0,0,1,216,40ZM200,53.9c-32.17,24.57-38.47,84.42-39.7,106.1H200ZM119.89,38.69a8,8,0,1,0-15.78,2.63L112,88.63a32,32,0,0,1-64,0l7.88-47.31a8,8,0,1,0-15.78-2.63l-8,48A8.17,8.17,0,0,0,32,88a48.07,48.07,0,0,0,40,47.32V224a8,8,0,0,0,16,0V135.32A48.07,48.07,0,0,0,128,88a8.17,8.17,0,0,0-.11-1.31Z"/></symbol>
+  <symbol id="i-reports" viewBox="0 0 256 256"><path d="M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 256 256"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm109.94-52.79a8,8,0,0,0-3.89-5.4l-29.83-17-.12-33.62a8,8,0,0,0-2.83-6.08,111.91,111.91,0,0,0-36.72-20.67,8,8,0,0,0-6.46.59L128,41.85,97.88,25a8,8,0,0,0-6.47-.6A112.1,112.1,0,0,0,54.73,45.15a8,8,0,0,0-2.83,6.07l-.15,33.65-29.83,17a8,8,0,0,0-3.89,5.4,106.47,106.47,0,0,0,0,41.56,8,8,0,0,0,3.89,5.4l29.83,17,.12,33.62a8,8,0,0,0,2.83,6.08,111.91,111.91,0,0,0,36.72,20.67,8,8,0,0,0,6.46-.59L128,214.15,158.12,231a7.91,7.91,0,0,0,3.9,1,8.09,8.09,0,0,0,2.57-.42,112.1,112.1,0,0,0,36.68-20.73,8,8,0,0,0,2.83-6.07l.15-33.65,29.83-17a8,8,0,0,0,3.89-5.4A106.47,106.47,0,0,0,237.94,107.21Zm-15,34.91-28.57,16.25a8,8,0,0,0-3,3c-.58,1-1.19,2.06-1.81,3.06a7.94,7.94,0,0,0-1.22,4.21l-.15,32.25a95.89,95.89,0,0,1-25.37,14.3L134,199.13a8,8,0,0,0-3.91-1h-.19c-1.21,0-2.43,0-3.64,0a8.08,8.08,0,0,0-4.1,1l-28.84,16.1A96,96,0,0,1,67.88,201l-.11-32.2a8,8,0,0,0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.09,8.09,0,0,0-3-3.06l-28.6-16.29a90.49,90.49,0,0,1,0-28.26L61.67,97.63a8,8,0,0,0,3-3c.58-1,1.19-2.06,1.81-3.06a7.94,7.94,0,0,0,1.22-4.21l.15-32.25a95.89,95.89,0,0,1,25.37-14.3L122,56.87a8,8,0,0,0,4.1,1c1.21,0,2.43,0,3.64,0a8.08,8.08,0,0,0,4.1-1l28.84-16.1A96,96,0,0,1,188.12,55l.11,32.2a8,8,0,0,0,1.22,4.22c.62,1,1.23,2,1.8,3.06a8.09,8.09,0,0,0,3,3.06l28.6,16.29A90.49,90.49,0,0,1,222.9,142.12Z"/></symbol>
+  <symbol id="i-more" viewBox="0 0 256 256"><path d="M128,96a32,32,0,1,0,32,32A32,32,0,0,0,128,96Zm0,48a16,16,0,1,1,16-16A16,16,0,0,1,128,144ZM48,96a32,32,0,1,0,32,32A32,32,0,0,0,48,96Zm0,48a16,16,0,1,1,16-16A16,16,0,0,1,48,144ZM208,96a32,32,0,1,0,32,32A32,32,0,0,0,208,96Zm0,48a16,16,0,1,1,16-16A16,16,0,0,1,208,144Z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></symbol>
+  <symbol id="i-up" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 256 256"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+  <symbol id="i-new" viewBox="0 0 256 256"><path d="M96.26,37.05A8,8,0,0,1,102,27.29a104.11,104.11,0,0,1,52,0,8,8,0,0,1-2,15.75,8.15,8.15,0,0,1-2-.26,88.09,88.09,0,0,0-44,0A8,8,0,0,1,96.26,37.05ZM53.79,55.14a104.05,104.05,0,0,0-26,45,8,8,0,0,0,15.42,4.27,88,88,0,0,1,22-38.09A8,8,0,0,0,53.79,55.14ZM43.21,151.55a8,8,0,1,0-15.42,4.28,104.12,104.12,0,0,0,26,45,8,8,0,0,0,11.41-11.22A88.14,88.14,0,0,1,43.21,151.55ZM150,213.22a88,88,0,0,1-44,0,8,8,0,1,0-4,15.49,104.11,104.11,0,0,0,52,0,8,8,0,0,0-4-15.49ZM222.65,146a8,8,0,0,0-9.85,5.58,87.91,87.91,0,0,1-22,38.08,8,8,0,1,0,11.42,11.21,104,104,0,0,0,26-45A8,8,0,0,0,222.65,146Zm-9.86-41.54a8,8,0,0,0,15.42-4.28,104,104,0,0,0-26-45,8,8,0,1,0-11.41,11.22A88,88,0,0,1,212.79,104.45Z"/></symbol>
+  <symbol id="i-prep" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,16.37a86.4,86.4,0,0,1,16,3V212.67a86.4,86.4,0,0,1-16,3Zm32,9.26a87.81,87.81,0,0,1,16,10.54V195.83a87.81,87.81,0,0,1-16,10.54ZM40,128a88.11,88.11,0,0,1,80-87.63V215.63A88.11,88.11,0,0,1,40,128Zm160,50.54V77.46a87.82,87.82,0,0,1,0,101.08Z"/></symbol>
+  <symbol id="i-ready" viewBox="0 0 256 256"><path d="M168,224a8,8,0,0,1-8,8H96a8,8,0,1,1,0-16h64A8,8,0,0,1,168,224Zm53.85-32A15.8,15.8,0,0,1,208,200H48a16,16,0,0,1-13.8-24.06C39.75,166.38,48,139.34,48,104a80,80,0,1,1,160,0c0,35.33,8.26,62.38,13.81,71.94A15.89,15.89,0,0,1,221.84,192ZM208,184c-7.73-13.27-16-43.95-16-80a64,64,0,1,0-128,0c0,36.06-8.28,66.74-16,80Z"/></symbol>
+  <symbol id="i-done" viewBox="0 0 256 256"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></symbol>
+  <symbol id="i-offline" viewBox="0 0 256 256"><path d="M213.92,210.62a8,8,0,1,1-11.84,10.76l-52-57.15a60,60,0,0,0-57.41,7.24,8,8,0,1,1-9.42-12.93A75.43,75.43,0,0,1,128,144c1.28,0,2.55,0,3.82.1L104.9,114.49A108,108,0,0,0,61,135.31,8,8,0,0,1,49.73,134,8,8,0,0,1,51,122.77a124.27,124.27,0,0,1,41.71-21.66L69.37,75.4a155.43,155.43,0,0,0-40.29,24A8,8,0,0,1,18.92,87,171.87,171.87,0,0,1,58,62.86L42.08,45.38A8,8,0,1,1,53.92,34.62ZM128,192a12,12,0,1,0,12,12A12,12,0,0,0,128,192ZM237.08,87A172.3,172.3,0,0,0,106,49.4a8,8,0,1,0,2,15.87A158.33,158.33,0,0,1,128,64a156.25,156.25,0,0,1,98.92,35.37A8,8,0,0,0,237.08,87ZM195,135.31a8,8,0,0,0,11.24-1.3,8,8,0,0,0-1.3-11.24,124.25,124.25,0,0,0-51.73-24.2A8,8,0,1,0,150,114.24,108.12,108.12,0,0,1,195,135.31Z"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"/></symbol>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div class="brand"><span class="logo" aria-hidden="true">T</span>Tablewise</div>
+    <div class="place"><b>Olive &amp; Ember</b><span>Downtown · Maya (Manager)</span></div>
+    <ul class="nav-list nav-main">
+      <li><a href="#" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-today"/></svg>Today</a></li>
+      <li><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-orders"/></svg>Orders</a></li>
+      <li><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-tables"/></svg>Tables</a></li>
+      <li><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>Menu</a></li>
+      <li class="nav-rare"><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-reports"/></svg>Reports</a></li>
+    </ul>
+    <ul class="nav-list nav-foot">
+      <li><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Settings</a></li>
+    </ul>
+    <button class="nav-more" type="button" id="open-more" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg>More</button>
+  </nav>
+
+  <main id="main">
+    <header class="top">
+      <div>
+        <h1>Today</h1>
+        <p class="sub"><span class="unit">Thursday, 8 October ·</span> <span class="unit">Dinner service · <span class="live" id="live">Live</span></span></p>
+      </div>
+      <div class="top-act">
+        <span class="why" id="why-new" hidden>Adding orders is paused while you're offline.</span>
+        <button class="btn btn-primary" type="button" data-new aria-describedby="why-new"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>New order</button>
+      </div>
+    </header>
+
+    <div class="banner" id="offline" role="status" hidden>
+      <svg class="ic" aria-hidden="true"><use href="#i-offline"/></svg>
+      <p><b>You're offline.</b> Tonight's orders stay on screen. Changing them is paused until the connection is back.</p>
+    </div>
+
+    <section class="figures" id="figures" aria-label="Today's numbers">
+      <div class="fig">
+        <p class="fig-l">Revenue today</p>
+        <p class="fig-v" data-empty="$0">$4,820</p>
+        <p class="fig-d" data-empty="No orders yet tonight"><svg class="ic" aria-hidden="true"><use href="#i-up"/></svg><span class="sr">Up</span><b>12%</b> vs last Thu</p>
+      </div>
+      <div class="fig">
+        <p class="fig-l">Orders</p>
+        <p class="fig-v" data-empty="0">137</p>
+        <p class="fig-d" data-empty="No orders yet tonight"><svg class="ic" aria-hidden="true"><use href="#i-up"/></svg><span class="sr">Up</span><b>8%</b> vs last Thu</p>
+      </div>
+      <div class="fig">
+        <p class="fig-l">Avg. ticket</p>
+        <p class="fig-v" data-empty="$0">$35.18</p>
+        <p class="fig-d" data-empty="No orders yet tonight"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg><span class="sr">Down</span><b>3%</b> vs last Thu</p>
+      </div>
+      <div class="fig">
+        <p class="fig-l">Open tables</p>
+        <div class="fig-row">
+          <p class="fig-v">9 <span class="of">/ 24</span></p>
+          <div class="meter" role="img" aria-label="15 tables seated, 4 reserved for 8 pm, 5 free"><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-seat"></i><i class="m-res"></i><i class="m-res"></i><i class="m-res"></i><i class="m-res"></i><i class="m-free"></i><i class="m-free"></i><i class="m-free"></i><i class="m-free"></i><i class="m-free"></i></div>
+        </div>
+        <p class="fig-d"><span class="key" aria-hidden="true"></span>4 reserved for 8 pm</p>
+      </div>
+    </section>
+
+    <div class="work">
+      <section class="orders" aria-labelledby="oh">
+        <div class="sec-head">
+          <h2 id="oh">Recent orders</h2>
+          <div class="toolbar">
+            <div class="bulk" id="bulk" hidden>
+              <span class="bulk-n" id="bulk-n">0 selected</span>
+              <button class="btn btn-sm" type="button" id="bulk-serve">Mark served</button>
+              <button class="btn btn-sm btn-quiet" type="button" id="bulk-clear">Clear selection</button>
+            </div>
+            <div class="search">
+              <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+              <input type="search" name="q" id="q" placeholder="Search orders" aria-label="Search orders by number, table, customer or item" autocomplete="off">
+            </div>
+            <div class="seg" role="group" aria-label="Filter orders">
+              <button class="chip" type="button" aria-pressed="true" data-f="all">All</button>
+              <button class="chip" type="button" aria-pressed="false" data-f="active">Active</button>
+              <button class="chip" type="button" aria-pressed="false" data-f="done">Done</button>
+            </div>
+          </div>
+        </div>
+        <table class="otable" id="otable">
+          <thead>
+            <tr>
+              <th class="c-sel"><label class="hit"><input type="checkbox" id="selall" aria-label="Select all orders shown"></label></th>
+              <th>Order</th><th>Items</th><th class="r">Time</th><th class="r">Total</th><th>Status</th>
+              <th class="c-act"><span class="sr">Action</span></th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+<tr data-id="1042"><td class="c-sel"><label class="hit"><input type="checkbox" data-sel="1042" aria-label="Select order #1042, Table 4, 2 × Ribeye, 1 × Caesar"></label></td><td class="c-order"><span class="oid">#1042</span><span class="where" title="Table 4">Table 4</span></td><td class="c-items"><span class="items" title="2 × Ribeye, 1 × Caesar">2 × Ribeye, 1 × Caesar</span></td><td class="c-time num r">7:42 pm</td><td class="c-total num r">$112.50</td><td class="c-status"><span class="st st-prep"><svg class="ic" aria-hidden="true"><use href="#i-prep"/></svg>Preparing</span></td><td class="c-act"><button class="btn btn-sm" type="button" data-advance="1042" aria-label="Mark ready, order #1042">Mark ready</button></td></tr>
+<tr data-id="1041"><td class="c-sel"><label class="hit"><input type="checkbox" data-sel="1041" aria-label="Select order #1041, Delivery · J. Okafor, Pad thai, spring rolls"></label></td><td class="c-order"><span class="oid">#1041</span><span class="where" title="Delivery · J. Okafor">Delivery · J. Okafor</span></td><td class="c-items"><span class="items" title="Pad thai, spring rolls">Pad thai, spring rolls</span></td><td class="c-time num r">7:38 pm</td><td class="c-total num r">$38</td><td class="c-status"><span class="st st-ready"><svg class="ic" aria-hidden="true"><use href="#i-ready"/></svg>Ready</span></td><td class="c-act"><button class="btn btn-sm" type="button" data-advance="1041" aria-label="Mark served, order #1041">Mark served</button></td></tr>
+<tr data-id="1040"><td class="c-sel"><label class="hit"><input type="checkbox" data-sel="1040" aria-label="Select order #1040, Table 11, 4 × Margherita, 2 × Lemonade"></label></td><td class="c-order"><span class="oid">#1040</span><span class="where" title="Table 11">Table 11</span></td><td class="c-items"><span class="items" title="4 × Margherita, 2 × Lemonade">4 × Margherita, 2 × Lemonade</span></td><td class="c-time num r">7:31 pm</td><td class="c-total num r">$86.20</td><td class="c-status"><span class="st st-prep"><svg class="ic" aria-hidden="true"><use href="#i-prep"/></svg>Preparing</span></td><td class="c-act"><button class="btn btn-sm" type="button" data-advance="1040" aria-label="Mark ready, order #1040">Mark ready</button></td></tr>
+<tr data-id="1039"><td class="c-sel"><label class="hit"><input type="checkbox" data-sel="1039" aria-label="Select order #1039, Takeaway · Priya, Lamb curry, naan ×3"></label></td><td class="c-order"><span class="oid">#1039</span><span class="where" title="Takeaway · Priya">Takeaway · Priya</span></td><td class="c-items"><span class="items" title="Lamb curry, naan ×3">Lamb curry, naan ×3</span></td><td class="c-time num r">7:24 pm</td><td class="c-total num r">$41.75</td><td class="c-status"><span class="st st-done"><svg class="ic" aria-hidden="true"><use href="#i-done"/></svg>Served</span></td><td class="c-act"></td></tr>
+<tr data-id="1038"><td class="c-sel"><label class="hit"><input type="checkbox" data-sel="1038" aria-label="Select order #1038, Table 2, Tasting menu ×2"></label></td><td class="c-order"><span class="oid">#1038</span><span class="where" title="Table 2">Table 2</span></td><td class="c-items"><span class="items" title="Tasting menu ×2">Tasting menu ×2</span></td><td class="c-time num r">7:10 pm</td><td class="c-total num r">$210</td><td class="c-status"><span class="st st-done"><svg class="ic" aria-hidden="true"><use href="#i-done"/></svg>Served</span></td><td class="c-act"></td></tr>
+<tr data-id="1037"><td class="c-sel"><label class="hit"><input type="checkbox" data-sel="1037" aria-label="Select order #1037, Table 8, Burger, fries, shake"></label></td><td class="c-order"><span class="oid">#1037</span><span class="where" title="Table 8">Table 8</span></td><td class="c-items"><span class="items" title="Burger, fries, shake">Burger, fries, shake</span></td><td class="c-time num r">7:02 pm</td><td class="c-total num r">$29.40</td><td class="c-status"><span class="st st-done"><svg class="ic" aria-hidden="true"><use href="#i-done"/></svg>Served</span></td><td class="c-act"></td></tr>
+          </tbody>
+        </table>
+        <div class="ostate" id="ostate" aria-live="polite" hidden></div>
+        <div class="more-row" id="more-row" hidden>
+          <button class="btn btn-sm" type="button" id="more">Show 10 more</button>
+          <span id="more-note"></span>
+        </div>
+      </section>
+
+      <section class="panel-lead" id="revenue" aria-labelledby="ch">
+        <div class="panel-head">
+          <h2 id="ch">Revenue this week</h2>
+          <p class="total">Total $28,460</p>
+        </div>
+        <p class="readout" id="read" aria-live="polite">Thu (today, so far): $4,820</p>
+        <div id="chart" role="group" aria-label="Bar chart of daily revenue, Friday to Thursday">
+<div class="plot"><div aria-hidden="true"><div class="tick" style="bottom:100.00%"><span>6k</span></div><div class="tick" style="bottom:66.67%"><span>4k</span></div><div class="tick" style="bottom:33.33%"><span>2k</span></div><div class="tick" style="bottom:0.00%"><span>0</span></div></div><div class="bars"><div class="col"><div class="bar" tabindex="0" role="img" data-i="0" aria-label="Fri: $3,980" style="height:66.33%"></div></div><div class="col"><div class="bar" tabindex="0" role="img" data-i="1" aria-label="Sat: $5,640" style="height:94.00%"></div></div><div class="col"><div class="bar" tabindex="0" role="img" data-i="2" aria-label="Sun: $4,720" style="height:78.67%"></div></div><div class="col"><div class="bar" tabindex="0" role="img" data-i="3" aria-label="Mon: $2,310" style="height:38.50%"></div></div><div class="col"><div class="bar" tabindex="0" role="img" data-i="4" aria-label="Tue: $2,760" style="height:46.00%"></div></div><div class="col"><div class="bar" tabindex="0" role="img" data-i="5" aria-label="Wed: $4,230" style="height:70.50%"></div></div><div class="col"><div class="bar is-today" tabindex="0" role="img" data-i="6" aria-label="Thu (today, so far): $4,820" style="height:80.33%"></div></div></div></div><div class="xlab" aria-hidden="true"><span>Fri</span><span>Sat</span><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span class="is-today">Thu</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" hidden>
+  <span class="toast-msg" id="toast-msg"></span>
+  <button class="btn btn-sm" type="button" id="toast-undo">Undo</button>
+</div>
+<p class="sr" id="announce" role="status" aria-live="polite"></p>
+
+<dialog id="dlg" aria-labelledby="dt">
+  <form method="dialog" id="form" class="dlg-body" novalidate>
+    <h2 id="dt">New order</h2>
+    <fieldset class="field">
+      <legend>Order type</legend>
+      <div class="radios">
+        <label><input type="radio" name="type" value="Dine-in" checked><span>Dine-in</span></label>
+        <label><input type="radio" name="type" value="Takeaway"><span>Takeaway</span></label>
+        <label><input type="radio" name="type" value="Delivery"><span>Delivery</span></label>
+      </div>
+    </fieldset>
+    <div class="field">
+      <label for="where">Table or customer</label>
+      <input name="where" id="where" autocomplete="off" placeholder="e.g. Table 7" required aria-describedby="e1">
+      <p class="err" id="e1" hidden><svg class="ic" aria-hidden="true"><use href="#i-warn"/></svg><span></span></p>
+    </div>
+    <div class="field">
+      <label for="items">Items</label>
+      <input name="items" id="items" autocomplete="off" placeholder="e.g. 2 × Margherita, 1 × Tiramisu" required aria-describedby="e2">
+      <p class="err" id="e2" hidden><svg class="ic" aria-hidden="true"><use href="#i-warn"/></svg><span></span></p>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="total">Total ($)</label>
+        <input name="total" id="total" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required aria-describedby="e3">
+        <p class="err" id="e3" hidden><svg class="ic" aria-hidden="true"><use href="#i-warn"/></svg><span></span></p>
+      </div>
+      <div class="field">
+        <label for="status">Status</label>
+        <select name="status" id="status"><option value="new">New</option><option value="prep">Preparing</option></select>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" type="button" id="cancel">Cancel</button>
+      <button class="btn btn-primary" type="submit">Add order</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="more-sheet" aria-labelledby="mt">
+  <div class="dlg-body">
+    <h2 id="mt">More</h2>
+    <div class="place"><b>Olive &amp; Ember</b><span>Downtown · Maya (Manager)</span></div>
+    <nav aria-label="More pages">
+      <ul class="sheet-list">
+        <li><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-reports"/></svg>Reports</a></li>
+        <li><a href="#"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Settings</a></li>
+      </ul>
+    </nav>
+    <div class="actions"><button class="btn" type="button" id="close-more">Close</button></div>
+  </div>
+</dialog>
+
+<script id="lib">
+// Pure render functions and data. build.mjs runs this too, so the first paint is in the markup.
+const ORDERS = [
+  { id: 1042, where: "Table 4", items: "2 × Ribeye, 1 × Caesar", time: "7:42 pm", total: 112.5, s: "prep" },
+  { id: 1041, where: "Delivery · J. Okafor", items: "Pad thai, spring rolls", time: "7:38 pm", total: 38, s: "ready" },
+  { id: 1040, where: "Table 11", items: "4 × Margherita, 2 × Lemonade", time: "7:31 pm", total: 86.2, s: "prep" },
+  { id: 1039, where: "Takeaway · Priya", items: "Lamb curry, naan ×3", time: "7:24 pm", total: 41.75, s: "done" },
+  { id: 1038, where: "Table 2", items: "Tasting menu ×2", time: "7:10 pm", total: 210, s: "done" },
+  { id: 1037, where: "Table 8", items: "Burger, fries, shake", time: "7:02 pm", total: 29.4, s: "done" }
+];
+const DAYS = [["Fri", 3980], ["Sat", 5640], ["Sun", 4720], ["Mon", 2310], ["Tue", 2760], ["Wed", 4230], ["Thu", 4820]];
+const STATUS = {
+  new: { label: "New", icon: "i-new", next: "prep", act: "Start preparing", past: "moved to preparing" },
+  prep: { label: "Preparing", icon: "i-prep", next: "ready", act: "Mark ready", past: "marked ready" },
+  ready: { label: "Ready", icon: "i-ready", next: "done", act: "Mark served", past: "marked served" },
+  done: { label: "Served", icon: "i-done" }
+};
+const usd = n => "$" + n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const icon = id => `<svg class="ic" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+function rowHTML(o, sel) {
+  const st = STATUS[o.s];
+  const act = st.next
+    ? `<button class="btn btn-sm" type="button" data-advance="${o.id}" aria-label="${st.act}, order #${o.id}">${st.act}</button>`
+    : "";
+  return `<tr data-id="${o.id}"${sel ? ' class="is-sel"' : ""}>` +
+    `<td class="c-sel"><label class="hit"><input type="checkbox" data-sel="${o.id}"${sel ? " checked" : ""} aria-label="Select order #${o.id}, ${esc(o.where)}, ${esc(o.items)}"></label></td>` +
+    `<td class="c-order"><span class="oid">#${o.id}</span><span class="where" title="${esc(o.where)}">${esc(o.where)}</span></td>` +
+    `<td class="c-items"><span class="items" title="${esc(o.items)}">${esc(o.items)}</span></td>` +
+    `<td class="c-time num r">${esc(o.time)}</td>` +
+    `<td class="c-total num r">${usd(o.total)}</td>` +
+    `<td class="c-status"><span class="st st-${o.s}">${icon(st.icon)}${st.label}</span></td>` +
+    `<td class="c-act">${act}</td></tr>`;
+}
+
+function chartHTML(days) {
+  const max = 6000, last = days.length - 1;
+  const ticks = [6000, 4000, 2000, 0].map(v =>
+    `<div class="tick" style="bottom:${(v / max * 100).toFixed(2)}%"><span>${v ? v / 1000 + "k" : "0"}</span></div>`).join("");
+  const bars = days.map(([d, v], i) =>
+    `<div class="col"><div class="bar${i === last ? " is-today" : ""}" tabindex="0" role="img" data-i="${i}" ` +
+    `aria-label="${d}${i === last ? " (today, so far)" : ""}: ${usd(v)}" style="height:${(v / max * 100).toFixed(2)}%"></div></div>`).join("");
+  const xs = days.map(([d], i) => `<span${i === last ? ' class="is-today"' : ""}>${d}</span>`).join("");
+  return `<div class="plot"><div aria-hidden="true">${ticks}</div><div class="bars">${bars}</div></div>` +
+    `<div class="xlab" aria-hidden="true">${xs}</div>`;
+}
+
+// Tables as a 12 x 2 floor: seated, then reserved, then free.
+function meterHTML(total, open, reserved) {
+  const seated = total - open, free = open - reserved;
+  const cells = Array.from({ length: total }, (_, i) =>
+    `<i class="${i < seated ? "m-seat" : i < seated + reserved ? "m-res" : "m-free"}"></i>`).join("");
+  return `<div class="meter" role="img" aria-label="${seated} tables seated, ${reserved} reserved for 8 pm, ${free} free">${cells}</div>`;
+}
+</script>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const params = new URLSearchParams(location.search);
+const FILTERS = ["all", "active", "done"];
+const st = {
+  filter: FILTERS.includes(params.get("filter")) ? params.get("filter") : "all",
+  q: params.get("q") || "",
+  sel: new Set(),
+  shown: 10,
+  mode: params.get("state") || "normal" // empty | loading | error | offline | noperm | stress
+};
+let offline = false;
+let orders = ORDERS.map(o => ({ ...o }));
+let days = DAYS.map(d => [...d]);
+const PAGE = 10;
+
+// ---------- previewable states (?state=...) ----------
+function stressOrders() {
+  const out = [{ id: 1036, where: "Takeaway · Alexandria Montgomery-Okonkwo for the Riverside General Hospital night shift", items: "Catering for 400: 120 × Margherita, 90 × Lamb curry, 80 × Pad thai, 60 × Caesar salad, 50 × Tiramisu", time: "6:58 pm", total: 1284906.4, s: "new" }];
+  const W = ["Table 3", "Table 9", "Takeaway · Sam", "Delivery · R. Ahmed", "Table 14", "Table 6"];
+  const I = ["Burger, fries", "Tasting menu ×2", "Ribeye, Caesar", "Pad thai", "Lamb curry, naan ×2", "Margherita, lemonade"];
+  const S = ["done", "done", "done", "prep", "new", "ready"];
+  for (let k = 0; k < 9993; k++) {
+    out.push({ id: 90000 + 9993 - k, where: W[k % 6], items: I[(k * 5) % 6], time: `6:${String(57 - (k % 50)).padStart(2, "0")} pm`,
+      total: Math.round((18 + (k * 37) % 190 + ((k * 13) % 100) / 100) * 100) / 100, s: S[(k * 7) % 6] });
+  }
+  return out;
+}
+if (st.mode === "stress") orders = orders.concat(stressOrders());
+if (st.mode === "empty") {
+  orders = [];
+  days[days.length - 1][1] = 0;
+  $$("[data-empty]").forEach(el => { el.textContent = el.dataset.empty; });
+  $("#read").textContent = "Thu (today, so far): $0";
+  $("#chart").innerHTML = chartHTML(days);
+}
+if (st.mode === "noperm") {
+  $("#figures").innerHTML = `<div class="lock" style="grid-column:1/-1">${icon("i-lock")}<p><b>Revenue is shown to managers and owners.</b>Ask the owner of Olive &amp; Ember to change your role if you need it.</p></div>`;
+  $("#revenue").hidden = true;
+}
+if (st.mode === "offline" || !navigator.onLine) setOffline(true);
+
+// ---------- orders ----------
+function visible() {
+  const q = st.q.trim().toLowerCase();
+  return orders.filter(o =>
+    (st.filter === "all" || (st.filter === "done" ? o.s === "done" : o.s !== "done")) &&
+    (!q || `#${o.id} ${o.where} ${o.items}`.toLowerCase().includes(q)));
+}
+function skeleton(n) {
+  const w = [64, 88, 72, 96, 58, 80];
+  return Array.from({ length: n }, (_, i) => `<tr aria-hidden="true"><td class="c-sel"></td>` +
+    `<td class="c-order"><span class="sk" style="width:52px"></span><span class="sk" style="width:${w[i % 6]}px;margin-top:6px"></span></td>` +
+    `<td class="c-items"><span class="sk" style="width:${w[(i + 2) % 6] + 60}px"></span></td>` +
+    `<td class="c-time"><span class="sk" style="width:48px;margin-left:auto"></span></td>` +
+    `<td class="c-total"><span class="sk" style="width:56px;margin-left:auto"></span></td>` +
+    `<td class="c-status"><span class="sk" style="width:76px"></span></td><td class="c-act"></td></tr>`).join("");
+}
+function stateHTML(list) {
+  const q = st.q.trim();
+  if (st.mode === "error") return `<p class="t bad">${icon("i-warn")}Recent orders didn't load.</p><p>The connection to Tablewise timed out. Check the restaurant's internet, then try again.</p><button class="btn btn-sm" type="button" id="retry">Try again</button>`;
+  if (!orders.length) return `<p class="t">No orders yet tonight.</p><p>Add the first one and it shows up here, with its status.</p><button class="btn btn-sm btn-primary" type="button" data-new>${icon("i-plus")}New order</button>`;
+  if (list.length) return "";
+  const which = st.filter === "active" ? "active " : st.filter === "done" ? "served " : "";
+  if (q) return `<p class="t">No ${which}orders match “${esc(q)}”.</p><p>Search looks at the order number, the table or customer, and the items.</p><button class="btn btn-sm" type="button" id="clear-q">Clear search</button>`;
+  return `<p class="t">No ${which}orders right now.</p><p>${st.filter === "done" ? "Orders show here once they are served." : "Every order tonight has been served."}</p><button class="btn btn-sm" type="button" data-f-go="all">Show all orders</button>`;
+}
+function renderOrders(focusId) {
+  const tb = $("#rows"), table = $("#otable"), box = $("#ostate");
+  if (st.mode === "loading") {
+    tb.innerHTML = skeleton(6); table.setAttribute("aria-busy", "true");
+    box.hidden = true; $("#more-row").hidden = true; return;
+  }
+  table.removeAttribute("aria-busy");
+  const list = st.mode === "error" ? [] : visible(), show = list.slice(0, st.shown);
+  tb.innerHTML = show.map(o => rowHTML(o, st.sel.has(o.id))).join("");
+  const html = stateHTML(list);
+  box.innerHTML = html; box.hidden = !html; table.hidden = !show.length;
+  const left = list.length - show.length;
+  $("#more-row").hidden = left <= 0;
+  if (left > 0) {
+    $("#more").textContent = `Show ${Math.min(PAGE, left)} more`;
+    $("#more-note").textContent = `${show.length.toLocaleString("en-US")} of ${list.length.toLocaleString("en-US")} shown`;
+  }
+  syncSelection(show);
+  if (focusId) ($(`[data-advance="${focusId}"]`) || $(`[data-sel="${focusId}"]`))?.focus();
+}
+function syncSelection(show = visible().slice(0, st.shown)) {
+  const n = st.sel.size, all = $("#selall"), onPage = show.filter(o => st.sel.has(o.id)).length;
+  $("#bulk").hidden = !n;
+  $("#bulk-n").textContent = `${n.toLocaleString("en-US")} selected`;
+  all.checked = show.length > 0 && onPage === show.length;
+  all.indeterminate = onPage > 0 && onPage < show.length;
+}
+function syncChips() { $$(".chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.f === st.filter))); }
+function writeURL(push) {
+  const p = new URLSearchParams(location.search);
+  st.filter === "all" ? p.delete("filter") : p.set("filter", st.filter);
+  st.q ? p.set("q", st.q) : p.delete("q");
+  const u = location.pathname + (p.toString() ? `?${p}` : "");
+  try { history[push ? "pushState" : "replaceState"](null, "", u); } catch { /* file:// may refuse */ }
+}
+function setFilter(f, push = true) {
+  st.filter = f; st.shown = PAGE; syncChips(); writeURL(push); renderOrders();
+}
+$$(".chip").forEach(c => c.addEventListener("click", () => setFilter(c.dataset.f)));
+const qInput = $("#q");
+qInput.value = st.q;
+qInput.addEventListener("input", () => { st.q = qInput.value; st.shown = PAGE; writeURL(false); renderOrders(); });
+window.addEventListener("popstate", () => {
+  const p = new URLSearchParams(location.search);
+  st.filter = FILTERS.includes(p.get("filter")) ? p.get("filter") : "all";
+  st.q = p.get("q") || ""; qInput.value = st.q; syncChips(); renderOrders();
+});
+$("#more").addEventListener("click", () => { st.shown += PAGE; renderOrders(); });
+
+$("#ostate").addEventListener("click", e => {
+  if (e.target.closest("#clear-q")) { st.q = ""; qInput.value = ""; writeURL(false); renderOrders(); qInput.focus(); }
+  const go = e.target.closest("[data-f-go]"); if (go) setFilter(go.dataset.fGo);
+  if (e.target.closest("#retry")) {
+    st.mode = "loading";
+    const t = setTimeout(() => renderOrders(), 300); // skeleton only if it takes longer than 300ms
+    setTimeout(() => { clearTimeout(t); st.mode = "normal"; renderOrders(); announce("Recent orders loaded"); }, 700);
+  }
+});
+
+$("#rows").addEventListener("change", e => {
+  const cb = e.target.closest("[data-sel]"); if (!cb) return;
+  const id = +cb.dataset.sel;
+  cb.checked ? st.sel.add(id) : st.sel.delete(id);
+  cb.closest("tr").classList.toggle("is-sel", cb.checked);
+  syncSelection();
+});
+$("#selall").addEventListener("change", e => {
+  visible().slice(0, st.shown).forEach(o => e.target.checked ? st.sel.add(o.id) : st.sel.delete(o.id));
+  renderOrders();
+});
+$("#bulk-clear").addEventListener("click", () => { st.sel.clear(); renderOrders(); qInput.focus(); });
+$("#bulk-serve").addEventListener("click", () => {
+  if (offline) return;
+  const picked = orders.filter(o => st.sel.has(o.id) && o.s !== "done");
+  st.sel.clear();
+  if (!picked.length) { renderOrders(); toast("Those orders were already served."); return; }
+  const before = picked.map(o => [o, o.s]);
+  picked.forEach(o => { o.s = "done"; });
+  renderOrders();
+  toast(`${picked.length} ${picked.length === 1 ? "order" : "orders"} marked served`, () => { before.forEach(([o, s]) => { o.s = s; }); renderOrders(); });
+});
+$("#rows").addEventListener("click", e => {
+  const b = e.target.closest("[data-advance]"); if (!b || offline) return;
+  const o = orders.find(x => x.id === +b.dataset.advance), prev = o.s;
+  o.s = STATUS[prev].next;
+  renderOrders(o.id);
+  toast(`Order #${o.id} ${STATUS[prev].past}`, () => { o.s = prev; renderOrders(o.id); });
+});
+
+// ---------- chart readout ----------
+const read = $("#read"), chart = $("#chart");
+const today = () => `Thu (today, so far): ${usd(days[days.length - 1][1])}`;
+function showDay(e) {
+  const b = e.target.closest(".bar"); if (!b) return;
+  const i = +b.dataset.i, [d, v] = days[i];
+  read.textContent = `${d}${i === days.length - 1 ? " (today, so far)" : ""}: ${usd(v)}`;
+}
+["mouseover", "focusin", "click"].forEach(ev => chart.addEventListener(ev, showDay));
+chart.addEventListener("mouseleave", () => { if (!chart.contains(document.activeElement)) read.textContent = today(); });
+chart.addEventListener("focusout", e => { if (!chart.contains(e.relatedTarget)) read.textContent = today(); });
+chart.addEventListener("keydown", e => {
+  const b = e.target.closest(".bar"); if (!b || !["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+  const bars = $$(".bar"), i = bars.indexOf(b) + (e.key === "ArrowRight" ? 1 : -1);
+  if (bars[i]) { e.preventDefault(); bars[i].focus(); }
+});
+
+// ---------- loading preview ----------
+if (st.mode === "loading") {
+  $$(".fig-v, .fig-d").forEach(el => { el.innerHTML = `<span class="sk" style="width:${el.classList.contains("fig-v") ? 88 : 120}px;height:${el.classList.contains("fig-v") ? 22 : 12}px"></span>`; });
+  $$(".meter").forEach(m => m.remove());
+  read.textContent = "Loading this week's revenue…";
+  $(".total").innerHTML = '<span class="sk" style="width:96px;background:var(--lead-pressed)"></span>';
+  $$(".bar").forEach((b, i) => { b.removeAttribute("tabindex"); b.removeAttribute("aria-label"); b.style.height = `${30 + (i % 3) * 15}%`; b.style.background = "var(--lead-pressed)"; b.style.borderColor = "var(--lead-pressed)"; });
+  $("#chart").setAttribute("aria-busy", "true");
+}
+
+// ---------- offline ----------
+function setOffline(on) {
+  offline = on;
+  document.body.classList.toggle("is-offline", on);
+  $("#offline").hidden = !on;
+  $("#why-new").hidden = !on;
+  $("#live").textContent = on ? "Offline" : "Live";
+  $$("[data-new]").forEach(b => on ? b.setAttribute("aria-disabled", "true") : b.removeAttribute("aria-disabled"));
+}
+window.addEventListener("offline", () => setOffline(true));
+window.addEventListener("online", () => { setOffline(false); toast("Back online. Orders are up to date."); });
+
+// ---------- toast slot (bottom right; above the tab bar on phones) ----------
+let tTimer;
+const toastEl = $("#toast");
+function announce(msg) { const a = $("#announce"); a.textContent = ""; requestAnimationFrame(() => { a.textContent = msg; }); }
+function toast(msg, undo) {
+  $("#toast-msg").textContent = msg;
+  const u = $("#toast-undo");
+  u.hidden = !undo;
+  u.onclick = () => { undo(); hideToast(); announce("Undone"); };
+  toastEl.hidden = false;
+  requestAnimationFrame(() => toastEl.classList.add("show"));
+  announce(msg);
+  clearTimeout(tTimer);
+  tTimer = setTimeout(hideToast, undo ? 8000 : 4000);
+}
+function hideToast() {
+  toastEl.classList.remove("show");
+  setTimeout(() => { if (!toastEl.classList.contains("show")) toastEl.hidden = true; }, 160);
+}
+toastEl.addEventListener("focusin", () => clearTimeout(tTimer));
+toastEl.addEventListener("mouseenter", () => clearTimeout(tTimer));
+toastEl.addEventListener("mouseleave", () => { tTimer = setTimeout(hideToast, 4000); });
+
+// ---------- new order dialog ----------
+const dlg = $("#dlg"), form = $("#form");
+let opener = null, tried = false;
+const dirty = new Set();
+const RULES = {
+  where: [v => v.trim(), "e1", "Add a table or customer name"],
+  items: [v => v.trim(), "e2", "Add at least one item"],
+  total: [v => parseFloat(v) > 0, "e3", "Enter a total above $0"]
+};
+function check(name) {
+  const [ok, errId, msg] = RULES[name], el = form.elements[name], err = $("#" + errId), good = !!ok(el.value);
+  err.hidden = good; err.querySelector("span").textContent = good ? "" : msg;
+  good ? el.removeAttribute("aria-invalid") : el.setAttribute("aria-invalid", "true");
+  return good;
+}
+Object.keys(RULES).forEach(n => {
+  const el = form.elements[n];
+  el.addEventListener("input", () => { dirty.add(n); if (el.hasAttribute("aria-invalid")) check(n); });
+  el.addEventListener("blur", () => { if (dirty.has(n) || tried) check(n); });
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-new]"); if (!b) return;
+  if (b.getAttribute("aria-disabled") === "true") return;
+  opener = b; dlg.showModal(); $("#where").focus();
+});
+$("#cancel").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener("close", () => {
+  tried = false; dirty.clear();
+  ["e1", "e2", "e3"].forEach(i => { $("#" + i).hidden = true; });
+  form.querySelectorAll("[aria-invalid]").forEach(x => x.removeAttribute("aria-invalid"));
+  (opener && document.contains(opener) ? opener : $("[data-new]"))?.focus();
+});
+form.addEventListener("submit", e => {
+  e.preventDefault(); tried = true;
+  const bad = Object.keys(RULES).filter(n => !check(n));
+  if (bad.length) { form.elements[bad[0]].focus(); return; }
+  const f = new FormData(form), type = f.get("type"), w = f.get("where").trim(), t = parseFloat(f.get("total"));
+  const id = Math.max(1042, ...orders.map(o => o.id < 90000 ? o.id : 0)) + 1;
+  const o = { id, where: type === "Dine-in" ? w : `${type} · ${w}`, items: f.get("items").trim(),
+    time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase(), total: t, s: f.get("status") };
+  orders.unshift(o);
+  st.filter = "all"; st.q = ""; qInput.value = ""; syncChips(); writeURL(false);
+  form.reset(); dlg.close();
+  renderOrders();
+  toast(`Order #${id} added · ${usd(t)}`, () => { orders = orders.filter(x => x !== o); renderOrders(); });
+});
+
+// ---------- more sheet (phone) ----------
+const sheet = $("#more-sheet");
+$("#open-more").addEventListener("click", () => sheet.showModal());
+$("#close-more").addEventListener("click", () => sheet.close());
+sheet.addEventListener("click", e => { if (e.target === sheet) sheet.close(); });
+sheet.addEventListener("close", () => $("#open-more").focus());
+
+syncChips();
+renderOrders();
+</script>
+</body>
+</html>

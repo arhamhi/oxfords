@@ -1,0 +1,1539 @@
+<!doctype html>
+<!--
+Reading this as: Fieldline's Today board for Northgate's three dispatchers, used on a 27-inch monitor in a dim
+back office from 6am (sometimes a laptop), so dark only, dense.
+Intent: get every job a technician, the emergency first, and see who is free to take it. Starts with Assign.
+Colour: node scripts/palette.mjs Tideline --mode dark --ramps, near-black ground. Tideline because heating demand
+follows the weather and this is a data screen; teal avoids the trade's red-and-blue and the red and amber this board
+needs for the emergency and the late technician. Lead = revenue block, support (ember, near warning) = the
+missed-calls series only, pop = the "now" chip. Controls neutral.
+Type: system stack, 20/16/14/13/12. Icons: Phosphor regular at the line height (stroke ~1.25px matches 14px text).
+Radius 6 controls, 10 panels, 4 inside the segmented control (6 minus its 2px gap). Spacing in 4s.
+Exceptions: gridlines on the lead block use the ramp token --lead-800, because no neutral line reads on teal.
+
+Done gate
+- Buttons: default, hover, focus-visible, pressed from tokens. Disabled: dialog Assign (aria-disabled, "Pick a
+  technician first." beside it) and New job in ?state=readonly ("View only" beside it). No loading button: assigning
+  is optimistic; Try again shows the skeleton.
+- Inputs: labels above; the toolbar search has icon, placeholder and accessible name. Errors under the field in
+  --danger-ink with an icon and a --danger border, input kept, checked on blur and on submit.
+- Every action: changes in place (sort, select, ranges) or a toast with Undo (assign, bulk assign, new job).
+- Destructive: none on this screen; cancelling a job lives on the job page. Assignment has Undo.
+- Icon-only: Close and Dismiss carry aria-label and a title tooltip.
+- Empty: ?state=empty (one sentence + New job); queue cleared ("Every job today has a technician");
+  no results quotes the query with Clear search (?q=zzz).
+- Loading and failure: ?state=loading (nothing for 300ms, then skeletons shaped like table, board and charts);
+  ?state=error (what failed, Try again, support link); ?state=offline (banner, assigning still works);
+  ?state=readonly (why, and who can grant it).
+- Messy content: long names truncate with the full value in title and in the dialog; 0, 1 and 10,412 rows
+  (?state=many, Show 20 more). No images on this screen.
+- Tables: search, sort by Window or Booked (kept in the URL), figures right-aligned and tabular, one action per row,
+  selection reveals "Assign N jobs" in the section toolbar.
+- Charts: plain bars from the series tokens, axis values, grid lines, labels, range control, value on hover and on
+  focus (arrow keys move). Revenue is one series on the lead block, labelled directly.
+- Navigation: Today shown with a full fill, five items, Reports/Settings/Help in the account menu; bottom bar on phones.
+- Keyboard and contrast: shoot.mjs 0 fail; Esc closes dialogs and popovers; focus enters the dialog and lands on the
+  next waiting job after assigning; every state has a word and an icon.
+- Touch: 44px targets at 390 (shoot.mjs 0 warn), nothing hover-only, 16px inputs, safe-area insets.
+- Motion: 120ms state changes, 200ms dialog and toast ease-out, reduced motion keeps a fade, never blocks input.
+- Colour: every colour is a palette.mjs token; 92% neutral at 1440, 87% at 390; all three roles used once each.
+- Themes: dark only, as decided above.
+- Consistency: one family, one palette, one icon set at one weight, radius per tier.
+- Slop floor: check.mjs 0 fail, 0 warn.
+- Redesign: not a redesign.
+-->
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Today · Fieldline</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+/* Oxfords colour: Tideline (teal world, one ember; weather, travel, data)
+   lead #326E6E, support #CE7D36, pop #C5CFCB
+   dark on near-black: native, nothing moved
+     too dark for text on this page: lead. Text, links and icons use --lead-ink.
+   notes:
+     pop is a tint or a grey: a block with dark text, or a mark on a lead or support block, never a mark on the page. The chart series skip it.
+     support sits near warning: warning states use --warning, never --support. Keep --support off controls; pair every state with a word and an icon.
+     ramps: lead sits nearest 700, support sits nearest 500, pop sits nearest 200
+   regenerate: node scripts/palette.mjs Tideline --mode dark --ramps */
+
+:root {
+  color-scheme: dark;
+  /* neutrals */
+  --page: #0A0A0A; --surface: #141414; --surface-2: #1E1E1E; --selected: #262626;
+  --line: #2E2E2E; --line-strong: #626262; --focus: #629796; --overlay: #000000A3;
+  --text: #EBEBEB; --text-2: #B1B1B1; --text-3: #8D8D8D; --text-disabled: #545454;
+  --shadow-1: none;
+  --shadow-2: 0 2px 4px #00000066, 0 16px 40px #00000080;
+  /* neutral controls */
+  --action: #F2F2F2; --action-hover: #E4E4E4; --action-pressed: #D7D7D7; --on-action: #111111;
+  --action-disabled: #2E2E2E; --on-action-disabled: #6D6D6D;
+  --control: #292929; --control-hover: #353535; --control-pressed: #181818;
+  /* palette */
+  --lead: #396D6D; --lead-hover: #487C7B; --lead-pressed: #245959;
+  --on-lead: #FFFFFF; --lead-ink: #629796; --lead-tint: #172A2A;
+  --support: #C98043; --support-hover: #D98F53; --support-pressed: #B26B2C;
+  --on-support: #111111; --support-ink: #C98043; --support-tint: #332215;
+  --pop: #C6CFCB; --pop-hover: #D6DFDB; --pop-pressed: #B0B8B5;
+  --on-pop: #111111; --pop-ink: #C6CFCB; --pop-tint: #242726;
+  /* semantic */
+  --danger: #BC2D2A; --danger-hover: #CE3F39; --danger-pressed: #A40B13;
+  --on-danger: #FFFFFF; --danger-ink: #EC5D53; --danger-tint: #36201D;
+  --warning: #F0AC3F; --warning-hover: #FFBD58; --warning-pressed: #D8951F;
+  --on-warning: #111111; --warning-ink: #F0AC3F; --warning-tint: #302412;
+  --success: #157337; --success-hover: #2A8245; --success-pressed: #005E28;
+  --on-success: #FFFFFF; --success-ink: #499F5F; --success-tint: #1A2B1D;
+  --info: #0065B0; --info-hover: #0874C6; --info-pressed: #00518F;
+  --on-info: #FFFFFF; --info-ink: #3591E5; --info-tint: #192837;
+  /* chart */
+  --series-1: #396D6D; --series-2: #C98043; --series-3: #ACD7D7; --series-4: #F2B17F;
+  --series-5: #71AAAA; --series-6: #B4B4B4; --series-muted: #747474;
+  /* ramps */
+  --grey-50: #F5F5F5; --grey-100: #E8E8E8; --grey-200: #D4D4D4; --grey-300: #BABABA; --grey-400: #A1A1A1; --grey-500: #898989;
+  --grey-600: #717171; --grey-700: #5B5B5B; --grey-800: #454545; --grey-900: #303030; --grey-950: #1F1F1F;
+  --lead-50: #EBF8F8; --lead-100: #D6EDED; --lead-200: #B8DDDC; --lead-300: #95C5C5; --lead-400: #78ADAC; --lead-500: #609494;
+  --lead-600: #487C7C; --lead-700: #336464; --lead-800: #224D4D; --lead-900: #153637; --lead-950: #0B2424;
+  --support-50: #FFF2E9; --support-100: #FFE2CC; --support-200: #FEC89E; --support-300: #EEAA74; --support-400: #D88E52; --support-500: #BD7638;
+  --support-600: #A35E1C; --support-700: #884800; --support-800: #693600; --support-900: #4B2500; --support-950: #331700;
+  --pop-50: #F3F6F5; --pop-100: #E5E9E7; --pop-200: #D0D6D3; --pop-300: #B5BDB9; --pop-400: #9BA4A0; --pop-500: #838B88;
+  --pop-600: #6C7470; --pop-700: #555D5A; --pop-800: #404744; --pop-900: #2D3230; --pop-950: #1D201F;
+}
+
+/* Type, radius and layout. Type scale 20 / 16 / 14 / 13 / 12. Spacing in 4s. */
+:root {
+  --fs-1: 20px; --fs-2: 16px; --fs-3: 14px; --fs-4: 13px; --fs-5: 12px;
+  --r-c: 6px; --r-p: 10px;
+  --head-w: 220px;
+  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--page); color: var(--text); font: 400 var(--fs-3)/20px var(--font); -webkit-text-size-adjust: 100%; scrollbar-color: var(--line-strong) transparent; }
+body { margin: 0; min-height: 100dvh; background: var(--page); caret-color: var(--lead-ink); accent-color: var(--action); }
+::selection { background: var(--lead-tint); color: var(--text); }
+h1, h2, h3, p, dl, dd, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+fieldset { margin: 0; border: 0; padding: 0; min-width: 0; }
+legend { padding: 0; }
+a { color: var(--lead-ink); text-underline-offset: 3px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tnum { font-variant-numeric: tabular-nums; }
+.ph { font-size: 1.4em; line-height: 1; vertical-align: -0.25em; flex: none; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.trunc { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.muted { color: var(--text-2); }
+[hidden] { display: none !important; }
+
+/* Buttons. States from the tokens: hover, pressed, focus ring, aria-disabled. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 14px; border: 1px solid transparent; border-radius: var(--r-c); font-weight: 500; white-space: nowrap; transition: background-color 120ms ease-out, border-color 120ms ease-out; }
+.btn .ph { font-size: 18px; }
+.btn-primary { background: var(--action); color: var(--on-action); }
+.btn-primary:hover { background: var(--action-hover); }
+.btn-primary:active { background: var(--action-pressed); }
+.btn-secondary { background: var(--control); color: var(--text); }
+.btn-secondary:hover { background: var(--control-hover); }
+.btn-secondary:active { background: var(--control-pressed); }
+.btn-quiet { background: transparent; color: var(--text-2); }
+.btn-quiet:hover { background: var(--control-hover); color: var(--text); }
+.btn-quiet:active { background: var(--control-pressed); }
+.btn[aria-disabled="true"], .btn:disabled { background: var(--action-disabled); color: var(--on-action-disabled); cursor: not-allowed; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: var(--fs-4); }
+.icon-btn { display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid transparent; border-radius: var(--r-c); background: transparent; color: var(--text-2); transition: background-color 120ms ease-out; }
+.icon-btn .ph { font-size: 20px; }
+.icon-btn:hover { background: var(--control-hover); color: var(--text); }
+.icon-btn:active { background: var(--control-pressed); }
+.reason { font-size: var(--fs-4); color: var(--text-2); }
+
+/* Top bar */
+.topbar { display: flex; align-items: center; gap: 24px; height: 52px; padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--page); }
+.brand { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.wordmark { font-size: var(--fs-2); font-weight: 700; }
+.org { font-size: var(--fs-4); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topnav { display: flex; gap: 4px; }
+.topnav a { display: flex; align-items: center; height: 32px; padding: 0 12px; border-radius: var(--r-c); color: var(--text-2); font-weight: 500; text-decoration: none; transition: background-color 120ms ease-out; }
+.topnav a:hover { background: var(--control-hover); color: var(--text); }
+.topnav a[aria-current="page"] { background: var(--selected); color: var(--text); }
+.acct { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px 0 12px; border: 1px solid transparent; border-radius: var(--r-c); background: transparent; color: var(--text); transition: background-color 120ms ease-out; }
+.acct .ph { font-size: 16px; color: var(--text-2); }
+.acct:hover { background: var(--control-hover); }
+.acct:active { background: var(--control-pressed); }
+.acct-short { display: none; }
+
+/* Page head */
+main { padding: 20px 24px 48px; }
+.pagehead { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "title search new"; align-items: end; gap: 12px; margin-bottom: 24px; }
+.title { grid-area: title; min-width: 0; }
+h1 { font-size: var(--fs-1); line-height: 28px; font-weight: 650; }
+.date { margin-top: 2px; font-size: var(--fs-4); line-height: 18px; color: var(--text-2); }
+.search { grid-area: search; position: relative; width: 320px; }
+.search .ph { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 18px; color: var(--text-3); pointer-events: none; }
+.search input { width: 100%; height: 32px; padding: 0 10px 0 34px; border: 1px solid var(--line-strong); border-radius: var(--r-c); background: var(--page); }
+.search input::placeholder { color: var(--text-3); }
+.newjob { grid-area: new; display: flex; align-items: center; gap: 8px; }
+
+/* Banners */
+.banner { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; margin-bottom: 24px; border-radius: var(--r-p); font-size: var(--fs-4); line-height: 18px; }
+.banner .ph { font-size: 18px; }
+.banner.warn { background: var(--warning-tint); }
+.banner.warn .ph { color: var(--warning-ink); }
+.banner.plain { background: var(--surface-2); }
+.banner.plain .ph { color: var(--text-2); }
+
+/* Layout: the work on the left, calls and bookings beside it */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+.work { min-width: 0; padding-right: 32px; }
+.side { min-width: 0; display: flex; flex-direction: column; gap: 40px; padding-left: 32px; border-left: 1px solid var(--line); }
+.work > section + section { margin-top: 40px; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 32px; margin-bottom: 8px; }
+h2 { font-size: var(--fs-2); line-height: 22px; font-weight: 600; }
+.count { font-size: var(--fs-4); color: var(--text-2); }
+.sec-head .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* Chips: quiet by default, tinted only when they need attention */
+.chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; height: 22px; padding: 0 6px; margin-left: -6px; border-radius: var(--r-c); font-size: var(--fs-4); color: var(--text-2); white-space: nowrap; }
+.chip .ph { font-size: 16px; }
+.chip-danger { margin-left: 0; background: var(--danger); color: var(--on-danger); font-weight: 600; }
+.chip-warn { margin-left: 0; background: var(--warning-tint); color: var(--warning-ink); font-weight: 500; }
+
+/* Queue table */
+.q { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.q th { height: 32px; padding: 0 8px; border-bottom: 1px solid var(--line); text-align: left; font-size: var(--fs-5); font-weight: 500; color: var(--text-3); white-space: nowrap; }
+.q td { height: 52px; padding: 0 8px; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+.q .c-sel { width: 40px; padding: 0 0 0 4px; }
+.q .c-type { width: 128px; }
+.q .c-cust { width: 220px; }
+.q .c-cust .nm { font-weight: 600; line-height: 18px; }
+.q .c-cust .ar { font-size: var(--fs-4); line-height: 18px; color: var(--text-3); }
+.q td.c-prob { white-space: normal; color: var(--text-2); }
+.q .c-prob .clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 18px; }
+.q .c-win { width: 120px; }
+.q .c-booked { width: 96px; text-align: right; color: var(--text-2); }
+.q .c-act { width: 92px; text-align: right; }
+.q tbody tr:hover td { background: var(--surface); }
+.q tbody tr.is-sel td { background: var(--selected); }
+.q tbody tr.is-emerg td { background: var(--danger-tint); }
+.q tbody tr.is-emerg .c-prob { color: var(--text); }
+.q tbody tr.is-new td { background: var(--lead-tint); }
+.chk { display: flex; align-items: center; justify-content: center; width: 32px; height: 40px; cursor: pointer; }
+.chk input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+.sort { display: inline-flex; align-items: center; gap: 2px; height: 28px; padding: 0 6px; margin: 0 -6px; border: 0; border-radius: var(--r-c); background: transparent; color: var(--text-3); font-size: var(--fs-5); font-weight: 500; transition: background-color 120ms ease-out; }
+.sort .ph { font-size: 14px; }
+.sort:hover { background: var(--control-hover); color: var(--text); }
+th[aria-sort] .sort { color: var(--text); }
+.ro { font-size: var(--fs-4); color: var(--text-3); }
+.more { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; font-size: var(--fs-4); color: var(--text-2); }
+
+/* Empty, error and loading */
+.state { padding: 20px 0 24px; border-bottom: 1px solid var(--line); }
+.state-title { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.state-title .ph { font-size: 20px; }
+.state-title .ph-warning-octagon { color: var(--danger-ink); }
+.state p + p { margin-top: 4px; }
+.state .actions-row { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+.sk { display: block; height: 12px; border-radius: 4px; background: var(--surface-2); }
+.sk-row { display: grid; grid-template-columns: 128px 200px 1fr 120px 92px; gap: 16px; align-items: center; height: 52px; border-bottom: 1px solid var(--line); }
+.sk-blk { position: absolute; top: 7px; bottom: 7px; height: auto; border-radius: var(--r-c); }
+.sk-block { height: 160px; border-radius: var(--r-p); background: var(--surface); }
+
+/* Technician board: a row per technician, jobs placed on the hours */
+.board { position: relative; }
+.b-hours { display: grid; grid-template-columns: var(--head-w) minmax(0, 1fr); height: 28px; border-bottom: 1px solid var(--line); }
+.hrs { position: relative; }
+.hrs .hr { position: absolute; top: 6px; padding-left: 4px; font-size: var(--fs-5); line-height: 16px; color: var(--text-3); white-space: nowrap; }
+.hrs .nowchip { position: absolute; top: 4px; z-index: 3; transform: translateX(-50%); height: 20px; padding: 0 6px; border-radius: var(--r-c); background: var(--pop); color: var(--on-pop); font-size: var(--fs-5); font-weight: 600; line-height: 20px; white-space: nowrap; }
+.b-row { display: grid; grid-template-columns: var(--head-w) minmax(0, 1fr); min-height: 48px; border-bottom: 1px solid var(--line); }
+.b-row.lanes-2 { min-height: 72px; }
+.b-tech { min-width: 0; padding: 6px 12px 6px 0; }
+.b-name { font-weight: 600; line-height: 18px; }
+.b-status { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 2px; font-size: var(--fs-5); line-height: 16px; color: var(--text-2); }
+.b-status .ph { font-size: 16px; }
+.b-status .chip { height: 20px; font-size: var(--fs-5); }
+.b-row.off .b-name, .b-row.off .b-status { color: var(--text-3); }
+.b-track { position: relative; min-width: 0; }
+.blk { position: absolute; top: 7px; bottom: 7px; z-index: 1; display: flex; align-items: center; gap: 4px; min-width: 0; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--r-c); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-5); line-height: 16px; text-align: left; white-space: nowrap; overflow: hidden; transition: background-color 120ms ease-out, border-color 120ms ease-out; }
+.blk span { overflow: hidden; text-overflow: ellipsis; }
+.blk .ph { font-size: 14px; }
+.blk:hover { background: var(--control-hover); }
+.blk.done { background: var(--surface); color: var(--text-3); }
+.blk.done:hover { background: var(--surface-2); }
+.blk.now { background: var(--control); border-color: var(--line-strong); color: var(--text); }
+.blk.now:hover { background: var(--control-hover); }
+.blk.late { background: var(--warning-tint); border-color: var(--warning); color: var(--warning-ink); }
+.blk.late:hover { border-color: var(--warning-hover); }
+.blk.emerg { background: var(--danger-tint); border-color: var(--danger); color: var(--danger-ink); }
+.blk.emerg:hover { border-color: var(--danger-hover); }
+.lanes-2 .blk { bottom: auto; height: calc(50% - 10px); }
+.lanes-2 .blk.l1 { top: calc(50% + 3px); }
+.b-grid { position: absolute; z-index: 0; left: var(--head-w); right: 0; top: 28px; bottom: 0; pointer-events: none; }
+.b-grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.b-grid i.nowline { width: 2px; margin-left: -1px; background: var(--line-strong); }
+.b-sum { display: none; }
+
+/* Side: calls and bookings */
+.seg { display: inline-flex; margin-left: auto; padding: 2px; border: 1px solid var(--line-strong); border-radius: var(--r-c); }
+.seg button { height: 26px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent; color: var(--text-2); font-size: var(--fs-4); transition: background-color 120ms ease-out; }
+.seg button:hover { background: var(--control-hover); color: var(--text); }
+.seg button:active { background: var(--control-pressed); }
+.seg button[aria-pressed="true"] { background: var(--selected); color: var(--text); font-weight: 600; }
+.figs { display: flex; flex-wrap: wrap; gap: 4px 24px; align-items: baseline; }
+.fig { display: flex; align-items: baseline; gap: 6px; font-size: var(--fs-4); color: var(--text-2); }
+.fig b { font-size: var(--fs-1); line-height: 28px; font-weight: 600; color: var(--text); }
+.sw { display: inline-block; width: 10px; height: 10px; align-self: center; }
+.sw-1 { background: var(--series-1); }
+.sw-2 { background: var(--series-2); }
+.fig-note { margin-top: 2px; font-size: var(--fs-4); line-height: 18px; color: var(--text-2); }
+.chart { position: relative; display: grid; grid-template-columns: 24px minmax(0, 1fr); grid-template-rows: 152px auto; column-gap: 8px; margin-top: 16px; }
+.yax { position: relative; }
+.yax span { position: absolute; right: 0; transform: translateY(50%); font-size: var(--fs-5); line-height: 16px; color: var(--text-3); }
+.plot { position: relative; border-bottom: 1px solid var(--line-strong); }
+.gl { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); }
+.groups { position: absolute; inset: 0; display: flex; gap: 4px; }
+.grp { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 2px; min-width: 0; border-radius: 2px; }
+.grp:focus-visible { outline-offset: 0; }
+.bar { width: 42%; max-width: 14px; transition: opacity 150ms ease-out; }
+.bar-1 { background: var(--series-1); }
+.bar-2 { background: var(--series-2); }
+.groups.dim .grp:not(.on) .bar { opacity: 0.35; }
+.xax { grid-column: 2; display: flex; gap: 4px; padding-top: 4px; }
+.xax span { flex: 1; min-width: 0; text-align: center; font-size: var(--fs-5); line-height: 16px; color: var(--text-3); white-space: nowrap; }
+.tip { position: absolute; top: -8px; z-index: 5; transform: translate(-50%, -100%); padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r-c); background: var(--surface-2); box-shadow: var(--shadow-2); font-size: var(--fs-5); line-height: 16px; white-space: nowrap; pointer-events: none; }
+.lead-block { padding: 16px; border-radius: var(--r-p); background: var(--lead); color: var(--on-lead); }
+.rev-total { font-size: var(--fs-1); line-height: 28px; font-weight: 600; }
+.rev-note { margin-top: 2px; font-size: var(--fs-4); line-height: 18px; }
+.rev { margin-top: 16px; }
+.rev-r, .rev-axrow { display: grid; grid-template-columns: 84px minmax(0, 1fr) 64px; column-gap: 8px; border-radius: 4px; }
+.rev-l, .rev-v { height: 28px; font-size: var(--fs-4); line-height: 28px; white-space: nowrap; }
+.rev-v { text-align: right; font-variant-numeric: tabular-nums; }
+.rev-t { position: relative; height: 28px; }
+.rev-t .rbar { position: absolute; left: 0; top: 8px; height: 12px; background: var(--on-lead); transition: opacity 150ms ease-out; }
+.rev.dim .rev-r:not(.on) .rbar { opacity: 0.4; }
+.rev-r:focus-visible { outline: 2px solid var(--on-lead); outline-offset: 2px; }
+.rev-grid { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--lead-800); }
+.rev-ax { position: relative; height: 20px; margin-top: 4px; font-size: var(--fs-5); line-height: 16px; }
+.rev-ax span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.rev-ax span:first-child { transform: none; }
+.rev-read { margin-top: 8px; font-size: var(--fs-4); line-height: 18px; }
+.side-empty { padding: 16px 0; border-top: 1px solid var(--line); font-size: var(--fs-4); color: var(--text-2); }
+
+/* Dialogs */
+.dlg { width: min(600px, calc(100vw - 32px)); max-height: min(760px, calc(100dvh - 48px)); padding: 0; border: 1px solid var(--line-strong); border-radius: var(--r-p); background: var(--surface); color: var(--text); box-shadow: var(--shadow-2); }
+.dlg[open] { display: flex; flex-direction: column; animation: dlg-in 200ms ease-out; }
+.dlg::backdrop { background: var(--overlay); }
+.dlg[open]::backdrop { animation: fade-in 200ms ease-out; }
+.dlg form { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.dlg-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 14px 20px; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { flex: 1; }
+.dlg-body { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px 20px; }
+.dlg-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); }
+.dlg-foot .reason { margin-right: auto; }
+.a-job { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.a-job .who { margin-top: 6px; font-weight: 600; }
+.a-job p { font-size: var(--fs-4); line-height: 18px; color: var(--text-2); }
+.a-job .issue { margin-top: 4px; color: var(--text); font-size: var(--fs-3); line-height: 20px; }
+.a-list li { display: flex; gap: 8px; padding: 4px 0; font-size: var(--fs-4); }
+.a-list li b { font-weight: 600; }
+.legend { margin-bottom: 8px; font-size: var(--fs-4); font-weight: 600; }
+.opts { border: 1px solid var(--line); border-radius: var(--r-c); max-height: 288px; overflow: auto; }
+.opt { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background-color 120ms ease-out; }
+.opt:last-child { border-bottom: 0; }
+.opt:hover { background: var(--surface-2); }
+.opt:has(input:checked) { background: var(--selected); }
+.opt input { grid-row: span 2; width: 16px; height: 16px; margin: 0; }
+.opt-name { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opt-when { text-align: right; font-variant-numeric: tabular-nums; font-size: var(--fs-4); }
+.opt-meta { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: var(--fs-5); line-height: 16px; color: var(--text-2); }
+.opt-meta .ph { font-size: 16px; }
+.opt-meta.warn { color: var(--warning-ink); }
+.opt-dist { text-align: right; font-size: var(--fs-5); line-height: 16px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.opt.is-off { cursor: not-allowed; }
+.opt.is-off .opt-name, .opt.is-off .opt-when, .opt.is-off .opt-meta { color: var(--text-disabled); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.span2 { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > label, .field > legend { font-size: var(--fs-4); line-height: 18px; font-weight: 500; }
+.field .opt-l { font-weight: 400; color: var(--text-2); }
+.input { width: 100%; height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: var(--r-c); background: var(--page); color: var(--text); }
+textarea.input { height: auto; min-height: 60px; padding: 6px 10px; resize: vertical; }
+.input::placeholder { color: var(--text-3); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.hint { font-size: var(--fs-5); line-height: 16px; color: var(--text-3); }
+.err { display: flex; align-items: flex-start; gap: 4px; font-size: var(--fs-5); line-height: 16px; color: var(--danger-ink); }
+.err .ph { font-size: 16px; }
+.check { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: var(--fs-4); cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 0; }
+.field-check { justify-content: flex-end; }
+.types { display: flex; flex-wrap: wrap; gap: 6px; }
+.types label { position: relative; display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: var(--r-c); font-size: var(--fs-4); color: var(--text-2); cursor: pointer; transition: background-color 120ms ease-out; }
+.types label:hover { background: var(--control-hover); color: var(--text); }
+.types input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.types label:has(input:checked) { background: var(--selected); color: var(--text); border-color: var(--text-3); font-weight: 600; }
+.types label:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Popovers, menus, toasts */
+.pop { position: fixed; inset: auto; margin: 0; width: 320px; max-width: calc(100vw - 16px); padding: 14px 16px; border: 1px solid var(--line-strong); border-radius: var(--r-p); background: var(--surface-2); color: var(--text); box-shadow: var(--shadow-2); }
+.pop h3 { font-size: var(--fs-3); line-height: 20px; font-weight: 600; }
+.pop dl { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 12px; margin-top: 10px; font-size: var(--fs-4); line-height: 18px; }
+.pop dt { color: var(--text-3); }
+.pop dd { min-width: 0; overflow-wrap: anywhere; }
+.pop .pop-act { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.menu { width: 200px; padding: 4px; }
+.menu a { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border-radius: var(--r-c); color: var(--text); text-decoration: none; }
+.menu a:hover { background: var(--control-hover); }
+.menu hr { margin: 4px 0; border: 0; border-top: 1px solid var(--line); }
+.toast-slot { position: fixed; right: 24px; bottom: 24px; z-index: 60; display: flex; flex-direction: column; gap: 8px; width: min(440px, calc(100vw - 32px)); pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; border: 1px solid var(--line-strong); border-radius: var(--r-p); background: var(--surface-2); box-shadow: var(--shadow-2); pointer-events: auto; animation: toast-in 200ms ease-out; }
+.toast p { flex: 1; font-size: var(--fs-4); line-height: 18px; }
+
+/* Bottom bar (phones only) */
+.bottombar { display: none; }
+
+@keyframes dlg-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes fade-in { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dlg[open], .toast { animation: fade-in 200ms ease-out; }
+}
+@media (prefers-contrast: more) {
+  .blk, .btn-secondary, .seg button[aria-pressed="true"] { border-color: var(--text-2); }
+}
+
+/* Laptop and tablet: one column, calls and bookings below the board */
+@media (max-width: 1199px) {
+  .layout { display: block; }
+  .work { padding-right: 0; }
+  .side { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; padding: 24px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+}
+
+/* Phone width */
+@media (max-width: 767px) {
+  .topbar { gap: 12px; padding: 0 16px; }
+  .topnav { display: none; }
+  .acct-full { display: none; }
+  .acct-short { display: inline; }
+  .acct { min-height: 44px; }
+  main { padding: 16px 16px 32px; }
+  .pagehead { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "title new" "search search"; align-items: center; margin-bottom: 20px; }
+  .search { width: 100%; }
+  .search input, .input { height: 44px; font-size: 16px; }
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 44px; font-size: var(--fs-3); }
+  .icon-btn { width: 44px; height: 44px; }
+  .seg button { height: 44px; }
+  .side { grid-template-columns: 1fr; }
+
+  .q thead { display: none; }
+  .q, .q tbody { display: block; }
+  .q tr { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-areas: "sel type win" "sel cust booked" "sel prob prob" ". act act"; row-gap: 2px; padding: 12px 0 14px; border-bottom: 1px solid var(--line); }
+  .q td { display: block; height: auto; padding: 0; border: 0; width: auto; }
+  .q tbody tr:hover td, .q tbody tr.is-sel td, .q tbody tr.is-emerg td, .q tbody tr.is-new td { background: transparent; }
+  .q tbody tr.is-sel { background: var(--selected); }
+  .q tbody tr.is-emerg { background: var(--danger-tint); }
+  .q tbody tr.is-new { background: var(--lead-tint); }
+  .q tbody tr.is-emerg, .q tbody tr.is-sel, .q tbody tr.is-new { margin: 0 -8px; padding: 12px 8px 14px; border-radius: var(--r-p); }
+  .q .c-sel { grid-area: sel; padding: 0; width: auto; }
+  .q .c-type { grid-area: type; width: auto; }
+  .q .c-win { grid-area: win; width: auto; text-align: right; }
+  .q .c-cust { grid-area: cust; width: auto; margin-top: 2px; }
+  .q .c-prob { grid-area: prob; margin-top: 2px; }
+  .q .c-booked { grid-area: booked; width: auto; align-self: end; font-size: var(--fs-4); line-height: 18px; color: var(--text-3); }
+  .q .c-act { grid-area: act; width: auto; margin-top: 10px; text-align: left; }
+  .q .c-act .btn { width: 100%; }
+  .chk { width: 44px; height: 44px; justify-content: flex-start; margin-top: -11px; }
+  .more { flex-direction: column; align-items: stretch; }
+  .state .actions-row { flex-wrap: wrap; }
+  .state .actions-row a { display: inline-flex; align-items: center; min-height: 44px; }
+
+  .b-hours, .b-grid { display: none; }
+  .b-row, .b-row.lanes-2 { display: block; min-height: 0; padding: 10px 0; }
+  .b-track { display: none; }
+  .b-tech { padding: 0; }
+  .b-sum { display: block; margin-top: 4px; font-size: var(--fs-4); line-height: 18px; color: var(--text-2); }
+  .b-sum p + p { color: var(--text-3); }
+  .sk-row { grid-template-columns: 1fr 80px; }
+  .sk-row .sk:nth-child(n+3) { display: none; }
+
+  .dlg { width: 100%; max-width: 100%; max-height: 92dvh; margin: auto 0 0; border-radius: var(--r-p) var(--r-p) 0 0; border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .dlg[open] { animation: sheet-in 250ms ease-out; }
+  .dlg-head { padding: 8px 8px 8px 16px; }
+  .dlg-body { padding: 16px; }
+  .dlg-foot { flex-wrap: wrap; padding: 12px 16px; }
+  .dlg-foot .reason { flex-basis: 100%; }
+  .dlg-foot .btn { flex: 1; }
+  .grid2 { grid-template-columns: 1fr; }
+  .opt { padding: 12px; }
+  .check { min-height: 44px; }
+  .types label { height: 44px; }
+
+  .bottombar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(5, 1fr); padding-bottom: env(safe-area-inset-bottom); border-top: 1px solid var(--line); background: var(--surface); }
+  .bottombar a, .bottombar button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 56px; border: 0; background: transparent; color: var(--text-2); font-size: var(--fs-5); line-height: 16px; text-decoration: none; }
+  .bottombar .ph { font-size: 22px; }
+  .bottombar [aria-current="page"] { background: var(--selected); color: var(--text); }
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  .toast-slot { left: 16px; right: 16px; width: auto; bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .pop { left: 8px !important; right: 8px; width: auto; }
+}
+@keyframes sheet-in { from { opacity: 0; transform: translateY(24px); } }
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .dlg[open] { animation: fade-in 200ms ease-out; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="wordmark">Fieldline</span>
+    <span class="org">Northgate Heating &amp; Air</span>
+  </div>
+  <nav class="topnav" aria-label="Main">
+    <a href="#today" aria-current="page">Today</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#jobs">Jobs</a>
+    <a href="#customers">Customers</a>
+    <a href="#technicians">Technicians</a>
+  </nav>
+  <button class="acct" id="acctBtn" popovertarget="acctMenu" aria-label="Account: Renee Kowalczyk">
+    <span class="acct-full">Renee Kowalczyk</span><span class="acct-short">Renee</span><i class="ph ph-caret-down" aria-hidden="true"></i>
+  </button>
+</header>
+<div id="acctMenu" class="pop menu" popover aria-label="Account">
+  <a href="#reports">Reports</a>
+  <a href="#settings">Settings</a>
+  <a href="#help">Help</a>
+  <hr>
+  <a href="#sign-out">Sign out</a>
+</div>
+
+<main id="main">
+  <div class="pagehead">
+    <div class="title">
+      <h1>Today</h1>
+      <p class="date" id="dateLine">Thursday, October 29 · updated 1:24 PM</p>
+    </div>
+    <div class="search">
+      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+      <input id="q" type="search" placeholder="Search jobs, customers, technicians" aria-label="Search jobs, customers and technicians" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="newjob">
+      <span class="reason" id="newReason" hidden>View only</span>
+      <button class="btn btn-primary" id="newJobBtn" type="button"><i class="ph ph-plus" aria-hidden="true"></i>New job</button>
+    </div>
+  </div>
+
+  <div id="banner"></div>
+
+  <div class="layout">
+    <div class="work">
+      <section aria-labelledby="qTitle">
+        <div class="sec-head">
+          <h2 id="qTitle" tabindex="-1">Needs a technician</h2>
+          <span class="count tnum" id="qCount"></span>
+          <div class="right" id="bulk"></div>
+        </div>
+        <div id="queueBody"></div>
+      </section>
+
+      <section aria-labelledby="tTitle" id="techSection">
+        <div class="sec-head">
+          <h2 id="tTitle">Technicians</h2>
+          <span class="count tnum" id="tCount"></span>
+        </div>
+        <div id="boardBody"></div>
+      </section>
+    </div>
+
+    <aside class="side" aria-label="Calls and bookings">
+      <section aria-labelledby="cTitle">
+        <div class="sec-head">
+          <h2 id="cTitle">Calls</h2>
+          <div class="seg" role="group" aria-label="Calls range">
+            <button type="button" data-seg="calls" data-val="today" aria-pressed="true">Today</button>
+            <button type="button" data-seg="calls" data-val="yesterday" aria-pressed="false">Yesterday</button>
+          </div>
+        </div>
+        <div id="callsBody"></div>
+      </section>
+
+      <section aria-labelledby="rTitle">
+        <div class="sec-head">
+          <h2 id="rTitle">Booked revenue</h2>
+          <div class="seg" role="group" aria-label="Booked revenue range">
+            <button type="button" data-seg="rev" data-val="this" aria-pressed="true">This week</button>
+            <button type="button" data-seg="rev" data-val="last" aria-pressed="false">Last week</button>
+          </div>
+        </div>
+        <div id="revBody"></div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<nav class="bottombar" aria-label="Main">
+  <a href="#today" aria-current="page"><i class="ph ph-calendar-dot" aria-hidden="true"></i>Today</a>
+  <a href="#schedule"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Schedule</a>
+  <a href="#jobs"><i class="ph ph-clipboard-text" aria-hidden="true"></i>Jobs</a>
+  <a href="#customers"><i class="ph ph-users" aria-hidden="true"></i>Customers</a>
+  <button type="button" popovertarget="moreMenu"><i class="ph ph-dots-three" aria-hidden="true"></i>More</button>
+</nav>
+<div id="moreMenu" class="pop menu" popover aria-label="More">
+  <a href="#technicians">Technicians</a>
+  <a href="#reports">Reports</a>
+  <a href="#settings">Settings</a>
+  <a href="#help">Help</a>
+  <hr>
+  <a href="#sign-out">Sign out</a>
+</div>
+
+<div class="toast-slot" id="toasts" aria-live="polite"></div>
+<div id="jobPop" class="pop" popover tabindex="-1" role="dialog" aria-labelledby="jpTitle"></div>
+
+<dialog id="assignDlg" class="dlg" aria-labelledby="aTitle">
+  <form id="assignForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="aTitle">Assign job</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close" title="Close (Esc)"><i class="ph ph-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="dlg-body">
+      <div id="aJob" class="a-job"></div>
+      <fieldset>
+        <legend class="legend">Technician</legend>
+        <div class="opts" id="aTechs"></div>
+      </fieldset>
+      <div class="grid2" id="aTimeRow">
+        <div class="field">
+          <label for="aTime">Arrive by</label>
+          <input class="input tnum" type="time" id="aTime" step="300" aria-describedby="aTimeHint aTimeErr">
+          <p class="hint" id="aTimeHint">Pick a technician to see the earliest time.</p>
+          <p class="err" id="aTimeErr" hidden></p>
+        </div>
+        <div class="field field-check">
+          <label class="check"><input type="checkbox" id="aText" checked><span id="aTextLabel">Text the customer this time</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <span class="reason" id="aReason">Pick a technician first.</span>
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="submit" class="btn btn-primary" id="aSubmit" aria-disabled="true" aria-describedby="aReason">Assign</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="newDlg" class="dlg" aria-labelledby="nTitle">
+  <form id="newForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="nTitle">New job</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close" title="Close (Esc)"><i class="ph ph-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="dlg-body">
+      <div class="grid2" style="margin-top:0">
+        <div class="field">
+          <label for="nName">Customer name</label>
+          <input class="input" id="nName" name="name" autocomplete="name" aria-describedby="nNameErr">
+          <p class="err" id="nNameErr" hidden></p>
+        </div>
+        <div class="field">
+          <label for="nPhone">Phone</label>
+          <input class="input tnum" id="nPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="614 382 0915" aria-describedby="nPhoneHint nPhoneErr">
+          <p class="hint" id="nPhoneHint">10 digits. The customer gets the arrival time here.</p>
+          <p class="err" id="nPhoneErr" hidden></p>
+        </div>
+        <div class="field">
+          <label for="nAddr">Street address</label>
+          <input class="input" id="nAddr" name="addr" autocomplete="street-address" aria-describedby="nAddrErr">
+          <p class="err" id="nAddrErr" hidden></p>
+        </div>
+        <div class="field">
+          <label for="nArea">Area</label>
+          <select class="input" id="nArea" name="area" aria-describedby="nAreaErr"></select>
+          <p class="err" id="nAreaErr" hidden></p>
+        </div>
+        <fieldset class="field span2">
+          <legend>Job type</legend>
+          <div class="types" id="nTypes"></div>
+        </fieldset>
+        <div class="field span2">
+          <label for="nProb">Problem</label>
+          <textarea class="input" id="nProb" name="prob" rows="2" aria-describedby="nProbHint nProbErr"></textarea>
+          <p class="hint" id="nProbHint">What the customer told you, in a few words.</p>
+          <p class="err" id="nProbErr" hidden></p>
+        </div>
+        <div class="field">
+          <label for="nWin">Arrival window</label>
+          <select class="input" id="nWin" name="win">
+            <option value="asap">As soon as possible</option>
+            <option value="14:00-16:00">2:00–4:00 PM</option>
+            <option value="15:00-17:00" selected>3:00–5:00 PM</option>
+            <option value="16:00-18:00">4:00–6:00 PM</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="submit" class="btn btn-primary" id="nSubmit">Add to queue</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+const qs = (s, el = document) => el.querySelector(s);
+const qsa = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('en-US');
+const money = n => '$' + nf.format(n);
+const plural = (n, one, many) => `${nf.format(n)} ${n === 1 ? one : many}`;
+const H = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+
+// The board is a snapshot: Thursday, October 29, 2026 at 1:24 PM in Columbus.
+const NOW = H('13:24');
+const DAY0 = H('7:00'), DAY1 = H('18:00');
+const BASE = new Date(2026, 9, 29);
+const dayFmt = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+function clock(m) {
+  m = ((m % 1440) + 1440) % 1440;
+  const h = Math.floor(m / 60), mm = m % 60;
+  return `${h % 12 || 12}:${String(mm).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+}
+function windowText(w) {
+  if (!w) return 'ASAP';
+  const ap = x => (x >= 720 ? 'PM' : 'AM');
+  const t = x => `${Math.floor(x / 60) % 12 || 12}:${String(x % 60).padStart(2, '0')}`;
+  return ap(w[0]) === ap(w[1]) ? `${t(w[0])}–${t(w[1])} ${ap(w[1])}` : `${t(w[0])} ${ap(w[0])}–${t(w[1])} ${ap(w[1])}`;
+}
+function span(a, b) { return windowText([a, b]); }
+function daysAgo(m) { return m >= 0 ? 0 : Math.ceil(-m / 1440); }
+function bookedRel(m) {
+  const d = NOW - m;
+  if (d < 1) return 'Just now';
+  if (d < 60) return `${d} min ago`;
+  if (m >= 0) return `${Math.floor(d / 60)} hr ago`;
+  const n = daysAgo(m);
+  if (n === 1) return 'Yesterday';
+  const dt = new Date(BASE); dt.setDate(dt.getDate() - n);
+  return n < 7 ? dt.toLocaleDateString('en-US', { weekday: 'long' }) : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function bookedAbs(m) {
+  const dt = new Date(BASE); dt.setDate(dt.getDate() - daysAgo(m));
+  return `${dayFmt.format(dt)}, ${clock(m)}`;
+}
+
+const TYPES = {
+  repair: { label: 'Repair', dur: 75 },
+  maintenance: { label: 'Maintenance', dur: 60 },
+  install: { label: 'Install', dur: 360 },
+  emergency: { label: 'Emergency', dur: 90 },
+  inspection: { label: 'Inspection', dur: 60 },
+};
+
+// Rough positions in miles from downtown Columbus, for drive times.
+const AREAS = {
+  'Bexley': [3.5, 0], 'Clintonville': [0, 5], 'Dublin': [-9, 9], 'Gahanna': [7, 4], 'German Village': [0.3, -1.5],
+  'Grandview Heights': [-2.5, 1.5], 'Grove City': [-5, -8], 'Hilliard': [-9, 2.5], 'Lewis Center': [1, 16],
+  'New Albany': [11, 8], 'Obetz': [2, -7], 'Pickerington': [14, -5], 'Powell': [-5, 13.5], 'Reynoldsburg': [10, -1],
+  'Upper Arlington': [-4.5, 3.5], 'Westerville': [3.5, 12], 'Whitehall': [5, -0.5], 'Worthington': [-1, 9.5],
+};
+const miles = (a, b) => { const p = AREAS[a], q = AREAS[b]; return Math.round((Math.hypot(p[0] - q[0], p[1] - q[1]) * 1.25 + 0.6) * 10) / 10; };
+const driveMin = mi => Math.round(mi * 2.1 + 5);
+
+// [id, type, customer, area, start, end, problem, address, extra]
+function tech(id, name, status, extra, jobs) {
+  return {
+    id, name, status, ...extra,
+    freeAt: extra.freeAt ? H(extra.freeAt) : NOW,
+    arrive: extra.arrive ? H(extra.arrive) : null,
+    jobs: jobs.map(j => ({ id: j[0], type: j[1], customer: j[2], area: j[3], start: H(j[4]), end: H(j[5]), issue: j[6], addr: j[7], ...(j[8] || {}) })),
+  };
+}
+const SEED_TECHS = () => [
+  tech('cad', 'Christopher Abernathy-Delgado', 'job', { at: 'New Albany', freeAt: '16:30' }, [
+    [4393, 'install', 'Prakash and Meera Iyer', 'New Albany', '8:00', '12:00', 'Ductwork for a basement finish', '7215 Lambton Park Rd'],
+    [4420, 'install', 'Whitmore Builders, lot 18', 'New Albany', '13:00', '16:30', 'New construction rough-in', '5690 Thompson Rd'],
+  ]),
+  tech('ba', 'Ben Achterberg', 'job', { at: 'Reynoldsburg', freeAt: '14:30' }, [
+    [4397, 'repair', 'Jeannie Covert', 'Reynoldsburg', '8:00', '10:00', 'Heat exchanger crack check', '1580 Brice Rd'],
+    [4407, 'maintenance', 'Dale Burkhart', 'Pickerington', '10:30', '11:30', 'Furnace tune-up', '245 Hill Rd N'],
+    [4416, 'repair', 'Brightview Apartments', 'Reynoldsburg', '12:00', '14:30', 'No heat in units 4C, 4D and 5A', '6900 Livingston Ave'],
+    [4428, 'maintenance', 'Lori Cheng', 'Pickerington', '15:00', '16:00', 'Furnace tune-up', '12960 Stonecreek Dr'],
+  ]),
+  tech('mb', 'Marcus Bell', 'job', { at: 'Hilliard', freeAt: '14:00' }, [
+    [4402, 'maintenance', 'Wendell Ashby', 'Worthington', '7:30', '9:00', 'Furnace tune-up on the service plan', '612 Evening St'],
+    [4405, 'repair', 'Corinne Haddad', 'Clintonville', '9:30', '11:30', 'Blower runs but no heat at the vents', '3318 Calumet St'],
+    [4417, 'repair', 'Tri-Village Pediatrics', 'Hilliard', '12:15', '14:00', 'Inducer motor failing on rooftop unit 2', '4850 Cemetery Rd'],
+    [4426, 'maintenance', 'Phil and Alma Ostrowski', 'Upper Arlington', '15:00', '16:15', 'Boiler tune-up', '2071 Tremont Rd'],
+  ]),
+  tech('kb', 'Kyle Brandt', 'late', { at: 'Grove City', freeAt: '15:00', late: 40 }, [
+    [4396, 'install', 'Tonya and Reggie Marsh', 'Grove City', '7:30', '13:25', 'Furnace and 3-ton AC replacement, running over', '3920 Haughn Rd', { planEnd: H('12:45') }],
+    [4419, 'repair', 'Arlene Fogarty', 'Obetz', '13:40', '15:00', 'Furnace bangs at startup', '4175 Alum Creek Dr', { late: 40, due: H('13:00') }],
+  ]),
+  tech('dh', 'Derek Hollis', 'off', { at: 'Bexley' }, []),
+  tech('sh', 'Shawna Hughes', 'free', { at: 'Gahanna' }, [
+    [4401, 'repair', 'Doug Pennington', 'Gahanna', '7:30', '8:45', 'Igniter replacement', '512 Granville St'],
+    [4406, 'maintenance', 'Vera Lindgren', 'Gahanna', '9:15', '10:15', 'Furnace tune-up', '1033 Shady Ln'],
+    [4410, 'repair', 'Quick Lube #12', 'Whitehall', '10:45', '12:00', 'Shop unit heater not firing', '4400 E Broad St'],
+    [4415, 'maintenance', 'Ama Owusu', 'Gahanna', '12:30', '13:15', 'Filter change and flame sensor clean', '86 Mill St'],
+    [4433, 'repair', 'Ronald Pickett', 'Reynoldsburg', '15:30', '17:00', 'Heat pump iced over', '7311 E Main St'],
+  ]),
+  tech('gl', 'Gabe Lindqvist', 'job', { at: 'Lewis Center', freeAt: '13:45' }, [
+    [4389, 'inspection', 'Orange Township Fire Station 2', 'Lewis Center', '7:00', '8:00', 'Annual gas appliance inspection', '1680 E Orange Rd'],
+    [4387, 'repair', 'Tamsin Royce', 'Lewis Center', '8:30', '10:30', 'No heat, failed control board', '7425 Gooding Blvd'],
+    [4423, 'repair', 'Hector Alvarado', 'Lewis Center', '11:00', '13:45', 'Replace inducer and pressure switch', '211 Hollenback Dr'],
+    [4424, 'maintenance', 'Joan Whitacre', 'Powell', '14:30', '15:30', 'Furnace tune-up', '4100 Steitz Rd'],
+  ]),
+  tech('do', 'Dana Okafor', 'free', { at: 'Clintonville' }, [
+    [4398, 'repair', 'Keisha Lamont', 'Clintonville', '7:00', '8:30', 'Thermostat wiring fault', '251 E Weber Rd'],
+    [4404, 'maintenance', 'Gerald Finch', 'Worthington', '9:00', '10:00', 'Furnace tune-up', '88 W Granville Rd'],
+    [4411, 'repair', 'Holy Rosary Parish Hall', 'Clintonville', '10:30', '12:45', 'Two furnaces, one short cycling', '3600 N High St'],
+    [4431, 'maintenance', 'Sandra Iwu', 'Grandview Heights', '16:00', '17:15', 'Humidifier pad and filter change', '1290 Haselton Rd'],
+  ]),
+  tech('lo', 'Luis Ortega', 'driving', { at: 'Worthington', dest: 'Westerville', arrive: '13:40', freeAt: '15:00' }, [
+    [4399, 'repair', 'Brian Teague', 'Powell', '7:30', '9:30', 'No heat upstairs, zone damper stuck', '9012 Liberty Rd'],
+    [4408, 'maintenance', 'Mohammed Al-Sayed', 'Lewis Center', '10:00', '11:15', 'Heat pump fall check', '644 Orange Rd'],
+    [4414, 'repair', 'Lucy Fairbanks', 'Worthington', '11:45', '13:00', 'Pilot light will not stay lit', '157 E Dublin-Granville Rd'],
+    [4422, 'maintenance', 'Westerville Library Annex', 'Westerville', '13:40', '15:00', 'Rooftop unit service and filters', '126 S State St'],
+  ]),
+  tech('jp', 'Jamal Pryor', 'driving', { at: 'Whitehall', dest: 'Pickerington', arrive: '13:35', freeAt: '15:00' }, [
+    [4394, 'emergency', 'Hollis Grant', 'Whitehall', '7:00', '9:00', 'No heat overnight, flame rollout switch tripped', '540 Collingwood Ave'],
+    [4409, 'repair', 'Sunita Rao', 'Bexley', '9:30', '11:00', 'Condensate pump failed', '2314 Fair Ave'],
+    [4413, 'maintenance', 'Gary Mendel', 'Whitehall', '11:30', '13:00', 'Furnace tune-up', '4791 Etna Rd'],
+    [4421, 'repair', 'Paula Esposito', 'Pickerington', '13:35', '15:00', 'Thermostat blank, no power to the furnace', '8 Windmiller Dr'],
+  ]),
+  tech('pr', 'Priya Raman', 'job', { at: 'German Village', freeAt: '14:15' }, [
+    [4400, 'inspection', 'Nadia Kowal', 'German Village', '8:00', '9:00', 'Pre-sale HVAC inspection', '214 E Beck St'],
+    [4403, 'inspection', 'Liam Brody', 'Bexley', '9:30', '10:30', 'Home warranty inspection', '2465 Bryden Rd'],
+    [4412, 'maintenance', 'The Sycamore Cafe', 'German Village', '11:00', '12:00', 'Make-up air unit service', '262 E Sycamore St'],
+    [4418, 'repair', 'Ester Villalobos', 'German Village', '12:45', '14:15', 'Furnace blowing cold air', '741 S 5th St'],
+    [4429, 'inspection', 'Mark Dunleavy', 'Bexley', '15:00', '16:00', 'Gas line pressure test', '2810 E Main St'],
+  ]),
+  tech('ns', 'Nate Szymanski', 'break', { at: 'Powell', freeAt: '13:45' }, [
+    [4390, 'repair', 'Evan Marsh', 'Dublin', '7:30', '9:00', 'Furnace short cycling', '5280 Brand Rd'],
+    [4391, 'maintenance', 'Rachel Toomey', 'Powell', '9:30', '11:00', 'Dual-fuel system check', '330 Grace Dr'],
+    [4392, 'repair', 'Kenji Watanabe', 'Powell', '11:30', '12:45', 'Blower motor capacitor', '9566 Bayhill Dr'],
+    [4425, 'repair', 'Bethany Kroll', 'Powell', '14:15', '15:30', 'Furnace locks out after ten minutes', '60 Murphy Pkwy'],
+  ]),
+  tech('rv', 'Rosa Villanueva', 'job', { at: 'Bexley', freeAt: '13:30' }, [
+    [4385, 'maintenance', 'Theo Papadakis', 'Bexley', '7:30', '8:45', 'Furnace tune-up', '155 S Roosevelt Ave'],
+    [4386, 'maintenance', 'Greta Halvorsen', 'Bexley', '9:15', '10:15', 'Furnace tune-up', '2560 Sherwood Rd'],
+    [4388, 'repair', 'Bexley Montessori School', 'Bexley', '11:30', '13:30', 'Classroom unit ventilators not heating', '2400 E Main St'],
+    [4383, 'maintenance', 'Darnell Price', 'Whitehall', '14:00', '15:00', 'Furnace tune-up', '915 Robinwood Ave'],
+    [4384, 'repair', 'Fiona McGrath', 'Bexley', '15:30', '17:00', 'Baseboard heat not circulating', '40 N Drexel Ave'],
+  ]),
+  tech('tw', 'Tom Wexler', 'job', { at: 'Dublin', freeAt: '17:00' }, [
+    [4395, 'install', 'Celeste Harrington', 'Dublin', '7:00', '17:00', '96% furnace and coil replacement', '6620 Riverside Dr'],
+  ]),
+];
+const SEED_QUEUE = () => [
+  { id: 4434, type: 'emergency', customer: 'Gloria Pettiford', addr: '1187 Elmwood Ave', area: 'Grandview Heights', win: null, booked: H('12:52'), issue: 'Furnace will not ignite. 51°F inside, two young children at home.' },
+  { id: 4430, type: 'repair', customer: 'Fernando Ruiz', addr: '4410 Kenny Rd', area: 'Upper Arlington', win: [H('15:00'), H('17:00')], booked: H('16:12') - 1440, issue: 'Heat pump short cycling, house stuck at 64°F' },
+  { id: 4432, type: 'inspection', customer: 'Meredith Castellanos-Whitfield', addr: '77 S Cassingham Rd', area: 'Bexley', win: [H('14:30'), H('16:00')], booked: H('10:05'), issue: "Pre-sale inspection, buyer's agent attending" },
+  { id: 4427, type: 'maintenance', customer: 'Lakeview Family Dental', addr: '2200 Henderson Rd', area: 'Upper Arlington', win: [H('16:00'), H('18:00')], booked: H('9:40') - 2880, issue: 'Fall service on two rooftop units' },
+  { id: 4435, type: 'repair', customer: 'Arun Patel', addr: '6031 Sunbury Rd', area: 'Westerville', win: [H('15:30'), H('17:30')], booked: H('13:08'), issue: 'Thermostat screen blank, furnace not running' },
+];
+
+const CALLS = {
+  today: { start: 6, answered: [9, 18, 26, 22, 19, 15, 17, 6], missed: [0, 1, 3, 2, 4, 1, 2, 1], note: '90% answered so far. Yesterday ended at 94%.' },
+  yesterday: { start: 6, answered: [7, 15, 21, 20, 16, 14, 13, 12, 11, 13, 10, 6], missed: [0, 1, 1, 2, 1, 0, 1, 1, 0, 2, 1, 0], note: '94% answered, 6 AM to 6 PM.' },
+};
+const REV_ORDER = ['install', 'repair', 'emergency', 'maintenance', 'inspection'];
+const REV = {
+  this: { range: 'Mon, Oct 26 to Thu, Oct 29', vs: '$15,172 more than last week by Thursday', rows: { install: [41860, 3], repair: [18425, 61], emergency: [9740, 17], maintenance: [7312, 52], inspection: [2145, 13] } },
+  last: { range: 'Mon, Oct 19 to Sun, Oct 25, the full week', vs: '', rows: { install: [36214, 3], repair: [22918, 74], emergency: [6385, 11], maintenance: [9870, 71], inspection: [2760, 16] } },
+};
+
+// ---------- state ----------
+const params = new URLSearchParams(location.search);
+const S = {
+  mode: params.get('state'),
+  techs: SEED_TECHS(),
+  queue: SEED_QUEUE(),
+  q: (params.get('q') || '').trim(),
+  sort: { key: params.get('sort') === 'booked' ? 'booked' : 'window', dir: params.get('dir') === '-1' ? -1 : 1 },
+  sel: new Set(),
+  shown: 20,
+  calls: 'today',
+  rev: 'this',
+  nextId: 4437,
+  newId: null,
+};
+const READONLY = S.mode === 'readonly';
+const OFFLINE = S.mode === 'offline';
+
+if (S.mode === 'empty') {
+  S.queue = [];
+  S.techs.forEach(t => { t.jobs = []; if (t.status !== 'off') { t.status = 'free'; t.freeAt = NOW; } });
+}
+if (S.mode === 'many') {
+  let seed = 4021;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const first = ['Alan', 'Bea', 'Carmen', 'Devon', 'Elena', 'Frank', 'Gwen', 'Hiro', 'Iris', 'Jonah', 'Kemi', 'Lars', 'Maya', 'Noor', 'Owen', 'Pilar', 'Quentin', 'Ravi', 'Sofia', 'Tariq', 'Uma', 'Vince', 'Wren', 'Yusuf'];
+  const last = ['Abbott', 'Baird', 'Castro', 'Dietz', 'Eng', 'Foley', 'Grier', 'Hart', 'Ivers', 'Jovic', 'Kerr', 'Lund', 'Moss', 'Nagy', 'Orr', 'Price', 'Rios', 'Shah', 'Toma', 'Underwood', 'Varga', 'Wolfe'];
+  const probs = ['Furnace tune-up', 'No heat upstairs', 'Thermostat not responding', 'Water heater pilot out', 'Heat pump making noise', 'Filter and humidifier service', 'Carbon monoxide alarm went off'];
+  const areas = Object.keys(AREAS);
+  const kinds = ['repair', 'repair', 'repair', 'maintenance', 'maintenance', 'inspection', 'install'];
+  const wins = [[H('14:00'), H('16:00')], [H('15:00'), H('17:00')], [H('16:00'), H('18:00')], [H('14:30'), H('16:30')]];
+  for (let i = 0; i < 10407; i++) {
+    S.queue.push({ id: 5000 + i, type: kinds[Math.floor(rnd() * kinds.length)], customer: `${first[Math.floor(rnd() * first.length)]} ${last[Math.floor(rnd() * last.length)]}`, addr: `${100 + Math.floor(rnd() * 9800)} Main St`, area: areas[Math.floor(rnd() * areas.length)], win: wins[Math.floor(rnd() * wins.length)], booked: NOW - Math.floor(rnd() * 60 * 24 * 12), issue: probs[Math.floor(rnd() * probs.length)] });
+  }
+}
+
+const allJobs = () => S.techs.flatMap(t => t.jobs.map(j => ({ job: j, tech: t })));
+const findQueued = id => S.queue.find(j => j.id === id);
+const findAssigned = id => allJobs().find(x => x.job.id === id);
+function phase(j) {
+  if (j.late && j.start > NOW) return 'late';
+  if (j.end <= NOW) return 'done';
+  if (j.start <= NOW) return 'now';
+  return 'next';
+}
+function nextJob(t) { return t.jobs.filter(j => j.start > NOW).sort((a, b) => a.start - b.start)[0]; }
+function statusOf(t) {
+  switch (t.status) {
+    case 'job': return { icon: 'wrench', text: `On a job until ${clock(t.freeAt)}` };
+    case 'driving': return { icon: 'truck', text: `Driving to ${t.dest}, arrives ${clock(t.arrive)}` };
+    case 'break': return { icon: 'coffee', text: `On break until ${clock(t.freeAt)}` };
+    case 'late': return { icon: 'clock-countdown', text: `Running ${t.late} min late`, warn: true };
+    case 'off': return { icon: 'minus-circle', text: 'Off today' };
+    default: { const n = nextJob(t); return { icon: 'check-circle', text: n ? `Free until ${clock(n.start)}` : 'Free for the rest of the day' }; }
+  }
+}
+function matchJob(j, q) {
+  if (!q) return true;
+  return `${j.customer} ${j.area} ${j.issue} ${TYPES[j.type].label} #${j.id} ${j.addr || ''}`.toLowerCase().includes(q);
+}
+
+// ---------- URL ----------
+function syncUrl() {
+  const u = new URL(location.href);
+  S.q ? u.searchParams.set('q', S.q) : u.searchParams.delete('q');
+  if (S.sort.key !== 'window' || S.sort.dir !== 1) { u.searchParams.set('sort', S.sort.key); u.searchParams.set('dir', String(S.sort.dir)); }
+  else { u.searchParams.delete('sort'); u.searchParams.delete('dir'); }
+  history.replaceState(null, '', u);
+}
+
+// ---------- queue ----------
+function sortedQueue() {
+  const q = S.q.toLowerCase(), { key, dir } = S.sort;
+  const ws = j => (j.win ? j.win[0] : -1);
+  return S.queue.filter(j => matchJob(j, q)).sort((a, b) =>
+    key === 'booked' ? (b.booked - a.booked) * dir : (ws(a) - ws(b)) * dir || a.booked - b.booked);
+}
+function typeChip(type) {
+  if (type === 'emergency') return '<span class="chip chip-danger"><i class="ph ph-warning-octagon" aria-hidden="true"></i>Emergency</span>';
+  return `<span class="chip">${TYPES[type].label}</span>`;
+}
+function noResults(what, scope) {
+  return `<div class="state"><p class="state-title">No ${what} match “${esc(S.q)}”</p>
+    <p class="muted">${scope}</p>
+    <div class="actions-row"><button type="button" class="btn btn-secondary" data-clear-q>Clear search</button></div></div>`;
+}
+function sortHead(key, label, right) {
+  const on = S.sort.key === key;
+  const asc = key === 'booked' ? S.sort.dir === -1 : S.sort.dir === 1;
+  const aria = on ? ` aria-sort="${asc ? 'ascending' : 'descending'}"` : '';
+  const icon = on ? `<i class="ph ph-caret-${asc ? 'up' : 'down'}" aria-hidden="true"></i>` : '';
+  return `<th class="${right ? 'c-booked' : 'c-win'}" scope="col"${aria}><button type="button" class="sort" data-sort="${key}">${label}${icon}</button></th>`;
+}
+function renderQueue() {
+  const body = qs('#queueBody');
+  const n = S.queue.length;
+  qs('#qCount').textContent = S.mode === 'loading' || S.mode === 'error' ? '' : n ? plural(n, 'job', 'jobs') : '';
+  renderBulk();
+  if (S.mode === 'loading') { body.innerHTML = skeletonRows(5); return; }
+  if (S.mode === 'error') {
+    body.innerHTML = `<div class="state" role="alert"><p class="state-title"><i class="ph ph-warning-octagon" aria-hidden="true"></i>Today's jobs did not load</p>
+      <p class="muted">The Fieldline server did not answer within 30 seconds. Nothing you assigned earlier was lost.</p>
+      <div class="actions-row"><button type="button" class="btn btn-secondary" data-retry><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Try again</button><a href="#help">Contact Fieldline support</a></div></div>`;
+    return;
+  }
+  if (S.mode === 'empty') {
+    body.innerHTML = `<div class="state"><p class="state-title">No jobs booked for today yet</p>
+      <p class="muted">Jobs you book show up here until a technician is assigned.</p>
+      <div class="actions-row"><button type="button" class="btn btn-secondary" data-new><i class="ph ph-plus" aria-hidden="true"></i>New job</button></div></div>`;
+    return;
+  }
+  if (!n) {
+    body.innerHTML = `<div class="state"><p class="state-title"><i class="ph ph-check-circle" aria-hidden="true"></i>Every job today has a technician</p>
+      <p class="muted">New jobs land here as they are booked.</p></div>`;
+    return;
+  }
+  const rows = sortedQueue();
+  if (!rows.length) {
+    body.innerHTML = boardMatches() ? noResults('waiting jobs', `${plural(n, 'job is', 'jobs are')} still waiting for a technician.`)
+      : noResults('jobs or technicians', 'Search covers customers, areas, problems, job numbers and technician names.');
+    return;
+  }
+  const vis = rows.slice(0, S.shown);
+  const allSel = vis.length && vis.every(j => S.sel.has(j.id));
+  body.innerHTML = `<table class="q">
+    <thead><tr>
+      <th class="c-sel" scope="col">${READONLY ? '<span class="vh">Select</span>' : `<label class="chk"><input type="checkbox" data-sel-all ${allSel ? 'checked' : ''} aria-label="Select all shown jobs"></label>`}</th>
+      <th class="c-type" scope="col">Type</th>
+      <th class="c-cust" scope="col">Customer and area</th>
+      <th class="c-prob" scope="col">Problem</th>
+      ${sortHead('window', 'Window')}
+      ${sortHead('booked', 'Booked', true)}
+      <th class="c-act" scope="col"><span class="vh">Action</span></th>
+    </tr></thead>
+    <tbody>${vis.map(queueRow).join('')}</tbody></table>
+    ${rows.length > vis.length ? `<div class="more"><span class="tnum">Showing ${nf.format(vis.length)} of ${nf.format(rows.length)}</span><button type="button" class="btn btn-secondary" data-more>Show 20 more</button></div>` : ''}`;
+}
+function queueRow(j) {
+  const cls = [j.type === 'emergency' ? 'is-emerg' : '', S.sel.has(j.id) ? 'is-sel' : '', S.newId === j.id ? 'is-new' : ''].join(' ').trim();
+  const who = `job ${j.id}, ${j.customer}`;
+  return `<tr class="${cls}" data-row="${j.id}">
+    <td class="c-sel">${READONLY ? '' : `<label class="chk"><input type="checkbox" data-sel="${j.id}" ${S.sel.has(j.id) ? 'checked' : ''} aria-label="Select ${esc(who)}"></label>`}</td>
+    <td class="c-type">${typeChip(j.type)}</td>
+    <td class="c-cust" title="${esc(j.customer)}, ${esc(j.area)}"><span class="trunc nm">${esc(j.customer)}</span><span class="trunc ar">${esc(j.area)}</span></td>
+    <td class="c-prob" title="${esc(j.issue)}"><span class="clamp">${esc(j.issue)}</span></td>
+    <td class="c-win tnum">${windowText(j.win)}</td>
+    <td class="c-booked tnum" title="Booked ${esc(bookedAbs(j.booked))}">${bookedRel(j.booked)}</td>
+    <td class="c-act">${READONLY ? '<span class="ro">View only</span>' : `<button type="button" class="btn btn-secondary btn-sm" data-assign="${j.id}" aria-label="Assign ${esc(who)}">Assign</button>`}</td>
+  </tr>`;
+}
+function renderBulk() {
+  const el = qs('#bulk');
+  const n = S.sel.size;
+  el.innerHTML = n && !READONLY ? `<span class="count tnum">${plural(n, 'job', 'jobs')} selected</span>
+    <button type="button" class="btn btn-secondary btn-sm" data-bulk>Assign ${plural(n, 'job', 'jobs')}</button>
+    <button type="button" class="btn btn-quiet btn-sm" data-clear-sel>Clear selection</button>` : '';
+}
+function skeletonBoard(n) {
+  return `<div role="status" aria-label="Loading"><span class="vh">Loading technicians</span>${Array.from({ length: n }, (_, i) =>
+    `<div class="b-row"><div class="b-tech"><span class="sk" style="width:${55 + (i * 13) % 35}%;margin-top:6px"></span><span class="sk" style="width:${40 + (i * 7) % 30}%;margin-top:8px;height:10px"></span></div>
+      <div class="b-track">${[[3 + (i * 5) % 10, 14], [22 + (i * 7) % 12, 18], [48 + (i * 3) % 10, 16]].map(([l, w]) => `<span class="sk sk-blk" style="left:${l}%;width:${w}%"></span>`).join('')}</div></div>`).join('')}</div>`;
+}
+function skeletonRows(n) {
+  return `<div role="status" aria-label="Loading"><span class="vh">Loading today's jobs</span>${Array.from({ length: n }, (_, i) =>
+    `<div class="sk-row"><span class="sk" style="width:${60 + (i * 17) % 40}%"></span><span class="sk" style="width:${70 - (i * 11) % 30}%"></span><span class="sk" style="width:${80 - (i * 23) % 45}%"></span><span class="sk" style="width:70%"></span><span class="sk" style="width:60%"></span></div>`).join('')}</div>`;
+}
+
+// ---------- board ----------
+const pct = m => `${(((Math.min(Math.max(m, DAY0), DAY1) - DAY0) / (DAY1 - DAY0)) * 100).toFixed(3)}%`;
+function blockLabel(j, t) {
+  const p = phase(j);
+  const state = p === 'done' ? 'done' : p === 'now' ? 'in progress' : p === 'late' ? `running ${j.late} min late, due ${clock(j.due)}` : 'scheduled';
+  return `${TYPES[j.type].label}, ${j.customer}, ${j.area}, ${span(j.start, j.end)}, ${state}`;
+}
+function renderBoard() {
+  const body = qs('#boardBody');
+  const working = S.techs.filter(t => t.status !== 'off');
+  const free = S.techs.filter(t => t.status === 'free').length;
+  const late = S.techs.filter(t => t.status === 'late').length;
+  const off = S.techs.length - working.length;
+  const jobsToday = allJobs().length + S.queue.length;
+  const done = allJobs().filter(x => phase(x.job) === 'done').length;
+  qs('#tCount').textContent = S.mode === 'loading' || S.mode === 'error' ? '' :
+    [`${working.length} working`, `${free} free now`, late ? `${late} running late` : '', off ? `${off} off today` : ''].filter(Boolean).join(' · ');
+  qs('#dateLine').textContent = S.mode === 'loading' || S.mode === 'error' ? 'Thursday, October 29' :
+    `Thursday, October 29 · ${plural(jobsToday, 'job', 'jobs')}, ${nf.format(done)} done · updated ${OFFLINE ? '1:19 PM' : '1:24 PM'}`;
+  if (S.mode === 'loading') { body.innerHTML = skeletonBoard(8); return; }
+  if (S.mode === 'error') { body.innerHTML = ''; qs('#techSection').hidden = true; return; }
+  qs('#techSection').hidden = false;
+  const list = boardMatches();
+  if (!list) {
+    const queueHasMatch = S.queue.some(j => matchJob(j, S.q.toLowerCase()));
+    if (!queueHasMatch && S.queue.length) { body.innerHTML = ''; qs('#techSection').hidden = true; return; }
+    body.innerHTML = noResults('technicians or assigned jobs', 'Search covers technician names, customers, areas, problems and job numbers.');
+    return;
+  }
+  let hrs = '';
+  for (let h = 7; h < 18; h++) hrs += `<span class="hr" style="left:${pct(h * 60)}">${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}</span>`;
+  let lines = '';
+  for (let h = 7; h <= 18; h++) lines += `<i style="left:${pct(h * 60)}"></i>`;
+  body.innerHTML = `<div class="board">
+    <div class="b-hours" aria-hidden="true"><div></div><div class="hrs">${hrs}<span class="nowchip tnum" style="left:${pct(NOW)}">${OFFLINE ? '1:19 PM' : '1:24 PM'}</span></div></div>
+    <ul class="b-rows" aria-label="Technicians and their jobs today">${list.map(boardRow).join('')}</ul>
+    <div class="b-grid" aria-hidden="true">${lines}<i class="nowline" style="left:${pct(NOW)}"></i></div>
+  </div>`;
+  clearChip();
+}
+function clearChip() {
+  const chip = qs('.nowchip'); if (!chip) return;
+  const c = chip.getBoundingClientRect();
+  qsa('.hrs .hr').forEach(l => { l.style.visibility = ''; const r = l.getBoundingClientRect(); if (r.right > c.left - 4 && r.left < c.right + 4) l.style.visibility = 'hidden'; });
+}
+addEventListener('resize', clearChip);
+function boardMatches() {
+  const q = S.q.toLowerCase();
+  const list = S.techs.filter(t => !q || t.name.toLowerCase().includes(q) || t.jobs.some(j => matchJob(j, q)));
+  return list.length ? list : null;
+}
+function lanes(jobs) {
+  const sorted = [...jobs].sort((a, b) => a.start - b.start);
+  const ends = [];
+  sorted.forEach(j => { let l = ends.findIndex(e => e <= j.start); if (l < 0) { l = ends.length; ends.push(0); } ends[l] = j.end; j._lane = l; });
+  return { sorted, count: Math.max(1, ends.length) };
+}
+function boardRow(t) {
+  const st = statusOf(t);
+  const { sorted, count } = lanes(t.jobs);
+  const status = st.warn
+    ? `<span class="chip chip-warn"><i class="ph ph-${st.icon}" aria-hidden="true"></i>${esc(st.text)}</span>`
+    : `<i class="ph ph-${st.icon}" aria-hidden="true"></i><span class="trunc" title="${esc(st.text)}">${esc(st.text)}</span>`;
+  const blocks = sorted.map(j => {
+    const p = phase(j);
+    const cls = p === 'late' ? 'late' : j.type === 'emergency' && p !== 'done' ? 'emerg' : p;
+    const icon = p === 'done' ? 'check' : p === 'late' ? 'clock-countdown' : cls === 'emerg' ? 'warning-octagon' : '';
+    const word = p === 'late' ? j.area : cls === 'emerg' ? `Emergency · ${j.area}` : `${j.area} · ${TYPES[j.type].label}`;
+    const left = pct(j.start), right = pct(j.end);
+    const label = blockLabel(j, t);
+    return `<button type="button" class="blk ${cls} l${Math.min(j._lane, 1)}" data-job="${j.id}" style="left:${left};width:calc(${right} - ${left} - 2px)" aria-label="${esc(label)}" title="${esc(label)}">${icon ? `<i class="ph ph-${icon}" aria-hidden="true"></i>` : ''}<span>${esc(word)}</span></button>`;
+  }).join('');
+  const now = t.jobs.find(j => phase(j) === 'now');
+  const nxt = t.jobs.filter(j => j.start > NOW).sort((a, b) => a.start - b.start)[0];
+  const sum = t.status === 'off' ? '' : `<div class="b-sum">
+    ${now ? `<p>Now: ${TYPES[now.type].label}, ${esc(now.area)}</p>` : ''}
+    <p>${nxt ? `Next: ${clock(nxt.start)} ${TYPES[nxt.type].label}, ${esc(nxt.area)}${nxt.late ? ` (due ${clock(nxt.due)})` : ''}` : 'No more jobs today'}</p></div>`;
+  return `<li class="b-row${t.status === 'off' ? ' off' : ''}${count > 1 ? ' lanes-2' : ''}">
+    <div class="b-tech"><p class="b-name trunc" title="${esc(t.name)}">${esc(t.name)}</p><p class="b-status">${status}</p>${sum}</div>
+    <div class="b-track">${blocks}</div></li>`;
+}
+
+// ---------- calls chart ----------
+function renderCalls() {
+  const body = qs('#callsBody');
+  if (S.mode === 'loading') { body.innerHTML = '<div class="sk-block"></div>'; return; }
+  if (S.mode === 'empty') { body.innerHTML = '<p class="side-empty">No calls logged yet today. Each call shows here as it comes in.</p>'; return; }
+  const d = CALLS[S.calls];
+  const a = d.answered.reduce((x, y) => x + y, 0), m = d.missed.reduce((x, y) => x + y, 0);
+  const max = Math.ceil(Math.max(...d.answered, ...d.missed) / 10) * 10;
+  const ticks = []; for (let v = 0; v <= max; v += 10) ticks.push(v);
+  const hourName = h => `${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}`;
+  const short = h => (h === d.start || h === 12 ? hourName(h) : String(h % 12 || 12));
+  const groups = d.answered.map((v, i) => {
+    const h = d.start + i, mi = d.missed[i];
+    const label = `${hourName(h)} to ${hourName(h + 1)}${S.calls === 'today' && i === d.answered.length - 1 ? ' so far' : ''}: ${v} answered, ${mi} missed`;
+    return `<div class="grp" data-grp="${i}" tabindex="${i === 0 ? 0 : -1}" role="img" aria-label="${label}" data-tip="${esc(label)}">
+      <span class="bar bar-1" style="height:${(v / max) * 100}%"></span><span class="bar bar-2" style="height:${(mi / max) * 100}%"></span></div>`;
+  }).join('');
+  body.innerHTML = `<div class="figs">
+      <p class="fig"><span class="sw sw-1" aria-hidden="true"></span><b class="tnum">${nf.format(a)}</b>answered</p>
+      <p class="fig"><span class="sw sw-2" aria-hidden="true"></span><b class="tnum">${nf.format(m)}</b>missed</p>
+    </div>
+    <p class="fig-note">${d.note}</p>
+    <div class="chart" id="callsChart">
+      <div class="yax tnum" aria-hidden="true">${ticks.map(v => `<span style="bottom:${(v / max) * 100}%">${v}</span>`).join('')}</div>
+      <div class="plot">${ticks.slice(1).map(v => `<span class="gl" style="bottom:${(v / max) * 100}%"></span>`).join('')}
+        <div class="groups" role="group" aria-label="Calls by hour. Use the arrow keys to move between hours.">${groups}</div>
+        <div class="tip tnum" id="callsTip" hidden></div></div>
+      <div class="xax tnum" aria-hidden="true">${d.answered.map((_, i) => `<span>${short(d.start + i)}</span>`).join('')}</div>
+    </div>`;
+}
+
+// ---------- revenue chart (single series on the lead block) ----------
+function renderRev() {
+  const body = qs('#revBody');
+  if (S.mode === 'loading') { body.innerHTML = '<div class="sk-block"></div>'; return; }
+  if (S.mode === 'empty') { body.innerHTML = '<p class="side-empty">Nothing booked this week yet. Booked jobs add up here by type.</p>'; return; }
+  const d = REV[S.rev];
+  const total = REV_ORDER.reduce((s, k) => s + d.rows[k][0], 0);
+  const jobs = REV_ORDER.reduce((s, k) => s + d.rows[k][1], 0);
+  const max = 45000;
+  const ticks = [0, 20000, 40000];
+  const rows = REV_ORDER.map((k, i) => {
+    const [v, n] = d.rows[k];
+    const tip = `${TYPES[k].label}: ${money(v)} from ${plural(n, 'job', 'jobs')}, ${money(Math.round(v / n))} each on average`;
+    return `<div class="rev-r" data-rev="${k}" tabindex="${i === 0 ? 0 : -1}" role="img" aria-label="${esc(tip)}" data-tip="${esc(tip)}">
+      <span class="rev-l">${TYPES[k].label}</span>
+      <span class="rev-t">${ticks.map(t => `<i class="rev-grid" style="left:${(t / max) * 100}%"></i>`).join('')}<span class="rbar" style="width:${(v / max) * 100}%"></span></span>
+      <span class="rev-v">${money(v)}</span></div>`;
+  }).join('');
+  body.innerHTML = `<div class="lead-block">
+    <p class="rev-total tnum">${money(total)}</p>
+    <p class="rev-note">${d.range}${d.vs ? `. ${d.vs}.` : '.'}</p>
+    <div class="rev" id="revChart" role="group" aria-label="Booked revenue by job type. Use the arrow keys to move between types.">${rows}
+      <div class="rev-axrow" aria-hidden="true"><span></span><div class="rev-ax tnum">${ticks.map(t => `<span style="left:${(t / max) * 100}%">${t ? '$' + t / 1000 + 'k' : '$0'}</span>`).join('')}</div><span></span></div>
+    </div>
+    <p class="rev-read" id="revRead" aria-live="polite">${plural(jobs, 'job', 'jobs')} booked. Point at a type for its job count.</p>
+  </div>`;
+}
+
+// ---------- banners ----------
+function renderBanner() {
+  const el = qs('#banner');
+  if (OFFLINE) el.innerHTML = `<div class="banner warn" role="status"><i class="ph ph-wifi-slash" aria-hidden="true"></i><p><b>You are offline.</b> The board shows jobs as of 1:19 PM. You can still assign jobs; they send when the connection is back.</p></div>`;
+  else if (READONLY) el.innerHTML = `<div class="banner plain"><i class="ph ph-lock-simple" aria-hidden="true"></i><p><b>You have view-only access.</b> To assign or book jobs, ask Pat Henninger, the office manager, to make you a dispatcher in Settings.</p></div>`;
+  else el.innerHTML = '';
+  const nb = qs('#newJobBtn');
+  if (READONLY) { nb.setAttribute('aria-disabled', 'true'); nb.setAttribute('aria-describedby', 'newReason'); qs('#newReason').hidden = false; }
+}
+
+function renderAll() { renderBanner(); renderQueue(); renderBoard(); renderCalls(); renderRev(); }
+
+// ---------- toasts and undo ----------
+let undoSnap = null, toastTimer = null;
+function snapshot() { return JSON.stringify({ techs: S.techs, queue: S.queue }); }
+function restore(s) { const o = JSON.parse(s); S.techs = o.techs; S.queue = o.queue; }
+function toast(msg, withUndo) {
+  const slot = qs('#toasts');
+  clearTimeout(toastTimer);
+  slot.innerHTML = `<div class="toast"><p>${msg}</p>${withUndo ? '<button type="button" class="btn btn-secondary btn-sm" data-undo>Undo</button>' : ''}<button type="button" class="icon-btn" data-dismiss aria-label="Dismiss" title="Dismiss"><i class="ph ph-x" aria-hidden="true"></i></button></div>`;
+  const t = slot.firstElementChild;
+  const arm = () => { toastTimer = setTimeout(() => { if (!t.matches(':hover, :focus-within')) { slot.innerHTML = ''; undoSnap = null; } else arm(); }, 8000); };
+  arm();
+}
+
+// ---------- assign dialog ----------
+const aDlg = qs('#assignDlg');
+let A = null;
+function availability(t) {
+  if (t.status === 'free') return { from: NOW, area: t.at };
+  const prev = t.jobs.filter(j => j.end <= t.freeAt).sort((a, b) => b.end - a.end)[0];
+  return { from: Math.max(NOW, t.freeAt), area: prev ? prev.area : t.at };
+}
+function techOptions(job, fromTech) {
+  const dur = TYPES[job.type].dur;
+  return S.techs.map(t => {
+    if (t.status === 'off') return { t, off: true, rank: 3 };
+    if (t.id === fromTech) return { t, current: true, rank: 2 };
+    const av = availability(t);
+    const mi = miles(av.area, job.area);
+    let arrive = Math.max(av.from + driveMin(mi), job.win ? job.win[0] : 0);
+    arrive = Math.ceil(arrive / 5) * 5;
+    const clash = t.jobs.filter(j => j.id !== job.id && j.end > arrive && j.start < arrive + dur && phase(j) !== 'done').sort((a, b) => a.start - b.start)[0];
+    return { t, mi, arrive, clash, rank: clash ? 1 : 0 };
+  }).sort((a, b) => a.rank - b.rank || (a.arrive || 0) - (b.arrive || 0) || a.t.name.localeCompare(b.t.name));
+}
+function openAssign(ids, opener, fromTech) {
+  const jobs = ids.map(id => findQueued(id) || findAssigned(id)?.job).filter(Boolean);
+  if (!jobs.length) return;
+  const first = jobs[0];
+  A = { jobs, ids, opener, fromTech, pick: null, opts: techOptions(first, fromTech) };
+  qs('#aTitle').textContent = jobs.length > 1 ? `Assign ${jobs.length} jobs` : `${fromTech ? 'Reassign' : 'Assign'} job #${first.id}`;
+  qs('#aJob').innerHTML = jobs.length > 1
+    ? `<ul class="a-list">${jobs.map(j => `<li><b>${esc(j.customer)}</b><span class="muted">${TYPES[j.type].label}, ${esc(j.area)}, ${windowText(j.win)}</span></li>`).join('')}</ul>
+       <p style="margin-top:6px">They go to one technician in this order. Arrival times follow the route.</p>`
+    : `${typeChip(first.type)}
+       <p class="who" style="color:var(--text)">${esc(first.customer)}</p>
+       <p>${esc(first.addr || '')}, ${esc(first.area)} · Window ${windowText(first.win)}${first.booked != null ? ` · booked ${bookedRel(first.booked).toLowerCase()}` : ''}</p>
+       <p class="issue">${esc(first.issue)}</p>`;
+  qs('#aTechs').innerHTML = A.opts.map((o, i) => {
+    const st = statusOf(o.t);
+    const meta = o.off ? 'Off today' : o.current ? 'Assigned to this job now' : o.clash
+      ? `<i class="ph ph-warning" aria-hidden="true"></i>Clashes with ${TYPES[o.clash.type].label.toLowerCase()} at ${clock(o.clash.start)}`
+      : st.warn ? `<i class="ph ph-clock-countdown" aria-hidden="true"></i>${esc(st.text)}` : esc(st.text);
+    const warn = (o.clash || st.warn) && !o.off && !o.current;
+    const disabled = o.off || o.current;
+    return `<label class="opt${disabled ? ' is-off' : ''}">
+      <input type="radio" name="tech" value="${o.t.id}" ${disabled ? 'disabled' : ''} aria-describedby="om${i}">
+      <span class="opt-name" title="${esc(o.t.name)}">${esc(o.t.name)}</span>
+      <span class="opt-when">${disabled ? '' : `Arrives ${clock(o.arrive)}`}</span>
+      <span class="opt-meta${warn ? ' warn' : ''}" id="om${i}">${meta}</span>
+      <span class="opt-dist">${disabled ? '' : `${o.mi.toFixed(1)} mi`}</span></label>`;
+  }).join('');
+  const firstOpen = qs('#aTechs input:not(:disabled)');
+  if (firstOpen) firstOpen.autofocus = true;
+  qs('#aTimeRow').hidden = jobs.length > 1;
+  qs('#aTime').value = '';
+  qs('#aTime').disabled = true;
+  qs('#aTimeHint').textContent = 'Pick a technician to see the earliest time.';
+  setTimeErr('');
+  const fn = first.customer.split(' ')[0];
+  qs('#aTextLabel').textContent = /^[A-Z][a-z]+$/.test(fn) && !/(Family|Builders|Apartments|Dental)/.test(first.customer) ? `Text ${fn} the arrival time` : 'Text the customer the arrival time';
+  qs('#aText').checked = true;
+  updateAssignBtn();
+  aDlg.showModal();
+}
+const toHHMM = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+function pickedOpt() { return A && A.opts.find(o => o.t.id === A.pick); }
+function updateAssignBtn() {
+  const b = qs('#aSubmit'), r = qs('#aReason'), o = pickedOpt();
+  if (!o) { b.setAttribute('aria-disabled', 'true'); b.textContent = 'Assign'; r.hidden = false; return; }
+  b.removeAttribute('aria-disabled');
+  b.textContent = `Assign to ${o.t.name.split(' ')[0]}`;
+  r.hidden = true;
+}
+function setTimeErr(msg) {
+  const e = qs('#aTimeErr'), i = qs('#aTime');
+  e.hidden = !msg;
+  qs('#aTimeHint').hidden = !!msg;
+  e.innerHTML = msg ? `<i class="ph ph-warning-octagon" aria-hidden="true"></i><span>${msg}</span>` : '';
+  msg ? i.setAttribute('aria-invalid', 'true') : i.removeAttribute('aria-invalid');
+}
+function validateTime() {
+  const o = pickedOpt();
+  if (!o || A.jobs.length > 1) return true;
+  const v = qs('#aTime').value;
+  if (!v) { setTimeErr(`Enter an arrival time, ${clock(o.arrive)} or later.`); return false; }
+  const m = H(v);
+  if (m < o.arrive) { setTimeErr(`${o.t.name.split(' ')[0]} cannot get there before ${clock(o.arrive)}. Pick ${clock(o.arrive)} or later.`); return false; }
+  if (m > H('19:00')) { setTimeErr('The last arrival Northgate books is 7:00 PM. Pick an earlier time.'); return false; }
+  setTimeErr('');
+  return true;
+}
+qs('#aTechs').addEventListener('change', e => {
+  if (e.target.name !== 'tech') return;
+  A.pick = e.target.value;
+  const o = pickedOpt();
+  const ti = qs('#aTime');
+  ti.disabled = false;
+  ti.value = toHHMM(o.arrive);
+  qs('#aTimeHint').textContent = `Earliest for ${o.t.name.split(' ')[0]}: ${clock(o.arrive)}, ${o.mi.toFixed(1)} mi away.`;
+  setTimeErr('');
+  updateAssignBtn();
+});
+qs('#aTime').addEventListener('blur', e => { if (e.relatedTarget?.closest('.dlg-foot')) return; if (A && A.pick) validateTime(); });
+qs('#assignForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!A.pick) { qs('#aReason').hidden = false; (qs('#aTechs input:not(:disabled)') || qs('#aSubmit')).focus(); return; }
+  if (!validateTime()) { qs('#aTime').focus(); return; }
+  doAssign();
+});
+function doAssign() {
+  const o = pickedOpt(), t = o.t;
+  undoSnap = snapshot();
+  const fromQueue = !A.fromTech;
+  const queueIdsBefore = sortedQueue().map(j => j.id);
+  let at = A.jobs.length > 1 ? o.arrive : H(qs('#aTime').value);
+  let prevEnd = null, prevArea = null;
+  A.jobs.forEach((job, i) => {
+    if (i > 0) at = Math.ceil(Math.max(prevEnd + driveMin(miles(prevArea, job.area)), job.win ? job.win[0] : 0) / 5) * 5;
+    const placed = { id: job.id, type: job.type, customer: job.customer, area: job.area, addr: job.addr, issue: job.issue, start: at, end: at + TYPES[job.type].dur };
+    if (fromQueue) S.queue = S.queue.filter(j => j.id !== job.id);
+    else { const old = S.techs.find(x => x.id === A.fromTech); old.jobs = old.jobs.filter(j => j.id !== job.id); }
+    t.jobs.push(placed);
+    prevEnd = placed.end; prevArea = job.area;
+  });
+  const firstArrive = A.jobs.length > 1 ? o.arrive : H(qs('#aTime').value);
+  if (t.status === 'free' && firstArrive - driveMin(o.mi) <= NOW + 15) {
+    t.status = 'driving'; t.dest = A.jobs[0].area; t.arrive = firstArrive; t.freeAt = prevEnd; t.at = prevArea;
+  }
+  A.jobs.forEach(j => S.sel.delete(j.id));
+  const first = A.jobs[0], count = A.jobs.length;
+  aDlg.close();
+  renderQueue(); renderBoard();
+  const where = OFFLINE ? ' It sends when you are back online.' : '';
+  toast(count > 1
+    ? `${count} jobs assigned to ${esc(t.name)}, first arrival ${clock(firstArrive)}.${where}`
+    : `${esc(first.customer)} is assigned to ${esc(t.name)}, arriving by ${clock(firstArrive)}.${where}`, true);
+  // Focus goes to the next job waiting, or the queue heading when none are left.
+  const nextId = fromQueue ? queueIdsBefore.find(id => !A.ids.includes(id) && findQueued(id)) : null;
+  const target = nextId ? qs(`[data-assign="${nextId}"]`) : fromQueue ? qs('#qTitle') : qs(`[data-job="${first.id}"]`);
+  (target || qs('#qTitle')).focus();
+}
+aDlg.addEventListener('close', () => {
+  if (A && A.opener && A.opener.isConnected && document.activeElement === document.body) A.opener.focus();
+});
+
+// ---------- new job dialog ----------
+const nDlg = qs('#newDlg');
+qs('#nArea').innerHTML = '<option value="">Choose an area</option>' + Object.keys(AREAS).map(a => `<option>${a}</option>`).join('');
+qs('#nTypes').innerHTML = Object.entries(TYPES).map(([k, v], i) => `<label><input type="radio" name="ntype" value="${k}" ${i === 0 ? 'checked' : ''}>${v.label}</label>`).join('');
+const NEW_RULES = {
+  nName: v => (v.trim().length >= 2 ? '' : "Enter the customer's name."),
+  nPhone: v => (v.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '').length === 10 ? '' : 'Enter a 10-digit phone number, like 614 382 0915.'),
+  nAddr: v => (/\d/.test(v) && v.trim().length > 4 ? '' : 'Enter the street address with the house number.'),
+  nArea: v => (v ? '' : 'Choose the area so the closest technicians show first.'),
+  nProb: v => (v.trim().length >= 3 ? '' : 'Say what is wrong, in a few words.'),
+};
+function fieldErr(id) {
+  const el = qs('#' + id), msg = NEW_RULES[id](el.value), e = qs(`#${id}Err`), hint = qs(`#${id}Hint`);
+  e.hidden = !msg;
+  if (hint) hint.hidden = !!msg;
+  e.innerHTML = msg ? `<i class="ph ph-warning-octagon" aria-hidden="true"></i><span>${msg}</span>` : '';
+  msg ? el.setAttribute('aria-invalid', 'true') : el.removeAttribute('aria-invalid');
+  return !msg;
+}
+Object.keys(NEW_RULES).forEach(id => {
+  // Moving to the footer buttons skips this: submit checks every field, and a message appearing here would shift the button away from the pointer.
+  qs('#' + id).addEventListener('blur', e => { if (e.relatedTarget?.closest('.dlg-foot')) return; if (qs('#' + id).value || qs('#' + id).hasAttribute('aria-invalid')) fieldErr(id); });
+  qs('#' + id).addEventListener('input', () => { if (qs('#' + id).hasAttribute('aria-invalid')) fieldErr(id); });
+});
+qs('#nTypes').addEventListener('change', e => { if (e.target.value === 'emergency') qs('#nWin').value = 'asap'; });
+function openNew(opener) {
+  if (READONLY) return;
+  qs('#newForm').reset();
+  Object.keys(NEW_RULES).forEach(id => { qs(`#${id}Err`).hidden = true; qs('#' + id).removeAttribute('aria-invalid'); const h = qs(`#${id}Hint`); if (h) h.hidden = false; });
+  nDlg._opener = opener;
+  nDlg.showModal();
+}
+qs('#newForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const bad = Object.keys(NEW_RULES).filter(id => !fieldErr(id));
+  if (bad.length) { qs('#' + bad[0]).focus(); return; }
+  const w = qs('#nWin').value;
+  const job = {
+    id: S.nextId++, type: qs('input[name="ntype"]:checked').value, customer: qs('#nName').value.trim(),
+    addr: qs('#nAddr').value.trim(), area: qs('#nArea').value, booked: NOW, issue: qs('#nProb').value.trim(),
+    win: w === 'asap' ? null : w.split('-').map(H),
+  };
+  undoSnap = snapshot();
+  if (S.mode === 'empty') S.mode = null;
+  S.queue.push(job);
+  S.newId = job.id;
+  nDlg.close();
+  renderQueue(); renderBoard();
+  toast(`Job #${job.id} for ${esc(job.customer)} is in the queue.${OFFLINE ? ' It sends when you are back online.' : ''}`, true);
+  (qs(`[data-assign="${job.id}"]`) || qs('#newJobBtn')).focus();
+});
+nDlg.addEventListener('close', () => { if (nDlg._opener && document.activeElement === document.body) nDlg._opener.focus(); });
+
+// ---------- popovers ----------
+function place(pop, anchor, alignRight) {
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = alignRight ? r.right - pw : r.left;
+  left = Math.max(8, Math.min(left, innerWidth - pw - 8));
+  let top = r.bottom + 6;
+  if (top + ph > innerHeight - 8) top = Math.max(8, r.top - ph - 6);
+  pop.style.left = `${left}px`; pop.style.top = `${top}px`;
+}
+['acctMenu', 'moreMenu'].forEach(id => {
+  const pop = qs('#' + id);
+  pop.addEventListener('toggle', e => {
+    if (e.newState !== 'open') return;
+    const anchor = id === 'acctMenu' ? qs('#acctBtn') : qs('[popovertarget="moreMenu"]');
+    place(pop, anchor, true);
+    if (id === 'moreMenu') { const r = anchor.getBoundingClientRect(); pop.style.top = `${Math.max(8, r.top - pop.offsetHeight - 6)}px`; }
+  });
+});
+const jobPop = qs('#jobPop');
+function openJobPop(id, anchor) {
+  const found = findAssigned(id);
+  if (!found) return;
+  const { job: j, tech: t } = found;
+  const p = phase(j);
+  const status = p === 'done' ? 'Done' : p === 'now' ? (j.planEnd ? `In progress, planned to finish ${clock(j.planEnd)}` : 'In progress') : p === 'late' ? `Running ${j.late} min late. Due ${clock(j.due)}, now about ${clock(j.start)}` : 'Scheduled';
+  const canMove = (p === 'next' || p === 'late') && !READONLY;
+  jobPop.innerHTML = `<h3 id="jpTitle">${TYPES[j.type].label} · #${j.id}</h3>
+    <dl>
+      <dt>Customer</dt><dd>${esc(j.customer)}</dd>
+      <dt>Address</dt><dd>${esc(j.addr || '')}, ${esc(j.area)}</dd>
+      <dt>Time</dt><dd class="tnum">${span(j.start, j.end)}</dd>
+      <dt>Technician</dt><dd>${esc(t.name)}</dd>
+      <dt>Problem</dt><dd>${esc(j.issue)}</dd>
+      <dt>Status</dt><dd${p === 'late' ? ' style="color:var(--warning-ink)"' : ''}>${status}</dd>
+    </dl>
+    ${canMove ? `<div class="pop-act"><button type="button" class="btn btn-secondary btn-sm" data-reassign="${j.id}" data-from="${t.id}">Reassign</button></div>` : ''}`;
+  jobPop._anchor = anchor;
+  jobPop.showPopover();
+  place(jobPop, anchor);
+  (qs('[data-reassign]', jobPop) || jobPop).focus();
+}
+jobPop.addEventListener('beforetoggle', e => {
+  if (e.newState === 'closed' && jobPop.contains(document.activeElement) && jobPop._anchor?.isConnected) setTimeout(() => jobPop._anchor.focus(), 0);
+});
+
+// ---------- charts: hover and keyboard ----------
+function showTip(grp) {
+  const tip = qs('#callsTip'); if (!tip) return;
+  const groups = grp.parentElement;
+  groups.classList.add('dim');
+  qsa('.grp', groups).forEach(g => g.classList.toggle('on', g === grp));
+  tip.textContent = grp.dataset.tip;
+  tip.hidden = false;
+  const plot = tip.parentElement, pr = plot.getBoundingClientRect(), gr = grp.getBoundingClientRect();
+  const half = tip.offsetWidth / 2;
+  const x = Math.max(half - 24, Math.min(gr.left + gr.width / 2 - pr.left, pr.width - half));
+  tip.style.left = `${x}px`;
+}
+function hideTip() {
+  const tip = qs('#callsTip'); if (tip) tip.hidden = true;
+  qsa('.groups').forEach(g => { g.classList.remove('dim'); qsa('.grp', g).forEach(x => x.classList.remove('on')); });
+}
+function showRev(row) {
+  const chart = qs('#revChart'); chart.classList.add('dim');
+  qsa('.rev-r', chart).forEach(r => r.classList.toggle('on', r === row));
+  qs('#revRead').textContent = row.dataset.tip + '.';
+}
+function hideRev() {
+  const chart = qs('#revChart'); if (!chart) return;
+  chart.classList.remove('dim'); qsa('.rev-r', chart).forEach(r => r.classList.remove('on'));
+  const d = REV[S.rev];
+  qs('#revRead').textContent = `${plural(REV_ORDER.reduce((s, k) => s + d.rows[k][1], 0), 'job', 'jobs')} booked. Point at a type for its job count.`;
+}
+function rove(e, sel) {
+  const items = qsa(sel, e.currentTarget);
+  const i = items.indexOf(document.activeElement);
+  if (i < 0) return;
+  const k = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, Home: -999, End: 999 }[e.key];
+  if (!k) return;
+  e.preventDefault();
+  const n = Math.max(0, Math.min(items.length - 1, i + k));
+  items.forEach((it, j) => (it.tabIndex = j === n ? 0 : -1));
+  items[n].focus();
+}
+const callsBody = qs('#callsBody'), revBody = qs('#revBody');
+callsBody.addEventListener('mouseover', e => { const g = e.target.closest('.grp'); if (g) showTip(g); });
+callsBody.addEventListener('mouseleave', hideTip);
+callsBody.addEventListener('focusin', e => { const g = e.target.closest('.grp'); if (g) showTip(g); });
+callsBody.addEventListener('focusout', hideTip);
+callsBody.addEventListener('keydown', e => rove(e, '.grp'));
+revBody.addEventListener('mouseover', e => { const r = e.target.closest('.rev-r'); if (r) showRev(r); });
+revBody.addEventListener('mouseleave', hideRev);
+revBody.addEventListener('focusin', e => { const r = e.target.closest('.rev-r'); if (r) showRev(r); });
+revBody.addEventListener('focusout', hideRev);
+revBody.addEventListener('keydown', e => rove(e, '.rev-r'));
+
+// ---------- events ----------
+document.addEventListener('click', e => {
+  const el = e.target.closest('button, [data-job]');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.assign) openAssign([Number(d.assign)], el);
+  else if ('bulk' in d) openAssign([...S.sel].filter(id => findQueued(id)), el);
+  else if ('clearSel' in d) { S.sel.clear(); renderQueue(); qs('#qTitle').focus(); }
+  else if (d.sort) {
+    S.sort = S.sort.key === d.sort ? { key: d.sort, dir: -S.sort.dir } : { key: d.sort, dir: 1 };
+    syncUrl(); renderQueue(); qs(`[data-sort="${d.sort}"]`).focus();
+  }
+  else if ('more' in d) { S.shown += 20; renderQueue(); const b = qs('[data-more]'); (b || qs('#qTitle')).focus(); }
+  else if ('clearQ' in d) { S.q = ''; qs('#q').value = ''; syncUrl(); renderQueue(); renderBoard(); qs('#q').focus(); }
+  else if (d.job) openJobPop(Number(d.job), el);
+  else if (d.reassign) { jobPop.hidePopover(); openAssign([Number(d.reassign)], jobPop._anchor, d.from); }
+  else if ('retry' in d) {
+    S.mode = 'loading'; renderQueue(); renderBoard();
+    setTimeout(() => { S.mode = null; renderQueue(); renderBoard(); qs('#qTitle').focus(); toast("Today's jobs are back.", false); }, 900);
+  }
+  else if (d.seg) {
+    if (d.seg === 'calls') S.calls = d.val; else S.rev = d.val;
+    qsa(`[data-seg="${d.seg}"]`).forEach(b => b.setAttribute('aria-pressed', String(b === el)));
+    d.seg === 'calls' ? renderCalls() : renderRev();
+  }
+  else if ('close' in d) el.closest('dialog').close();
+  else if ('undo' in d) {
+    if (!undoSnap) return;
+    restore(undoSnap); undoSnap = null; S.newId = null;
+    renderQueue(); renderBoard();
+    toast('Undone. The board is back to how it was.', false);
+    qs('#qTitle').focus();
+  }
+  else if ('dismiss' in d) { qs('#toasts').innerHTML = ''; undoSnap = null; }
+  else if ('new' in d || el.id === 'newJobBtn') openNew(el);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.sel) {
+    const id = Number(t.dataset.sel);
+    t.checked ? S.sel.add(id) : S.sel.delete(id);
+    t.closest('tr').classList.toggle('is-sel', t.checked);
+    const all = qs('[data-sel-all]');
+    if (all) all.checked = qsa('[data-sel]').every(x => x.checked);
+    renderBulk();
+  } else if ('selAll' in t.dataset) {
+    qsa('[data-sel]').forEach(x => { x.checked = t.checked; const id = Number(x.dataset.sel); t.checked ? S.sel.add(id) : S.sel.delete(id); x.closest('tr').classList.toggle('is-sel', t.checked); });
+    renderBulk();
+  }
+});
+const qInput = qs('#q');
+qInput.value = S.q;
+qInput.addEventListener('input', () => { S.q = qInput.value.trim(); S.shown = 20; syncUrl(); renderQueue(); renderBoard(); });
+qInput.addEventListener('keydown', e => { if (e.key === 'Escape' && qInput.value) { e.preventDefault(); qInput.value = ''; S.q = ''; syncUrl(); renderQueue(); renderBoard(); } });
+
+// Loading shows nothing for the first 300ms, then a skeleton shaped like the result.
+if (S.mode === 'loading') {
+  renderBanner();
+  qs('#qCount').textContent = ''; qs('#tCount').textContent = '';
+  setTimeout(renderAll, 300);
+} else renderAll();
+})();
+</script>
+</body>
+</html>

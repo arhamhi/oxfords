@@ -1,0 +1,1611 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Workspace settings · Shiftboard</title>
+<style>
+/* Palette: Cellar, lead and support swapped. Cellar brown floods the plan and billing panel,
+   the rust carries the error and delete states (a palette red owns the critical state),
+   the khaki marks what is pending. Everything else is neutral. */
+:root {
+  color-scheme: light dark;
+  --page: #FFFFFF;
+  --raised: #FAFAFA;
+  --raised-2: #F4F4F5;
+  --hover: #F0F0F0;
+  --fill-active: #E7E7E7;
+  --sel: #F4F4F5;
+  --line: #E5E5E5;
+  --line-btn: #CFCFCF;
+  --line-strong: #8C8C8C;
+  --text: #111111;
+  --quiet: #6B6B6B;
+  --lead: #3E3428;
+  --on-lead: #FFFFFF;
+  --on-lead-quiet: #D0CBC4;
+  --on-lead-line: rgba(255, 255, 255, 0.2);
+  --support: #983219;
+  --support-fill: #983219;
+  --support-fill-hover: #7F2914;
+  --support-wash: #FBF3F1;
+  --pop: #C1BB97;
+  --on-pop: #111111;
+  --focus: #3E3428;
+  --btn: #111111;
+  --on-btn: #FFFFFF;
+  --btn-hover: #2E2E2E;
+  --btn-disabled: #EDEDED;
+  --on-btn-disabled: #8A8A8A;
+  --layer: #FFFFFF;
+  --toast-bg: #111111;
+  --toast-text: #F5F5F5;
+  --shadow: 0 8px 24px rgba(17, 17, 17, 0.10), 0 1px 3px rgba(17, 17, 17, 0.08);
+  --scrim: rgba(17, 17, 17, 0.36);
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #000000;
+    --raised: #141414;
+    --raised-2: #1C1C1E;
+    --hover: #1A1A1A;
+    --fill-active: #262628;
+    --sel: #161618;
+    --line: #2A2A2A;
+    --line-btn: #3A3A3A;
+    --line-strong: #6B6B6B;
+    --text: #F5F5F5;
+    --quiet: #A3A3A3;
+    --lead: #3A322A;
+    --on-lead: #FFFFFF;
+    --on-lead-quiet: #CFC9C1;
+    --on-lead-line: rgba(255, 255, 255, 0.16);
+    --support: #E08A72;
+    --support-fill: #B8462B;
+    --support-fill-hover: #C85636;
+    --support-wash: #1C1210;
+    --pop: #C1BB97;
+    --on-pop: #111111;
+    --focus: #C1BB97;
+    --btn: #F5F5F5;
+    --on-btn: #111111;
+    --btn-hover: #D9D9D9;
+    --btn-disabled: #2C2C2E;
+    --on-btn-disabled: #7A7A7A;
+    --layer: #1C1C1E;
+    --toast-bg: #2A2A2C;
+    --toast-text: #F5F5F5;
+    --shadow: none;
+    --scrim: rgba(0, 0, 0, 0.64);
+  }
+}
+@media (prefers-contrast: more) {
+  :root { --line: #8C8C8C; --line-btn: #111111; --quiet: #4D4D4D; }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root { --line: #8A8A8A; --line-btn: #F5F5F5; --quiet: #C4C4C4; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  transition: background-color 200ms ease-out, color 200ms ease-out;
+}
+::selection { background: var(--pop); color: var(--on-pop); }
+input, select, button, textarea { font: inherit; color: inherit; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+input[type="checkbox"] { accent-color: var(--text); width: 16px; height: 16px; margin: 0; cursor: pointer; }
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.i { width: 20px; height: 20px; flex: none; fill: currentColor; }
+.i-16 { width: 16px; height: 16px; }
+.i-18 { width: 18px; height: 18px; }
+.num { font-variant-numeric: tabular-nums; }
+.quiet { color: var(--quiet); }
+[hidden] { display: none !important; }
+
+.skip { position: absolute; left: 12px; top: -60px; z-index: 100; padding: 8px 12px; border-radius: 6px; background: var(--btn); color: var(--on-btn); text-decoration: none; }
+.skip:focus { top: 12px; }
+
+/* Shell */
+.app { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100dvh; }
+.side-col { background: var(--raised); border-right: 1px solid var(--line); }
+.side {
+  position: sticky; top: 0; height: 100dvh;
+  display: flex; flex-direction: column; gap: 4px; padding: 12px;
+}
+.ws-switch, .account {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px; border: 0; border-radius: 6px; background: transparent;
+  text-align: left; cursor: pointer;
+}
+.ws-switch { margin-bottom: 16px; }
+.ws-switch:hover, .account:hover, .ws-switch[aria-expanded="true"], .account[aria-expanded="true"] { background: var(--hover); }
+.stack { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.stack .top { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stack .under { font-size: 13px; line-height: 18px; color: var(--quiet); }
+.nav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.nav a {
+  display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 8px;
+  border-radius: 6px; text-decoration: none; color: var(--text);
+}
+.nav a .i { color: var(--quiet); }
+.nav a:hover { background: var(--hover); }
+.nav a[aria-current="page"] { background: var(--fill-active); font-weight: 600; }
+.nav a[aria-current="page"] .i { color: var(--text); }
+.nav-bottom { margin-top: auto; padding-bottom: 8px; }
+.account { border-top: 1px solid var(--line); border-radius: 0 0 6px 6px; padding-top: 12px; }
+
+.main { min-width: 0; padding: 32px 40px 96px; }
+.main:focus { outline: none; }
+.wrap { max-width: 1040px; }
+.page-head h1 { font-size: 24px; line-height: 32px; font-weight: 650; margin: 0; }
+h1:focus, h2:focus { outline: none; }
+h1:focus-visible, h2:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: 2px; }
+
+.banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; margin-bottom: 24px; border-radius: 10px; background: var(--raised-2); }
+.banner p { margin: 0; }
+
+/* Sections */
+.sec { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+.sec:first-of-type { margin-top: 24px; padding-top: 0; border-top: 0; }
+.sec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.sec-head h2 { font-size: 16px; line-height: 24px; font-weight: 600; margin: 0; }
+.sec-desc { margin: 4px 0 0; color: var(--quiet); max-width: 64ch; }
+.head-action { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+/* Forms */
+.form { max-width: 480px; display: flex; flex-direction: column; gap: 24px; }
+.field { display: flex; flex-direction: column; }
+.label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.label { font-weight: 600; }
+.hint { margin: 2px 0 8px; color: var(--quiet); font-size: 13px; line-height: 18px; }
+.count { font-size: 13px; line-height: 18px; color: var(--quiet); font-variant-numeric: tabular-nums; }
+.count.over { color: var(--support); font-weight: 600; }
+.input, .select select {
+  width: 100%; height: 36px; padding: 0 12px;
+  border: 1px solid var(--line-strong); border-radius: 6px;
+  background: var(--page); color: var(--text);
+  transition: border-color 120ms ease-out;
+}
+.input:hover, .select select:hover { border-color: var(--text); }
+.input:disabled, .select select:disabled { border-color: var(--line); color: var(--quiet); cursor: not-allowed; }
+.input[aria-invalid="true"] { border-color: var(--support); }
+.err { display: flex; align-items: flex-start; gap: 6px; margin: 8px 0 0; color: var(--support); font-size: 13px; line-height: 18px; }
+.select { position: relative; display: flex; }
+.select select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; text-overflow: ellipsis; }
+.select > .i { position: absolute; right: 10px; top: 50%; width: 16px; height: 16px; margin-top: -8px; pointer-events: none; color: var(--quiet); }
+.form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.why { margin: 0; display: flex; align-items: center; gap: 6px; color: var(--quiet); font-size: 13px; line-height: 18px; }
+.note { margin: 0; color: var(--quiet); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 6px;
+  font-weight: 600; white-space: nowrap; text-decoration: none; cursor: pointer;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out, transform 120ms ease-out;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--btn); color: var(--on-btn); }
+.btn-primary:hover { background: var(--btn-hover); }
+.btn-secondary { background: transparent; color: var(--text); border-color: var(--line-btn); }
+.btn-secondary:hover { background: var(--hover); }
+.btn-ghost { background: transparent; color: var(--text); padding: 0 12px; }
+.btn-ghost:hover { background: var(--hover); }
+.btn-danger-outline { background: transparent; color: var(--support); border-color: var(--support); }
+.btn-danger-outline:hover { background: var(--support-wash); }
+.btn-danger { background: var(--support-fill); color: #FFFFFF; }
+.btn-danger:hover { background: var(--support-fill-hover); }
+.btn[aria-disabled="true"], .btn[aria-disabled="true"]:hover {
+  background: var(--btn-disabled); color: var(--on-btn-disabled); border-color: transparent; cursor: not-allowed;
+}
+.btn[aria-disabled="true"]:active { transform: none; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  border: 0; border-radius: 6px; background: transparent; color: var(--quiet); cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.icon-btn:hover, .icon-btn[aria-expanded="true"] { background: var(--hover); color: var(--text); }
+
+/* Members toolbar and table */
+.toolbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.tb-filters { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.tb-field { display: flex; flex-direction: column; gap: 4px; }
+.tb-field > .lbl { font-size: 13px; line-height: 18px; color: var(--quiet); }
+.tb-field .select select { width: 160px; }
+.tb-sort { display: none; }
+.search { position: relative; display: flex; }
+.search > .i { position: absolute; left: 10px; top: 50%; margin-top: -10px; color: var(--quiet); pointer-events: none; }
+.search input { width: 260px; padding-left: 38px; }
+.search input::-webkit-search-cancel-button { cursor: pointer; }
+.tb-right { display: flex; align-items: center; gap: 8px; min-height: 36px; color: var(--quiet); flex-wrap: wrap; }
+.sel-count { color: var(--text); font-weight: 600; margin-right: 4px; }
+
+.tbl-wrap { border-top: 1px solid var(--line); }
+.mt { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.mt th {
+  height: 36px; padding: 0 12px; text-align: left; white-space: nowrap;
+  font-size: 13px; line-height: 18px; font-weight: 500; color: var(--quiet);
+  border-bottom: 1px solid var(--line);
+}
+.mt td { height: 52px; padding: 6px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.mt tbody tr:hover td { background: var(--raised); }
+.mt tr.is-sel td { background: var(--sel); }
+.mt .c-sel { width: 44px; padding: 0 0 0 2px; }
+.mt .c-name { width: auto; }
+.mt .c-email { width: 28%; }
+.mt .c-role { width: 136px; }
+.mt .c-loc { width: 136px; }
+.mt .c-active { width: 128px; text-align: right; }
+.mt .c-act { width: 52px; padding: 0 4px 0 0; text-align: right; }
+.cb { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 6px; cursor: pointer; }
+.cb:hover { background: var(--hover); }
+.th-btn {
+  display: inline-flex; align-items: center; gap: 4px; height: 28px; margin: 0 -6px; padding: 0 6px;
+  border: 0; border-radius: 6px; background: transparent; color: inherit; font-weight: inherit; cursor: pointer;
+}
+.th-btn:hover { background: var(--hover); color: var(--text); }
+.th-btn[data-on] { color: var(--text); }
+.name-line { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.name { font-weight: 600; min-width: 0; }
+.you { flex: none; font-size: 13px; color: var(--quiet); }
+.trunc { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-email, .c-loc, .c-active, .email-sub, .sub { color: var(--quiet); }
+.email-sub, .sub { display: none; font-size: 13px; line-height: 18px; }
+.sub { display: block; }
+.c-loc .is-all { color: var(--quiet); }
+.role-text { display: inline-block; }
+.select.compact { display: inline-flex; margin-left: -9px; }
+.select.compact select { width: auto; min-width: 112px; height: 32px; padding: 0 30px 0 8px; border-color: transparent; background: transparent; }
+.select.compact select:hover { border-color: var(--line-strong); }
+.select.compact select:disabled { color: var(--quiet); border-color: transparent; }
+.select.compact > .i { right: 8px; }
+.chip-pending {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 1px solid transparent;
+  border-radius: 6px; background: var(--pop); color: var(--on-pop); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap;
+}
+.tfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; color: var(--quiet); }
+.state { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 28px 0 8px; }
+.state p { margin: 0; max-width: 60ch; }
+.state-title { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.state-title.is-err { color: var(--support); }
+.sk { display: block; height: 12px; border-radius: 6px; background: var(--raised-2); }
+
+/* Plan and billing: the one lead block */
+.plan { background: var(--lead); color: var(--on-lead); border-radius: 10px; padding: 24px; }
+.plan a { color: var(--on-lead); }
+.plan-top a { white-space: nowrap; }
+.plan :focus-visible { outline-color: var(--pop); }
+.plan-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.plan-name { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; }
+.plan-sub { margin: 2px 0 0; color: var(--on-lead-quiet); }
+.strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--on-lead-line); }
+.fig { padding: 16px 24px 0 0; min-width: 0; }
+.fig + .fig { padding-left: 24px; border-left: 1px solid var(--on-lead-line); }
+.fig dt { font-size: 13px; line-height: 18px; color: var(--on-lead-quiet); }
+.fig dd { margin: 0; }
+.big { margin-top: 4px; font-size: 20px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.big .of { color: var(--on-lead-quiet); font-weight: 500; }
+.fig .small { margin-top: 4px; font-size: 13px; line-height: 18px; color: var(--on-lead-quiet); }
+.meter { display: grid; grid-template-columns: repeat(40, minmax(0, 1fr)); gap: 2px; height: 12px; margin: 10px 0 8px; forced-color-adjust: none; }
+.meter span { background: var(--on-lead); }
+.meter .p { background: var(--pop); }
+.meter .f { background: transparent; box-shadow: inset 0 0 0 1px var(--on-lead-quiet); }
+.swatch { display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--pop); vertical-align: 0; }
+.noperm { padding: 0; }
+
+/* Danger zone */
+.danger-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.danger-row p { margin: 0; }
+.danger-row .strong { font-weight: 600; }
+.danger-row .quiet { margin-top: 2px; max-width: 64ch; }
+
+/* Deleted state */
+.gone { max-width: 560px; padding-top: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.gone h1 { font-size: 24px; line-height: 32px; font-weight: 650; margin: 0; }
+.gone p { margin: 0; }
+
+/* Overlays */
+dialog {
+  width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px);
+  padding: 24px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--layer); color: var(--text); box-shadow: var(--shadow);
+}
+dialog::backdrop { background: var(--scrim); }
+dialog[open] { animation: dlg-in 200ms ease-out; }
+dialog[open]::backdrop { animation: fade-in 200ms ease-out; }
+dialog h2 { margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; }
+.dlg-body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.dlg-body p { margin: 0; }
+.dlg-fields { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.dlg-fields .span2 { grid-column: 1 / -1; }
+.dlg-fields .hint { margin-bottom: 6px; }
+.dlg-fields .label { margin-bottom: 6px; }
+.dlg-actions { margin-top: 24px; display: flex; justify-content: flex-end; gap: 8px; }
+.dlg-why { margin-top: 8px; justify-content: flex-end; text-align: right; }
+.form-err { margin-top: 16px; }
+.more-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.more-list a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 6px; text-decoration: none; }
+.more-list a[aria-current="page"] { background: var(--fill-active); font-weight: 600; }
+.more-sep { height: 1px; margin: 8px 0; background: var(--line); }
+
+.menu {
+  position: fixed; z-index: 50; min-width: 220px; max-width: calc(100vw - 16px); padding: 4px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--layer); box-shadow: var(--shadow);
+  animation: menu-in 150ms ease-out;
+}
+.menu.up { animation-name: menu-in-up; }
+.menu [role^="menuitem"] {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px;
+  border: 0; border-radius: 6px; background: transparent; color: var(--text);
+  text-align: left; text-decoration: none; cursor: pointer; white-space: nowrap;
+}
+.menu [role^="menuitem"] .i { color: var(--quiet); }
+.menu [role^="menuitem"]:hover, .menu [role^="menuitem"]:focus-visible { background: var(--hover); outline: none; }
+.menu [role^="menuitem"]:focus-visible { box-shadow: inset 0 0 0 2px var(--focus); }
+.menu .danger, .menu .danger .i { color: var(--support); }
+.menu .ml { margin-left: auto; color: var(--text); }
+.menu-sep { height: 1px; margin: 4px 0; background: var(--line); }
+
+.toasts { position: fixed; right: 24px; bottom: 24px; z-index: 60; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
+.toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 8px;
+  min-width: 280px; max-width: min(440px, calc(100vw - 32px)); padding: 8px 8px 8px 16px;
+  border-radius: 10px; background: var(--toast-bg); color: var(--toast-text); box-shadow: var(--shadow);
+  animation: toast-in 200ms ease-out;
+}
+.toast p { margin: 0; flex: 1; }
+.toast .t-btn { height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--toast-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.toast .t-btn:hover, .toast .icon-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.toast .icon-btn { color: var(--toast-text); }
+.toast :focus-visible { outline-color: var(--pop); }
+
+.tip {
+  position: fixed; z-index: 70; max-width: 320px; padding: 6px 8px; border-radius: 6px;
+  background: var(--toast-bg); color: var(--toast-text); font-size: 12px; line-height: 16px;
+  pointer-events: none; overflow-wrap: anywhere;
+}
+
+.tabbar { display: none; }
+
+@keyframes dlg-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes menu-in-up { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Narrower desktop: email moves under the name */
+@media (max-width: 1279px) {
+  .mt .c-email { display: none; }
+  .email-sub { display: block; }
+}
+
+/* Tablet and phone: sidebar becomes a bottom bar */
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side-col { display: none; }
+  .main { padding: 24px 24px calc(96px + env(safe-area-inset-bottom)); }
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+    background: var(--page); border-top: 1px solid var(--line);
+  }
+  .tabbar a, .tabbar button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    min-height: 56px; padding: 6px 2px; border: 0; background: transparent;
+    color: var(--quiet); font-size: 12px; line-height: 16px; text-decoration: none; cursor: pointer;
+  }
+  .tabbar .i { width: 24px; height: 24px; }
+  .tabbar .is-current { color: var(--text); font-weight: 600; }
+  .tabbar .ico-wrap { display: grid; place-items: center; width: 48px; height: 28px; border-radius: 6px; }
+  .tabbar .is-current .ico-wrap { background: var(--fill-active); }
+  .toasts { left: 16px; right: 16px; bottom: calc(68px + env(safe-area-inset-bottom)); align-items: stretch; }
+  .toast { min-width: 0; max-width: none; }
+}
+
+/* Phone */
+@media (max-width: 720px) {
+  .main { padding: 16px max(16px, env(safe-area-inset-left)) calc(96px + env(safe-area-inset-bottom)); }
+  .input, .select select, .search input { height: 44px; font-size: 16px; }
+  .btn { height: 44px; padding: 0 20px; }
+  .icon-btn { width: 44px; height: 44px; }
+  .sec-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .head-action { align-items: flex-start; }
+  .form { max-width: none; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .tb-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+  .tb-search, .tb-sort { grid-column: 1 / -1; }
+  .tb-sort { display: flex; }
+  .tb-field .select select { width: 100%; padding-right: 30px; padding-left: 10px; }
+  .tb-field .select > .i { right: 8px; }
+  .search input { width: 100%; }
+  .tb-right { min-height: 0; }
+  .tb-right .btn { flex: 1; }
+  .mt, .mt tbody { display: block; }
+  .mt thead { display: none; }
+  .mt tr {
+    display: grid; grid-template-columns: 44px minmax(0, 1fr) auto 44px;
+    grid-template-areas: "sel name active act" "sel role loc act";
+    column-gap: 8px; row-gap: 2px; padding: 4px 0 8px; border-bottom: 1px solid var(--line);
+  }
+  .mt tr.is-sel { background: var(--sel); }
+  .mt td, .mt tr.is-sel td, .mt tbody tr:hover td { display: block; height: auto; padding: 0; border: 0; background: none; width: auto; }
+  .mt .c-sel, .mt .c-name, .mt .c-role, .mt .c-loc, .mt .c-active, .mt .c-act { width: auto; }
+  .mt .c-sel { grid-area: sel; }
+  .mt .c-name { grid-area: name; padding-top: 12px; }
+  .mt .c-active { grid-area: active; padding-top: 12px; text-align: right; font-size: 13px; }
+  .mt .c-role { grid-area: role; align-self: center; }
+  .mt .c-loc { grid-area: loc; align-self: center; text-align: right; }
+  .mt .c-act { grid-area: act; }
+  .cb { width: 44px; height: 44px; }
+  .select.compact select { height: 44px; }
+  .role-text { line-height: 44px; }
+  .strip { grid-template-columns: minmax(0, 1fr); }
+  .fig { padding: 16px 0; }
+  .fig + .fig { padding-left: 0; border-left: 0; border-top: 1px solid var(--on-lead-line); }
+  .fig:last-child { padding-bottom: 0; }
+  .plan { padding: 20px 16px; }
+  .danger-row { flex-direction: column; align-items: stretch; gap: 16px; }
+  .tfoot { flex-direction: column; align-items: stretch; text-align: center; }
+  dialog {
+    width: 100%; max-width: 100%; margin: auto 0 0; max-height: 92dvh;
+    padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+    border-width: 1px 0 0; border-radius: 10px 10px 0 0;
+  }
+  dialog[open] { animation: sheet-in 250ms ease-out; }
+  .dlg-fields { grid-template-columns: minmax(0, 1fr); }
+  .dlg-actions { flex-direction: column-reverse; }
+  .dlg-actions .btn { width: 100%; }
+  .dlg-why { justify-content: center; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog[open], dialog[open]::backdrop, .menu, .menu.up, .toast { animation: fade-in 200ms ease-out; }
+  .btn:active { transform: none; opacity: 0.8; }
+}
+@media (forced-colors: active) {
+  .nav a[aria-current="page"], .more-list a[aria-current="page"] { outline: 2px solid CanvasText; }
+  .meter span { background: CanvasText; } .meter .p { background: Highlight; } .meter .f { background: Canvas; box-shadow: inset 0 0 0 1px CanvasText; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><!--icons:start--><symbol id="i-airplane-tilt" viewBox="0 0 256 256"><path d="M185.33,114.21l29.14-27.42.17-.17a32,32,0,0,0-45.26-45.26c0,.06-.11.11-.17.17L141.79,70.67l-83-30.2a8,8,0,0,0-8.39,1.86l-24,24a8,8,0,0,0,1.22,12.31l63.89,42.59L76.69,136H56a8,8,0,0,0-5.65,2.34l-24,24A8,8,0,0,0,29,175.42l36.82,14.73,14.7,36.75.06.16a8,8,0,0,0,13.18,2.47l23.87-23.88A8,8,0,0,0,120,200V179.31l14.76-14.76,42.59,63.89a8,8,0,0,0,12.31,1.22l24-24a8,8,0,0,0,1.86-8.39Zm-.07,97.23-42.59-63.88A8,8,0,0,0,136.8,144c-.27,0-.53,0-.79,0a8,8,0,0,0-5.66,2.35l-24,24A8,8,0,0,0,104,176v20.69L90.93,209.76,79.43,181A8,8,0,0,0,75,176.57l-28.74-11.5L59.32,152H80a8,8,0,0,0,5.66-2.34l24-24a8,8,0,0,0-1.22-12.32L44.56,70.74l13.5-13.49,83.22,30.26a8,8,0,0,0,8.56-2L180.78,52.6A16,16,0,0,1,203.4,75.23l-32.87,30.93a8,8,0,0,0-2,8.56l30.26,83.22Z"/></symbol><symbol id="i-arrow-counter-clockwise" viewBox="0 0 256 256"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></symbol><symbol id="i-arrow-down" viewBox="0 0 256 256"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></symbol><symbol id="i-arrow-up" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></symbol><symbol id="i-calendar-blank" viewBox="0 0 256 256"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"/></symbol><symbol id="i-calendar-plus" viewBox="0 0 256 256"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-48-56a8,8,0,0,1-8,8H136v16a8,8,0,0,1-16,0V160H104a8,8,0,0,1,0-16h16V128a8,8,0,0,1,16,0v16h16A8,8,0,0,1,160,152Z"/></symbol><symbol id="i-caret-down" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></symbol><symbol id="i-caret-up-down" viewBox="0 0 256 256"><path d="M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z"/></symbol><symbol id="i-chart-bar" viewBox="0 0 256 256"><path d="M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z"/></symbol><symbol id="i-check" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></symbol><symbol id="i-clock" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"/></symbol><symbol id="i-copy" viewBox="0 0 256 256"><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></symbol><symbol id="i-dots-three" viewBox="0 0 256 256"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/></symbol><symbol id="i-envelope-simple" viewBox="0 0 256 256"><path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"/></symbol><symbol id="i-gear-six" viewBox="0 0 256 256"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm109.94-52.79a8,8,0,0,0-3.89-5.4l-29.83-17-.12-33.62a8,8,0,0,0-2.83-6.08,111.91,111.91,0,0,0-36.72-20.67,8,8,0,0,0-6.46.59L128,41.85,97.88,25a8,8,0,0,0-6.47-.6A112.1,112.1,0,0,0,54.73,45.15a8,8,0,0,0-2.83,6.07l-.15,33.65-29.83,17a8,8,0,0,0-3.89,5.4,106.47,106.47,0,0,0,0,41.56,8,8,0,0,0,3.89,5.4l29.83,17,.12,33.62a8,8,0,0,0,2.83,6.08,111.91,111.91,0,0,0,36.72,20.67,8,8,0,0,0,6.46-.59L128,214.15,158.12,231a7.91,7.91,0,0,0,3.9,1,8.09,8.09,0,0,0,2.57-.42,112.1,112.1,0,0,0,36.68-20.73,8,8,0,0,0,2.83-6.07l.15-33.65,29.83-17a8,8,0,0,0,3.89-5.4A106.47,106.47,0,0,0,237.94,107.21Zm-15,34.91-28.57,16.25a8,8,0,0,0-3,3c-.58,1-1.19,2.06-1.81,3.06a7.94,7.94,0,0,0-1.22,4.21l-.15,32.25a95.89,95.89,0,0,1-25.37,14.3L134,199.13a8,8,0,0,0-3.91-1h-.19c-1.21,0-2.43,0-3.64,0a8.08,8.08,0,0,0-4.1,1l-28.84,16.1A96,96,0,0,1,67.88,201l-.11-32.2a8,8,0,0,0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.09,8.09,0,0,0-3-3.06l-28.6-16.29a90.49,90.49,0,0,1,0-28.26L61.67,97.63a8,8,0,0,0,3-3c.58-1,1.19-2.06,1.81-3.06a7.94,7.94,0,0,0,1.22-4.21l.15-32.25a95.89,95.89,0,0,1,25.37-14.3L122,56.87a8,8,0,0,0,4.1,1c1.21,0,2.43,0,3.64,0a8.08,8.08,0,0,0,4.1-1l28.84-16.1A96,96,0,0,1,188.12,55l.11,32.2a8,8,0,0,0,1.22,4.22c.62,1,1.23,2,1.8,3.06a8.09,8.09,0,0,0,3,3.06l28.6,16.29A90.49,90.49,0,0,1,222.9,142.12Z"/></symbol><symbol id="i-magnifying-glass" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></symbol><symbol id="i-question" viewBox="0 0 256 256"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></symbol><symbol id="i-sign-out" viewBox="0 0 256 256"><path d="M120,216a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V40a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H56V208h56A8,8,0,0,1,120,216Zm109.66-93.66-40-40a8,8,0,0,0-11.32,11.32L204.69,120H112a8,8,0,0,0,0,16h92.69l-26.35,26.34a8,8,0,0,0,11.32,11.32l40-40A8,8,0,0,0,229.66,122.34Z"/></symbol><symbol id="i-trash" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></symbol><symbol id="i-user-plus" viewBox="0 0 256 256"><path d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"/></symbol><symbol id="i-warning-circle" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></symbol><symbol id="i-wifi-slash" viewBox="0 0 256 256"><path d="M213.92,210.62a8,8,0,1,1-11.84,10.76l-52-57.15a60,60,0,0,0-57.41,7.24,8,8,0,1,1-9.42-12.93A75.43,75.43,0,0,1,128,144c1.28,0,2.55,0,3.82.1L104.9,114.49A108,108,0,0,0,61,135.31,8,8,0,0,1,49.73,134,8,8,0,0,1,51,122.77a124.27,124.27,0,0,1,41.71-21.66L69.37,75.4a155.43,155.43,0,0,0-40.29,24A8,8,0,0,1,18.92,87,171.87,171.87,0,0,1,58,62.86L42.08,45.38A8,8,0,1,1,53.92,34.62ZM128,192a12,12,0,1,0,12,12A12,12,0,0,0,128,192ZM237.08,87A172.3,172.3,0,0,0,106,49.4a8,8,0,1,0,2,15.87A158.33,158.33,0,0,1,128,64a156.25,156.25,0,0,1,98.92,35.37A8,8,0,0,0,237.08,87ZM195,135.31a8,8,0,0,0,11.24-1.3,8,8,0,0,0-1.3-11.24,124.25,124.25,0,0,0-51.73-24.2A8,8,0,1,0,150,114.24,108.12,108.12,0,0,1,195,135.31Z"/></symbol><symbol id="i-x" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol><!--icons:end--></svg>
+<a class="skip" href="#main">Skip to settings</a>
+
+<div class="app">
+  <div class="side-col">
+  <nav class="side" aria-label="Main">
+    <button type="button" class="ws-switch" id="ws-switch" aria-haspopup="menu" aria-expanded="false">
+      <span class="stack"><span class="under">Shiftboard</span><span class="top" data-ws-name>Marlow Kitchen Group</span></span>
+      <svg class="i i-16 quiet" aria-hidden="true"><use href="#i-caret-up-down"/></svg>
+    </button>
+    <ul class="nav">
+      <li><a href="/rota"><svg class="i" aria-hidden="true"><use href="#i-calendar-blank"/></svg>Rota</a></li>
+      <li><a href="/open-shifts"><svg class="i" aria-hidden="true"><use href="#i-calendar-plus"/></svg>Open shifts</a></li>
+      <li><a href="/time-off"><svg class="i" aria-hidden="true"><use href="#i-airplane-tilt"/></svg>Time off</a></li>
+      <li><a href="/timesheets"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Timesheets</a></li>
+      <li><a href="/reports"><svg class="i" aria-hidden="true"><use href="#i-chart-bar"/></svg>Reports</a></li>
+    </ul>
+    <ul class="nav nav-bottom">
+      <li><a href="/settings" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-gear-six"/></svg>Settings</a></li>
+      <li><a href="/help"><svg class="i" aria-hidden="true"><use href="#i-question"/></svg>Help</a></li>
+    </ul>
+    <button type="button" class="account" id="account-btn" aria-haspopup="menu" aria-expanded="false">
+      <span class="stack"><span class="top" data-viewer-name>Hannah Reyes</span><span class="under" data-viewer-role>Owner</span></span>
+      <svg class="i i-16 quiet" aria-hidden="true"><use href="#i-caret-up-down"/></svg>
+    </button>
+  </nav>
+  </div>
+
+  <main id="main" class="main" tabindex="-1">
+    <div class="wrap" id="wrap">
+      <div class="banner" id="offline" role="status" hidden>
+        <svg class="i" aria-hidden="true"><use href="#i-wifi-slash"/></svg>
+        <p><strong>You're offline.</strong> You can read these settings. Saving, invites and role changes wait until you reconnect.</p>
+      </div>
+
+      <header class="page-head"><h1 id="page-title" tabindex="-1">Workspace settings</h1></header>
+
+      <section class="sec" id="general" aria-labelledby="general-h">
+        <div class="sec-head">
+          <div>
+            <h2 id="general-h">General</h2>
+            <p class="sec-desc">Your staff see these in the app and at the top of every rota.</p>
+          </div>
+        </div>
+        <form class="form" id="general-form" novalidate>
+          <div class="field">
+            <div class="label-row">
+              <label class="label" for="ws-name">Workspace name</label>
+              <span class="count" id="name-count" aria-hidden="true">58 / 40</span>
+            </div>
+            <p class="hint" id="name-hint">Up to 40 characters. Location names are added to each rota for you.</p>
+            <input class="input" id="ws-name" name="name" type="text" autocomplete="organization" enterkeyhint="done"
+              aria-describedby="name-hint name-err" aria-invalid="true"
+              value="Marlow Kitchen Group (Marlow, Henley, Windsor, Maidenhead)">
+            <p class="err" id="name-err">
+              <svg class="i i-18" aria-hidden="true"><use href="#i-warning-circle"/></svg>
+              <span id="name-err-text">Shorten the name to 40 characters or fewer. It has 58 now.</span>
+            </p>
+          </div>
+          <div class="field">
+            <label class="label" for="ws-tz">Timezone</label>
+            <p class="hint" id="tz-hint">Shift times and clock-ins use this timezone. Changing it does not move shifts you have already published.</p>
+            <span class="select">
+              <select id="ws-tz" name="tz" aria-describedby="tz-hint tz-now">
+                <option value="Europe/London" selected>Europe/London (GMT)</option>
+              </select>
+              <svg class="i" aria-hidden="true"><use href="#i-caret-down"/></svg>
+            </span>
+            <p class="hint" id="tz-now" style="margin:8px 0 0">It's 18:40 on Saturday in London.</p>
+          </div>
+          <div class="form-actions" id="form-actions">
+            <button type="submit" class="btn btn-primary" id="save" aria-disabled="true" aria-describedby="save-why">Save changes</button>
+            <button type="button" class="btn btn-ghost" id="discard">Discard changes</button>
+            <p class="why" id="save-why" aria-live="polite">Fix the workspace name to save.</p>
+          </div>
+          <p class="note" id="general-noperm" hidden>Only owners and admins can change these. Ask Hannah Reyes or Daniel Okafor.</p>
+        </form>
+      </section>
+
+      <section class="sec" id="members" aria-labelledby="members-h">
+        <div class="sec-head">
+          <div>
+            <h2 id="members-h" tabindex="-1">Members</h2>
+            <p class="sec-desc">Owners handle billing and roles, admins run every location, and managers build the rota for their own. <span id="roles-noperm" hidden>Only owners can change roles.</span></p>
+          </div>
+          <div class="head-action">
+            <button type="button" class="btn btn-secondary" id="invite-btn" aria-describedby="invite-why">
+              <svg class="i" aria-hidden="true"><use href="#i-user-plus"/></svg>Invite people
+            </button>
+            <p class="why" id="invite-why" hidden>Only owners and admins can invite people.</p>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="tb-filters">
+            <div class="tb-field tb-search">
+              <label class="lbl" for="q">Search</label>
+              <span class="search">
+                <svg class="i" aria-hidden="true"><use href="#i-magnifying-glass"/></svg>
+                <input class="input" id="q" type="search" placeholder="Name or email" autocomplete="off" spellcheck="false">
+              </span>
+            </div>
+            <div class="tb-field">
+              <label class="lbl" for="f-role">Role</label>
+              <span class="select">
+                <select id="f-role">
+                  <option value="all">All roles</option>
+                  <option value="Owner">Owners</option>
+                  <option value="Admin">Admins</option>
+                  <option value="Manager">Managers</option>
+                  <option value="Staff">Staff</option>
+                </select>
+                <svg class="i" aria-hidden="true"><use href="#i-caret-down"/></svg>
+              </span>
+            </div>
+            <div class="tb-field">
+              <label class="lbl" for="f-loc">Location</label>
+              <span class="select">
+                <select id="f-loc">
+                  <option value="all">All locations</option>
+                  <option value="Marlow">Marlow</option>
+                  <option value="Henley">Henley</option>
+                  <option value="Windsor">Windsor</option>
+                  <option value="Maidenhead">Maidenhead</option>
+                </select>
+                <svg class="i" aria-hidden="true"><use href="#i-caret-down"/></svg>
+              </span>
+            </div>
+            <div class="tb-field tb-sort">
+              <label class="lbl" for="f-sort">Sort</label>
+              <span class="select">
+                <select id="f-sort">
+                  <option value="role">Role</option>
+                  <option value="name">Name</option>
+                  <option value="active">Last active</option>
+                </select>
+                <svg class="i" aria-hidden="true"><use href="#i-caret-down"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="tb-right" id="tb-right"></div>
+        </div>
+
+        <div class="tbl-wrap" id="members-body" aria-live="off"></div>
+        <div class="tfoot" id="members-foot"></div>
+      </section>
+
+      <section class="sec" id="billing" aria-labelledby="billing-h">
+        <div class="sec-head">
+          <div>
+            <h2 id="billing-h">Plan and billing</h2>
+            <p class="sec-desc">Only owners can see this.</p>
+          </div>
+        </div>
+        <div class="plan" id="plan">
+          <div class="plan-top">
+            <div>
+              <p class="plan-name">Group plan</p>
+              <p class="plan-sub">£3.85 per seat a month plus VAT, up to 40 seats. Billed on the 14th.</p>
+            </div>
+            <a href="/settings/billing/plan">Change plan</a>
+          </div>
+          <dl class="strip">
+            <div class="fig">
+              <dt>Seats used</dt>
+              <dd class="big"><span id="seats-used">38</span> <span class="of">of 40</span></dd>
+              <dd><div class="meter" id="meter" role="img" aria-label="38 of 40 seats used, 1 held for a pending invite, 1 free"></div></dd>
+              <dd class="small"><span class="swatch" aria-hidden="true"></span><span id="seats-note">1 held for a pending invite, 1 free</span></dd>
+            </div>
+            <div class="fig">
+              <dt>Next invoice</dt>
+              <dd class="big" id="inv-amount">£175.56</dd>
+              <dd class="small" id="inv-note">14 Nov 2026, £9.24 more than October</dd>
+            </div>
+            <div class="fig">
+              <dt>Payment card</dt>
+              <dd class="big">Visa ending 4417</dd>
+              <dd class="small">Expires 03/2028 · <a href="/settings/billing/card">Update card</a></dd>
+            </div>
+          </dl>
+        </div>
+        <div class="noperm" id="billing-noperm" hidden>
+          <p class="note">Only owners can see the plan, invoices and payment card. Ask Hannah Reyes or Daniel Okafor.</p>
+        </div>
+      </section>
+
+      <section class="sec" id="danger" aria-labelledby="danger-h">
+        <div class="sec-head"><h2 id="danger-h">Danger zone</h2></div>
+        <div class="danger-row">
+          <div>
+            <p class="strong">Delete <span data-ws-name>Marlow Kitchen Group</span></p>
+            <p class="quiet">Removes access for all <span data-n="people">38 people</span> and stops billing. Owners can restore it for 30 days, then the rota, timesheets and time-off history are deleted for good.</p>
+          </div>
+          <div class="head-action">
+            <button type="button" class="btn btn-danger-outline" id="delete-btn" aria-describedby="delete-why">Delete workspace</button>
+            <p class="why" id="delete-why" hidden>Only owners can delete the workspace.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="wrap" id="deleted" hidden>
+      <div class="gone">
+        <h1 id="gone-title" tabindex="-1"><span data-ws-name>Marlow Kitchen Group</span> is deleted</h1>
+        <p class="quiet">Nobody can sign in to it now and billing has stopped. You can restore it, with everything in it, until 30 November 2026.</p>
+        <button type="button" class="btn btn-primary" id="restore">Restore workspace</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="tabbar" aria-label="Main">
+  <a href="/rota"><span class="ico-wrap"><svg class="i" aria-hidden="true"><use href="#i-calendar-blank"/></svg></span>Rota</a>
+  <a href="/open-shifts"><span class="ico-wrap"><svg class="i" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span>Open shifts</a>
+  <a href="/time-off"><span class="ico-wrap"><svg class="i" aria-hidden="true"><use href="#i-airplane-tilt"/></svg></span>Time off</a>
+  <a href="/timesheets"><span class="ico-wrap"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg></span>Timesheets</a>
+  <button type="button" class="is-current" id="more-btn" aria-haspopup="dialog"><span class="ico-wrap"><svg class="i" aria-hidden="true"><use href="#i-dots-three"/></svg></span>More<span class="sr">, Settings is open</span></button>
+</nav>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<dialog id="dlg-delete" aria-labelledby="dd-title" aria-describedby="dd-desc">
+  <form id="dd-form" novalidate>
+    <h2 id="dd-title">Delete <span data-ws-name>Marlow Kitchen Group</span>?</h2>
+    <div class="dlg-body" id="dd-desc">
+      <p><span data-n="people-cap">All 38 people</span> lose access straight away, including the managers at Marlow, Henley, Windsor and Maidenhead. Billing stops today, so the <span data-inv>£175.56</span> invoice due on 14 Nov is not charged.</p>
+      <p class="quiet">Owners can restore the workspace until 30 Nov 2026. After that the rota, timesheets and time-off history are deleted for good.</p>
+    </div>
+    <div class="dlg-fields">
+      <div class="field span2">
+        <label class="label" for="dd-confirm">Type <span data-ws-name>Marlow Kitchen Group</span> to confirm</label>
+        <input class="input" id="dd-confirm" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:6px">
+      </div>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="btn btn-secondary" id="dd-cancel">Cancel</button>
+      <button type="submit" class="btn btn-danger" id="dd-go" aria-disabled="true" aria-describedby="dd-why">Delete workspace</button>
+    </div>
+    <p class="why dlg-why" id="dd-why">Type the name exactly to turn on Delete.</p>
+  </form>
+</dialog>
+
+<dialog id="dlg-invite" aria-labelledby="inv-title" aria-describedby="inv-desc">
+  <form id="inv-form" novalidate>
+    <h2 id="inv-title">Invite people</h2>
+    <div class="dlg-body"><p class="quiet" id="inv-desc">They get an email with a link to the staff app. An invite holds a seat until it is accepted. <span id="inv-seats">1 seat is free.</span></p></div>
+    <div class="dlg-fields">
+      <div class="field">
+        <label class="label" for="inv-name">Name</label>
+        <input class="input" id="inv-name" type="text" autocomplete="off" style="margin-top:6px" aria-describedby="inv-name-err">
+        <p class="err" id="inv-name-err" hidden><svg class="i i-18" aria-hidden="true"><use href="#i-warning-circle"/></svg><span></span></p>
+      </div>
+      <div class="field">
+        <label class="label" for="inv-email">Email</label>
+        <input class="input" id="inv-email" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:6px" aria-describedby="inv-email-err">
+        <p class="err" id="inv-email-err" hidden><svg class="i i-18" aria-hidden="true"><use href="#i-warning-circle"/></svg><span></span></p>
+      </div>
+      <div class="field">
+        <label class="label" for="inv-role">Role</label>
+        <span class="select" style="margin-top:6px">
+          <select id="inv-role"><option>Staff</option><option>Manager</option><option>Admin</option><option>Owner</option></select>
+          <svg class="i" aria-hidden="true"><use href="#i-caret-down"/></svg>
+        </span>
+      </div>
+      <div class="field">
+        <label class="label" for="inv-loc">Location</label>
+        <span class="select" style="margin-top:6px">
+          <select id="inv-loc"><option>Marlow</option><option>Henley</option><option>Windsor</option><option>Maidenhead</option></select>
+          <svg class="i" aria-hidden="true"><use href="#i-caret-down"/></svg>
+        </span>
+      </div>
+    </div>
+    <p class="err form-err" id="inv-form-err" hidden><svg class="i i-18" aria-hidden="true"><use href="#i-warning-circle"/></svg><span></span></p>
+    <div class="dlg-actions">
+      <button type="button" class="btn btn-secondary" id="inv-cancel">Cancel</button>
+      <button type="submit" class="btn btn-primary" id="inv-go" aria-describedby="inv-why">Send invite</button>
+    </div>
+    <p class="why dlg-why" id="inv-why" hidden></p>
+  </form>
+</dialog>
+
+<dialog id="dlg-more" aria-labelledby="more-title">
+  <h2 id="more-title">More</h2>
+  <ul class="more-list">
+    <li><a href="/reports"><svg class="i" aria-hidden="true"><use href="#i-chart-bar"/></svg>Reports</a></li>
+    <li><a href="/settings" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-gear-six"/></svg>Settings</a></li>
+    <li><a href="/help"><svg class="i" aria-hidden="true"><use href="#i-question"/></svg>Help</a></li>
+    <li class="more-sep" role="separator"></li>
+    <li><a href="/account"><span class="stack"><span class="top" data-viewer-name>Hannah Reyes</span><span class="under"><span data-viewer-role>Owner</span> · <span data-ws-name>Marlow Kitchen Group</span></span></span></a></li>
+    <li><a href="/sign-out"><svg class="i" aria-hidden="true"><use href="#i-sign-out"/></svg>Sign out</a></li>
+  </ul>
+  <div class="dlg-actions"><button type="button" class="btn btn-secondary" id="more-close">Close</button></div>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const ico = (n, cls = 'i') => `<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`;
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const fmtN = n => n.toLocaleString('en-GB');
+  const gbp = p => (p / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+  const setDisabled = (el, on) => el.setAttribute('aria-disabled', on ? 'true' : 'false');
+  const isDisabled = el => el.getAttribute('aria-disabled') === 'true';
+
+  // Fixed "now" so the mock data reads the same every time it is opened.
+  const NOW = new Date('2026-10-31T18:40:00Z');
+  const P = new URLSearchParams(location.search);
+  const MODE = P.get('state');                      // empty | loading | error | offline
+  const VIEWER = P.get('as') === 'manager' ? 'manager' : 'owner';
+  const PRICE_P = 385, VAT = 1.2, SEAT_LIMIT = 40, OCT_SEATS = 36;
+  const ROLES = ['Owner', 'Admin', 'Manager', 'Staff'];
+  const RANK = { Owner: 0, Admin: 1, Manager: 2, Staff: 3 };
+  const LOCS = ['Marlow', 'Henley', 'Windsor', 'Maidenhead'];
+  const saved = { name: 'Marlow Kitchen Group', tz: 'Europe/London' };
+
+  // [name, email, role, home restaurant, minutes since last active]
+  const SEED = [
+    ['Hannah Reyes', 'hannah@marlowkitchen.co.uk', 'Owner', 'Marlow', 12],
+    ['Daniel Okafor', 'daniel@marlowkitchen.co.uk', 'Owner', 'Henley', 134],
+    ['Anastasia Kowalczyk-Fairweather', 'anastasia.kowalczyk-fairweather@marlowkitchen.co.uk', 'Admin', 'Windsor', 1310],
+    ['Marcus Webb', 'marcus.webb@marlowkitchen.co.uk', 'Admin', 'Marlow', 5790],
+    ['Ellie Brennan', 'ellie.brennan@marlowkitchen.co.uk', 'Manager', 'Marlow', 38],
+    ['Tomasz Nowak', 'tomasz.nowak@marlowkitchen.co.uk', 'Manager', 'Henley', 187],
+    ['Grace Adeyemi', 'grace.adeyemi@marlowkitchen.co.uk', 'Manager', 'Windsor', 71],
+    ['Callum Fraser', 'callum.fraser@marlowkitchen.co.uk', 'Manager', 'Maidenhead', 1622],
+    ['Amira Haddad', 'amira.haddad@gmail.com', 'Staff', 'Marlow', 46],
+    ['Josh Pemberton', 'joshpemberton94@outlook.com', 'Staff', 'Marlow', 260],
+    ['Niamh Gallagher', 'niamhg@icloud.com', 'Staff', 'Marlow', 2890],
+    ['Luca Moretti', 'luca.moretti@gmail.com', 'Staff', 'Marlow', 19],
+    ['Freya Holt', 'freya.holt@hotmail.co.uk', 'Staff', 'Marlow', 8650],
+    ['Kwame Asante', 'kwame.asante@gmail.com', 'Staff', 'Marlow', 515],
+    ['Bethany Cole', 'beth.cole@outlook.com', 'Staff', 'Marlow', 3],
+    ['Ryan Doyle', 'ryan.doyle88@gmail.com', 'Staff', 'Marlow', 206000],
+    ['Sophie Lindqvist', 'sophie.lindqvist@gmail.com', 'Staff', 'Henley', 95],
+    ['Olivia Tran', 'olivia.tran@gmail.com', 'Staff', 'Henley', 330],
+    ['Sam Whitaker', 'samwhitaker@icloud.com', 'Staff', 'Henley', 1450],
+    ['Chloé Dubois', 'chloe.dubois@gmail.com', 'Staff', 'Henley', 58],
+    ['Harvey Lund', 'harvey.lund@outlook.com', 'Staff', 'Henley', 4320],
+    ['Megan Price', 'megprice@gmail.com', 'Staff', 'Henley', 27],
+    ['Ibrahim Saleh', 'ibrahim.saleh@gmail.com', 'Staff', 'Henley', 760],
+    ['Zoe Carter', 'zoe.carter@yahoo.co.uk', 'Staff', 'Henley', 21900],
+    ['Alfie Robson', 'alfie.robson@gmail.com', 'Staff', 'Henley', 1180],
+    ['Isla McKenzie', 'isla.mckenzie@gmail.com', 'Staff', 'Windsor', 9],
+    ['Mateo Ruiz', 'mateo.ruiz@outlook.com', 'Staff', 'Windsor', 402],
+    ['Jade Morrison', 'jade.morrison@icloud.com', 'Staff', 'Windsor', 2210],
+    ['Ethan Clarke', 'ethan.clarke@gmail.com', 'Staff', 'Windsor', 88],
+    ['Rosa Fernandes', 'rosa.fernandes@gmail.com', 'Staff', 'Windsor', 13400],
+    ['Kieran Walsh', 'kieranwalsh@hotmail.co.uk', 'Staff', 'Windsor', 640],
+    ['Hana Novak', 'hana.novak@gmail.com', 'Staff', 'Windsor', 151],
+    ['Leo Barnes', 'leo.barnes@gmail.com', 'Staff', 'Maidenhead', 33],
+    ['Ava Thompson', 'ava.thompson@outlook.com', 'Staff', 'Maidenhead', 1960],
+    ['Dominic Achterberg', 'dom.achterberg@gmail.com', 'Staff', 'Maidenhead', 275],
+    ['Lily Evans', 'lily.evans@icloud.com', 'Staff', 'Maidenhead', 7100],
+    ['Noah Sinclair', 'noah.sinclair@gmail.com', 'Staff', 'Maidenhead', 112],
+    ['Maisie Doherty', 'maisie.doherty@gmail.com', 'Staff', 'Maidenhead', 3650],
+  ];
+
+  let uid = 0;
+  let members = SEED.map(a => ({ id: ++uid, name: a[0], email: a[1], role: a[2], home: a[3], mins: a[4], pending: false }));
+  members.push({ id: ++uid, name: 'Joel Mensah', email: 'joel.mensah@outlook.com', role: 'Staff', home: 'Windsor', mins: 3035, pending: true, by: 'Grace Adeyemi' });
+  const selfEmail = VIEWER === 'manager' ? 'ellie.brennan@marlowkitchen.co.uk' : 'hannah@marlowkitchen.co.uk';
+  members.forEach(m => { m.self = m.email === selfEmail; });
+  const me = members.find(m => m.self);
+
+  // Stress and empty states, reachable by query: ?state=empty, ?rows=10000
+  let stress = false;
+  const rowsParam = P.get('rows');
+  if (MODE === 'empty') members = [me];
+  else if (rowsParam !== null) {
+    const want = Math.max(1, parseInt(rowsParam, 10) || 1);
+    const others = members.filter(m => !m.self);
+    if (want <= members.length) members = [me, ...others.slice(0, want - 1)];
+    else {
+      stress = true;
+      const FN = ['Aaron', 'Bea', 'Cian', 'Dara', 'Esme', 'Felix', 'Gabi', 'Hugo', 'Ines', 'Jonah', 'Kit', 'Lena', 'Milo', 'Nora', 'Omar', 'Pia', 'Quinn', 'Rafa', 'Sana', 'Theo', 'Uma', 'Vik', 'Wren', 'Yara', 'Zak'];
+      const LN = ['Abbott', 'Baird', 'Carr', 'Dunn', 'Ellis', 'Flynn', 'Gill', 'Hart', 'Irwin', 'Joyce', 'Kerr', 'Lowe', 'Marsh', 'Nash', 'Orr', 'Pike', 'Quigley', 'Rowe', 'Shaw', 'Toms', 'Usher', 'Vance', 'Wade', 'Yates', 'Zeller'];
+      for (let i = 0; members.length < want; i++) {
+        const n = `${FN[i % 25]} ${LN[Math.floor(i / 25) % 25]}`;
+        const k = Math.floor(i / 625);
+        members.push({ id: ++uid, name: n, email: `${norm(n).replace(' ', '.')}${k || ''}@gmail.com`, role: 'Staff', home: LOCS[i % 4], mins: (i * 37) % 40000 + 5, pending: false, self: false });
+      }
+    }
+  }
+
+  const SORTS = ['role', 'name', 'active'];
+  const sortParam = (P.get('sort') || 'role').split('-');
+  const st = {
+    q: P.get('q') || '',
+    role: ROLES.includes(P.get('role')) ? P.get('role') : 'all',
+    loc: LOCS.includes(P.get('loc')) ? P.get('loc') : 'all',
+    sort: SORTS.includes(sortParam[0]) ? sortParam[0] : 'role',
+    dir: sortParam[1] === 'desc' ? -1 : 1,
+    shown: 10,
+    sel: new Set(),
+    loading: MODE === 'loading',
+    failed: MODE === 'error',
+    offline: MODE === 'offline' || navigator.onLine === false,
+  };
+  let currentShown = [];
+
+  const byId = id => members.find(m => m.id === id);
+  const allLoc = m => m.role === 'Owner' || m.role === 'Admin';
+  const displayLoc = m => (allLoc(m) ? 'All locations' : m.home);
+  const fmtDate = (d, o) => d.toLocaleString('en-GB', { timeZone: saved.tz, ...o });
+  const ago = mins => new Date(NOW.getTime() - mins * 60000);
+  function relTime(mins) {
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins} min ago`;
+    if (mins < 1440) return `${Math.floor(mins / 60)} h ago`;
+    if (mins < 2880) return 'Yesterday';
+    if (mins < 10080) return `${Math.floor(mins / 1440)} days ago`;
+    const d = ago(mins);
+    return fmtDate(d, { day: 'numeric', month: 'short', ...(d.getUTCFullYear() !== NOW.getUTCFullYear() ? { year: 'numeric' } : {}) });
+  }
+  const absTime = mins => fmtDate(ago(mins), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  // URL keeps the view shareable: filters, sort and the open dialog.
+  function syncURL() {
+    let u;
+    try { u = new URL(location.href); } catch (e) { return; }
+    const set = (k, v) => (v ? u.searchParams.set(k, v) : u.searchParams.delete(k));
+    set('q', st.q.trim());
+    set('role', st.role === 'all' ? '' : st.role);
+    set('loc', st.loc === 'all' ? '' : st.loc);
+    set('sort', st.sort === 'role' && st.dir === 1 ? '' : st.sort + (st.dir === -1 ? '-desc' : ''));
+    set('dialog', $('#dlg-delete').open ? 'delete' : '');
+    try { history.replaceState(null, '', u); } catch (e) { /* file:// can refuse this */ }
+  }
+
+  /* ---------- Tooltips ---------- */
+  const tip = $('#tip');
+  let tipTimer;
+  function showTip(el) {
+    const t = el.dataset.tip;
+    if (!t) return;
+    tip.textContent = t;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    const x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+    let y = r.top - h - 6;
+    if (y < 8) y = r.bottom + 6;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function hideTip() { clearTimeout(tipTimer); tip.hidden = true; }
+  document.addEventListener('pointerover', e => {
+    if (e.pointerType === 'touch') return;
+    const el = e.target.closest('[data-tip]');
+    if (!el) return;
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(() => showTip(el), 400);
+  });
+  document.addEventListener('pointerout', e => { if (e.target.closest('[data-tip]')) hideTip(); });
+  document.addEventListener('focusin', e => {
+    const el = e.target.closest('[data-tip]');
+    if (el && el.matches(':focus-visible')) showTip(el); else hideTip();
+  });
+  document.addEventListener('focusout', hideTip);
+  document.addEventListener('scroll', hideTip, true);
+
+  function markTruncation(root) {
+    $$('.trunc', root).forEach(el => {
+      if (el.scrollWidth > el.clientWidth + 1) { el.dataset.tip = el.textContent; el.tabIndex = 0; }
+      else { delete el.dataset.tip; el.removeAttribute('tabindex'); }
+    });
+  }
+
+  /* ---------- Toast: one slot, bottom right ---------- */
+  const slot = $('#toasts');
+  let toastTimer;
+  function toast(msg, undo) {
+    clearTimeout(toastTimer);
+    slot.innerHTML = '';
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<p>${esc(msg)}</p>${undo ? '<button type="button" class="t-btn" data-undo>Undo</button>' : ''}<button type="button" class="icon-btn" aria-label="Dismiss" data-tip="Dismiss">${ico('x')}</button>`;
+    slot.appendChild(t);
+    const done = () => { clearTimeout(toastTimer); hideTip(); t.remove(); };
+    const arm = () => { clearTimeout(toastTimer); toastTimer = setTimeout(done, 6000); };
+    const u = t.querySelector('[data-undo]');
+    if (u) u.addEventListener('click', () => { done(); undo(); });
+    t.querySelector('.icon-btn').addEventListener('click', done);
+    t.addEventListener('pointerenter', () => clearTimeout(toastTimer));
+    t.addEventListener('pointerleave', arm);
+    t.addEventListener('focusin', () => clearTimeout(toastTimer));
+    t.addEventListener('focusout', arm);
+    arm();
+  }
+
+  /* ---------- Menus (rendered at body level so nothing clips them) ---------- */
+  let menuEl = null, menuBtn = null;
+  function closeMenu(refocus) {
+    if (!menuEl) return;
+    menuEl.remove();
+    menuBtn.setAttribute('aria-expanded', 'false');
+    if (refocus) menuBtn.focus();
+    menuEl = menuBtn = null;
+  }
+  function openMenu(btn, items, align) {
+    if (menuBtn === btn) { closeMenu(true); return; }
+    closeMenu(false);
+    hideTip();
+    const m = document.createElement('div');
+    m.className = 'menu';
+    m.setAttribute('role', 'menu');
+    m.setAttribute('aria-label', btn.getAttribute('aria-label') || btn.textContent.trim());
+    m.innerHTML = items.map((it, i) => {
+      if (it.sep) return '<div class="menu-sep" role="separator"></div>';
+      const inner = `${it.icon ? ico(it.icon) : ''}<span>${esc(it.label)}</span>${it.checked ? ico('check', 'i ml') : ''}`;
+      if (it.href) return `<a role="menuitem" tabindex="-1" href="${it.href}">${inner}</a>`;
+      const role = it.checked !== undefined ? 'menuitemradio' : 'menuitem';
+      return `<button type="button" role="${role}" ${it.checked !== undefined ? `aria-checked="${it.checked}"` : ''} tabindex="-1" data-i="${i}" class="${it.danger ? 'danger' : ''}" ${it.disabled ? 'aria-disabled="true"' : ''}>${inner}</button>`;
+    }).join('');
+    document.body.appendChild(m);
+    const r = btn.getBoundingClientRect();
+    const w = m.offsetWidth, h = m.offsetHeight;
+    let x = align === 'left' ? r.left : r.right - w;
+    x = Math.min(Math.max(8, x), innerWidth - w - 8);
+    let y = r.bottom + 4;
+    if (y + h > innerHeight - 8) { y = Math.max(8, r.top - h - 4); m.classList.add('up'); }
+    m.style.left = x + 'px';
+    m.style.top = y + 'px';
+    menuEl = m; menuBtn = btn;
+    btn.setAttribute('aria-expanded', 'true');
+    const list = $$('[role^="menuitem"]', m);
+    (list.find(el => el.getAttribute('aria-disabled') !== 'true') || list[0]).focus();
+    m.addEventListener('click', e => {
+      const b = e.target.closest('button[role^="menuitem"]');
+      if (!b) { if (e.target.closest('a')) closeMenu(false); return; }
+      if (b.getAttribute('aria-disabled') === 'true') return;
+      const it = items[+b.dataset.i];
+      closeMenu(true);
+      if (it.run) it.run();
+    });
+    m.addEventListener('keydown', e => {
+      const i = list.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); list[(i + 1) % list.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); list[0].focus(); }
+      else if (e.key === 'End') { e.preventDefault(); list[list.length - 1].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeMenu(true); }
+      else if (e.key === 'Tab') closeMenu(false);
+    });
+  }
+  document.addEventListener('pointerdown', e => {
+    if (menuEl && !menuEl.contains(e.target) && !menuBtn.contains(e.target)) closeMenu(false);
+  });
+  addEventListener('resize', () => closeMenu(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
+
+  /* ---------- Dialogs ---------- */
+  let lastTrigger = null;
+  function openDialog(d, trigger) {
+    lastTrigger = trigger || document.activeElement;
+    closeMenu(false);
+    hideTip();
+    d.showModal();
+  }
+  $$('dialog').forEach(d => {
+    d.addEventListener('close', () => {
+      if (d.id === 'dlg-delete') syncURL();
+      if (lastTrigger && document.contains(lastTrigger)) lastTrigger.focus();
+    });
+    d.addEventListener('click', e => {
+      if (e.target !== d) return;
+      const r = d.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) d.close();
+    });
+  });
+
+  /* ---------- General form ---------- */
+  const nameIn = $('#ws-name'), tzSel = $('#ws-tz'), saveBtn = $('#save'), discardBtn = $('#discard');
+  const saveWhy = $('#save-why'), nameErr = $('#name-err'), nameErrText = $('#name-err-text'), nameCount = $('#name-count');
+  let nameErrShown = true; // the default view: the name was edited and the field was left
+
+  function tzLabel(tz) {
+    let off = '';
+    try { off = new Intl.DateTimeFormat('en-GB', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(NOW).find(p => p.type === 'timeZoneName').value; } catch (e) { off = ''; }
+    return `${tz.replace(/_/g, ' ')}${off ? ` (${off})` : ''}`;
+  }
+  (function fillZones() {
+    let zones = [];
+    try { zones = Intl.supportedValuesOf('timeZone'); } catch (e) { zones = []; }
+    if (!zones.length) zones = ['Europe/Dublin', 'Europe/Lisbon', 'Europe/London', 'Europe/Madrid', 'Europe/Paris', 'America/New_York', 'Asia/Dubai'];
+    if (!zones.includes(saved.tz)) zones.push(saved.tz);
+    tzSel.innerHTML = zones.sort().map(z => `<option value="${z}"${z === saved.tz ? ' selected' : ''}>${esc(tzLabel(z))}</option>`).join('');
+  })();
+  function syncTzNow() {
+    const tz = tzSel.value;
+    const city = tz.split('/').pop().replace(/_/g, ' ');
+    let t = '';
+    try { t = NOW.toLocaleString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', weekday: 'long' }); } catch (e) { t = ''; }
+    const [day, time] = t.split(' ');
+    $('#tz-now').textContent = time ? `It's ${time} on ${day.replace(',', '')} in ${city}.` : '';
+  }
+
+  function nameProblem(v) {
+    const n = v.trim().length;
+    if (!n) return 'Enter a workspace name. Staff see it at the top of every rota.';
+    if (n > 40) return `Shorten the name to 40 characters or fewer. It has ${n} now.`;
+    return '';
+  }
+  function showNameErr(msg) { nameErrText.textContent = msg; nameErr.hidden = false; nameIn.setAttribute('aria-invalid', 'true'); }
+  function hideNameErr() { nameErr.hidden = true; nameIn.setAttribute('aria-invalid', 'false'); }
+  function syncForm() {
+    if (VIEWER !== 'owner') return;
+    const v = nameIn.value, n = v.trim().length;
+    nameCount.textContent = `${n} / 40`;
+    nameCount.classList.toggle('over', n > 40);
+    const prob = nameProblem(v);
+    if (nameErrShown) { if (prob) showNameErr(prob); else { hideNameErr(); nameErrShown = false; } }
+    const dirty = v.trim() !== saved.name || tzSel.value !== saved.tz;
+    let why = '';
+    if (!dirty) why = 'No changes to save.';
+    else if (prob) why = 'Fix the workspace name to save.';
+    else if (st.offline) why = "You're offline. You can save when you reconnect.";
+    setDisabled(saveBtn, !!why);
+    saveWhy.textContent = why || 'You have unsaved changes.';
+    discardBtn.hidden = !dirty;
+  }
+  nameIn.addEventListener('input', syncForm);
+  nameIn.addEventListener('blur', () => {
+    const p = nameProblem(nameIn.value);
+    nameErrShown = !!p;
+    if (p) showNameErr(p); else hideNameErr();
+    syncForm();
+  });
+  tzSel.addEventListener('change', () => { syncTzNow(); syncForm(); });
+  $('#general-form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (isDisabled(saveBtn)) {
+      if (nameProblem(nameIn.value)) { nameErrShown = true; syncForm(); nameIn.focus(); }
+      return;
+    }
+    setDisabled(saveBtn, true);
+    saveBtn.textContent = 'Saving…';
+    saveBtn.setAttribute('aria-busy', 'true');
+    saveWhy.textContent = 'Saving your changes.';
+    setTimeout(() => {
+      saved.name = nameIn.value.trim();
+      nameIn.value = saved.name;
+      saved.tz = tzSel.value;
+      saveBtn.textContent = 'Save changes';
+      saveBtn.removeAttribute('aria-busy');
+      syncForm();
+      saveWhy.innerHTML = `${ico('check', 'i i-18')}<span>Saved just now.</span>`;
+      applyName();
+      render();
+    }, 700);
+  });
+  discardBtn.addEventListener('click', () => {
+    const before = { name: nameIn.value, tz: tzSel.value, err: nameErrShown };
+    nameIn.value = saved.name;
+    tzSel.value = saved.tz;
+    nameErrShown = false;
+    hideNameErr();
+    syncTzNow();
+    syncForm();
+    saveBtn.focus();
+    toast('Changes discarded.', () => {
+      nameIn.value = before.name; tzSel.value = before.tz; nameErrShown = before.err;
+      syncTzNow(); syncForm(); nameIn.focus();
+    });
+  });
+  function applyName() {
+    $$('[data-ws-name]').forEach(el => { el.textContent = saved.name; });
+    document.title = 'Workspace settings · Shiftboard';
+  }
+
+  /* ---------- Members ---------- */
+  const body = $('#members-body'), foot = $('#members-foot'), right = $('#tb-right');
+  const qIn = $('#q'), fRole = $('#f-role'), fLoc = $('#f-loc'), fSort = $('#f-sort');
+  qIn.value = st.q; fRole.value = st.role; fLoc.value = st.loc; fSort.value = st.sort;
+
+  function cmp(a, b) {
+    if (st.sort === 'name') return a.name.localeCompare(b.name, 'en-GB');
+    if (st.sort === 'active') return a.mins - b.mins;
+    return RANK[a.role] - RANK[b.role];
+  }
+  function visibleList() {
+    const q = norm(st.q.trim());
+    const list = members.filter(m =>
+      (!q || norm(m.name).includes(q) || norm(m.email).includes(q)) &&
+      (st.role === 'all' || m.role === st.role) &&
+      (st.loc === 'all' || displayLoc(m) === st.loc));
+    return list.sort((a, b) => (b.pending - a.pending) || st.dir * cmp(a, b) || a.name.localeCompare(b.name, 'en-GB'));
+  }
+  const canEditRoles = () => VIEWER === 'owner';
+
+  function rowHTML(m) {
+    const nm = esc(m.name), em = esc(m.email);
+    const selectable = canEditRoles() && !m.self;
+    const on = st.sel.has(m.id);
+    const cb = selectable ? `<label class="cb"><input type="checkbox" data-sel="${m.id}"${on ? ' checked' : ''}><span class="sr">Select ${nm}</span></label>` : '';
+    const role = selectable
+      ? `<span class="select compact"><select data-role="${m.id}" aria-label="Role for ${nm}"${st.offline ? ' disabled' : ''}>${ROLES.map(r => `<option${r === m.role ? ' selected' : ''}>${r}</option>`).join('')}</select>${ico('caret-down')}</span>`
+      : `<span class="role-text">${m.role}</span>`;
+    const active = m.pending
+      ? '<span class="chip-pending">Invite pending</span>'
+      : `<time datetime="${ago(m.mins).toISOString()}" data-tip="${esc(absTime(m.mins))}">${relTime(m.mins)}</time><span class="sr">, ${esc(absTime(m.mins))}</span>`;
+    const loc = displayLoc(m);
+    return `<tr data-id="${m.id}" class="${on ? 'is-sel' : ''}">
+      <td class="c-sel">${cb}</td>
+      <td class="c-name"><div class="name-line"><span class="name trunc">${nm}</span>${m.self ? '<span class="you">You</span>' : ''}</div><span class="email-sub trunc">${em}</span>${m.pending ? `<span class="sub">Invited by ${esc(m.by)}, ${relTime(m.mins).toLowerCase()}</span>` : ''}</td>
+      <td class="c-email"><span class="trunc">${em}</span></td>
+      <td class="c-role">${role}</td>
+      <td class="c-loc"><span class="trunc" data-loc>${loc}</span></td>
+      <td class="c-active">${active}</td>
+      <td class="c-act"><button type="button" class="icon-btn" data-menu="${m.id}" aria-haspopup="menu" aria-expanded="false" aria-label="More actions for ${nm}" data-tip="More actions">${ico('dots-three')}</button></td>
+    </tr>`;
+  }
+  function sortHead(key, label, cls) {
+    const on = st.sort === key;
+    let aria = 'none', arrow = '';
+    if (on) {
+      const asc = key === 'active' ? st.dir === -1 : st.dir === 1;
+      aria = asc ? 'ascending' : 'descending';
+      arrow = ico(asc ? 'arrow-up' : 'arrow-down', 'i i-16');
+    }
+    return `<th class="${cls}" scope="col" aria-sort="${aria}"><button type="button" class="th-btn" data-sort="${key}"${on ? ' data-on' : ''}>${label}${arrow}</button></th>`;
+  }
+  function tableHTML(rows) {
+    const selAll = canEditRoles() ? '<label class="cb"><input type="checkbox" id="sel-all"><span class="sr">Select all shown members</span></label>' : '<span class="sr">Selection</span>';
+    return `<table class="mt"><caption class="sr">Members of ${esc(saved.name)}</caption><thead><tr>
+      <th class="c-sel" scope="col">${selAll}</th>
+      ${sortHead('name', 'Name', 'c-name')}
+      <th class="c-email" scope="col">Email</th>
+      ${sortHead('role', 'Role', 'c-role')}
+      <th class="c-loc" scope="col">Location</th>
+      ${sortHead('active', 'Last active', 'c-active')}
+      <th class="c-act" scope="col"><span class="sr">Actions</span></th>
+    </tr></thead><tbody>${rows.map(rowHTML).join('')}</tbody></table>`;
+  }
+  function skeletonHTML() {
+    const w = [[52, 70], [38, 58], [64, 44], [46, 66], [58, 50], [42, 62]];
+    return `<div aria-busy="true"><span class="sr">Loading members</span><table class="mt" aria-hidden="true"><tbody>${w.map(([a, b]) => `<tr>
+      <td class="c-sel"></td>
+      <td class="c-name"><span class="sk" style="width:${a}%"></span></td>
+      <td class="c-email"><span class="sk" style="width:${b}%"></span></td>
+      <td class="c-role"><span class="sk" style="width:60%"></span></td>
+      <td class="c-loc"><span class="sk" style="width:70%"></span></td>
+      <td class="c-active"><span class="sk" style="width:56%;margin-left:auto"></span></td>
+      <td class="c-act"></td></tr>`).join('')}</tbody></table></div>`;
+  }
+  function renderRight() {
+    if (st.sel.size) {
+      const n = st.sel.size;
+      right.innerHTML = `<span class="sel-count">${fmtN(n)} selected</span><button type="button" class="btn btn-danger-outline" id="bulk-remove">${ico('trash')}Remove ${n === 1 ? '1 person' : `${fmtN(n)} people`}</button><button type="button" class="btn btn-ghost" id="bulk-clear">Clear selection</button>`;
+      return;
+    }
+    if (st.loading) { right.innerHTML = '<span>Loading members…</span>'; return; }
+    const used = members.filter(m => !m.pending).length, pend = members.length - used;
+    right.innerHTML = `<span class="num">${fmtN(used)} ${used === 1 ? 'member' : 'members'}${pend ? `, ${pend} ${pend === 1 ? 'invite' : 'invites'} pending` : ''}</span>`;
+  }
+  function syncSelAll() {
+    const sa = $('#sel-all');
+    if (!sa) return;
+    const ids = currentShown.filter(m => !m.self).map(m => m.id);
+    const n = ids.filter(id => st.sel.has(id)).length;
+    sa.checked = ids.length > 0 && n === ids.length;
+    sa.indeterminate = n > 0 && n < ids.length;
+  }
+
+  function render() {
+    renderRight();
+    if (st.loading) { body.innerHTML = skeletonHTML(); foot.hidden = true; return; }
+    if (st.failed) {
+      body.innerHTML = `<div class="state" role="alert">
+        <p class="state-title is-err">${ico('warning-circle')}Couldn't load members</p>
+        <p class="quiet">The request timed out before Shiftboard answered. Nothing has changed. Try again, and if it keeps failing, check status.shiftboard.app.</p>
+        <button type="button" class="btn btn-secondary" id="retry">Try again</button></div>`;
+      foot.hidden = true;
+      return;
+    }
+    const list = visibleList();
+    if (!list.length) {
+      const q = st.q.trim();
+      const filtered = st.role !== 'all' || st.loc !== 'all';
+      body.innerHTML = `<div class="state">
+        <p class="state-title">${q ? `No members match “${esc(q)}”${filtered ? ' with these filters' : ''}` : 'No members match these filters'}</p>
+        <p class="quiet">${q ? 'Check the spelling, or search by email instead.' : 'Try another role or location.'}</p>
+        <button type="button" class="btn btn-secondary" id="clear-filters">Clear search and filters</button></div>`;
+      foot.hidden = true;
+      currentShown = [];
+      return;
+    }
+    currentShown = list.slice(0, st.shown);
+    body.innerHTML = tableHTML(currentShown) + (members.length === 1 ? `<div class="state">
+        <p>It's just you so far. Invite your managers and staff so they can see their shifts.</p>
+        <button type="button" class="btn btn-secondary" data-invite>Invite people</button></div>` : '');
+    const shown = currentShown.length, total = list.length;
+    foot.hidden = total <= 1;
+    foot.innerHTML = `<span class="num">Showing ${fmtN(shown)} of ${fmtN(total)}</span>${shown < total ? `<button type="button" class="btn btn-secondary" id="more-rows">Show ${fmtN(Math.min(10, total - shown))} more</button>` : ''}`;
+    syncSelAll();
+    markTruncation(body);
+  }
+
+  function updateCounts() {
+    const used = members.filter(m => !m.pending).length;
+    const pend = members.length - used;
+    $$('[data-n="people"]').forEach(el => { el.textContent = used === 1 ? '1 person' : `${fmtN(used)} people`; });
+    $$('[data-n="people-cap"]').forEach(el => { el.textContent = used === 1 ? 'The 1 person' : `All ${fmtN(used)} people`; });
+    if (stress) return;
+    const free = Math.max(0, SEAT_LIMIT - used - pend);
+    $('#seats-used').textContent = fmtN(used);
+    $('#meter').innerHTML = Array.from({ length: SEAT_LIMIT }, (_, i) => `<span class="${i < used ? '' : i < used + pend ? 'p' : 'f'}"></span>`).join('');
+    const note = `${pend} held for ${pend === 1 ? 'a pending invite' : 'pending invites'}, ${free} free`;
+    $('#seats-note').textContent = note;
+    $('#meter').setAttribute('aria-label', `${used} of ${SEAT_LIMIT} seats used, ${note}`);
+    const inv = Math.round(used * PRICE_P * VAT), oct = Math.round(OCT_SEATS * PRICE_P * VAT), diff = inv - oct;
+    $('#inv-amount').textContent = gbp(inv);
+    $$('[data-inv]').forEach(el => { el.textContent = gbp(inv); });
+    $('#inv-note').textContent = `14 Nov 2026, ${diff === 0 ? 'same as October' : `${gbp(Math.abs(diff))} ${diff > 0 ? 'more' : 'less'} than October`}`;
+    $('#inv-seats').textContent = free === 1 ? '1 seat is free.' : `${free} seats are free.`;
+  }
+
+  function removeMembers(ids, msg) {
+    const gone = members.filter(m => ids.includes(m.id));
+    members = members.filter(m => !ids.includes(m.id));
+    ids.forEach(id => st.sel.delete(id));
+    render(); updateCounts();
+    toast(msg, () => { members = members.concat(gone).sort((a, b) => a.id - b.id); render(); updateCounts(); });
+  }
+  async function copyText(text) {
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+      ta.remove();
+    }
+    toast(ok ? `Copied ${text}` : `Couldn't copy. The email is ${text}`);
+  }
+  const roleWithArticle = r => (r === 'Staff' ? 'Staff' : `${r === 'Owner' || r === 'Admin' ? 'an' : 'a'} ${r}`);
+
+  function setRole(m, role, sel) {
+    const prev = m.role;
+    if (prev === role) return;
+    m.role = role;
+    const row = body.querySelector(`tr[data-id="${m.id}"]`);
+    if (row) { const l = row.querySelector('[data-loc]'); if (l) l.textContent = displayLoc(m); }
+    toast(`${m.name} is now ${roleWithArticle(role)}.`, () => {
+      m.role = prev;
+      const s = body.querySelector(`select[data-role="${m.id}"]`);
+      if (s) { s.value = prev; const l = s.closest('tr').querySelector('[data-loc]'); if (l) l.textContent = displayLoc(m); s.focus(); }
+    });
+  }
+
+  body.addEventListener('change', e => {
+    const s = e.target.closest('select[data-role]');
+    if (s) { setRole(byId(+s.dataset.role), s.value, s); return; }
+    const c = e.target.closest('input[data-sel]');
+    if (c) {
+      const id = +c.dataset.sel;
+      if (c.checked) st.sel.add(id); else st.sel.delete(id);
+      c.closest('tr').classList.toggle('is-sel', c.checked);
+      renderRight(); syncSelAll();
+      return;
+    }
+    if (e.target.id === 'sel-all') {
+      const on = e.target.checked;
+      currentShown.filter(m => !m.self).forEach(m => {
+        if (on) st.sel.add(m.id); else st.sel.delete(m.id);
+        const box = body.querySelector(`input[data-sel="${m.id}"]`);
+        if (box) { box.checked = on; box.closest('tr').classList.toggle('is-sel', on); }
+      });
+      renderRight(); syncSelAll();
+    }
+  });
+  body.addEventListener('click', e => {
+    const mb = e.target.closest('[data-menu]');
+    if (mb) { openRowMenu(mb, byId(+mb.dataset.menu)); return; }
+    const sb = e.target.closest('[data-sort]');
+    if (sb) {
+      const k = sb.dataset.sort;
+      if (st.sort === k) st.dir *= -1; else { st.sort = k; st.dir = 1; }
+      fSort.value = st.sort;
+      syncURL(); render();
+      const again = body.querySelector(`[data-sort="${k}"]`);
+      if (again) again.focus();
+      return;
+    }
+    if (e.target.closest('#clear-filters')) {
+      st.q = ''; st.role = 'all'; st.loc = 'all';
+      qIn.value = ''; fRole.value = 'all'; fLoc.value = 'all';
+      syncURL(); render(); qIn.focus();
+      return;
+    }
+    if (e.target.closest('#retry')) { retry(); return; }
+    if (e.target.closest('[data-invite]')) openInvite(e.target.closest('[data-invite]'));
+  });
+  foot.addEventListener('click', e => {
+    if (!e.target.closest('#more-rows')) return;
+    const firstNew = currentShown.length;
+    st.shown += 10;
+    render();
+    const rows = $$('tbody tr', body);
+    const target = rows[firstNew] && (rows[firstNew].querySelector('input, select, button'));
+    const more = $('#more-rows');
+    (more || target || $('#members-h')).focus();
+  });
+  right.addEventListener('click', e => {
+    if (e.target.closest('#bulk-clear')) {
+      st.sel.clear(); render(); qIn.focus();
+      return;
+    }
+    if (e.target.closest('#bulk-remove')) {
+      const ids = [...st.sel];
+      removeMembers(ids, ids.length === 1 ? `Removed ${byId(ids[0]).name} from the workspace.` : `Removed ${ids.length} people from the workspace.`);
+      $('#members-h').focus();
+    }
+  });
+
+  function openRowMenu(btn, m) {
+    const items = [];
+    if (m.pending) items.push({ label: 'Resend invite', icon: 'envelope-simple', disabled: st.offline, run: () => toast(`Invite sent again to ${m.email}.`) });
+    items.push({ label: 'Copy email', icon: 'copy', run: () => copyText(m.email) });
+    if (canEditRoles() && !m.self) {
+      items.push({ sep: true });
+      items.push(m.pending
+        ? { label: 'Cancel invite', icon: 'x', danger: true, disabled: st.offline, run: () => removeMembers([m.id], `Invite to ${m.name} cancelled.`) }
+        : { label: 'Remove from workspace', icon: 'trash', danger: true, disabled: st.offline, run: () => removeMembers([m.id], `Removed ${m.name} from the workspace.`) });
+    }
+    openMenu(btn, items, 'right');
+  }
+
+  qIn.addEventListener('input', () => { st.q = qIn.value; st.shown = 10; st.sel.clear(); syncURL(); render(); });
+  fRole.addEventListener('change', () => { st.role = fRole.value; st.shown = 10; st.sel.clear(); syncURL(); render(); });
+  fLoc.addEventListener('change', () => { st.loc = fLoc.value; st.shown = 10; st.sel.clear(); syncURL(); render(); });
+  fSort.addEventListener('change', () => { st.sort = fSort.value; st.dir = 1; syncURL(); render(); });
+
+  function retry() {
+    st.failed = false;
+    const sk = setTimeout(() => { st.loading = true; render(); }, 300);
+    setTimeout(() => { clearTimeout(sk); st.loading = false; render(); $('#members-h').focus(); }, 900);
+  }
+
+  /* ---------- Invite ---------- */
+  const dlgInvite = $('#dlg-invite'), invName = $('#inv-name'), invEmail = $('#inv-email'), invGo = $('#inv-go');
+  function fieldErr(input, msg) {
+    const p = $('#' + input.id + '-err');
+    if (msg) { p.querySelector('span').textContent = msg; p.hidden = false; input.setAttribute('aria-invalid', 'true'); }
+    else { p.hidden = true; input.setAttribute('aria-invalid', 'false'); }
+  }
+  const nameMsg = v => (v.trim() ? '' : 'Enter their name as it should appear on the rota.');
+  function emailMsg(v) {
+    v = v.trim();
+    if (!v) return 'Enter the email address they use.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Check the email. It should look like name@gmail.com.';
+    const dup = members.find(m => m.email.toLowerCase() === v.toLowerCase());
+    if (dup) return dup.pending ? `${dup.name} already has an invite to this email.` : `${dup.name} already uses this email.`;
+    return '';
+  }
+  function syncInviteSend() {
+    const why = $('#inv-why');
+    const off = st.offline;
+    setDisabled(invGo, off);
+    why.hidden = !off;
+    why.textContent = off ? "You're offline. You can send the invite when you reconnect." : '';
+  }
+  invName.addEventListener('blur', () => { if (invName.value) fieldErr(invName, nameMsg(invName.value)); });
+  invEmail.addEventListener('blur', () => { if (invEmail.value) fieldErr(invEmail, emailMsg(invEmail.value)); });
+  invName.addEventListener('input', () => { if (invName.getAttribute('aria-invalid') === 'true') fieldErr(invName, nameMsg(invName.value)); });
+  invEmail.addEventListener('input', () => { if (invEmail.getAttribute('aria-invalid') === 'true') fieldErr(invEmail, emailMsg(invEmail.value)); });
+  $('#inv-role').addEventListener('change', e => {
+    const all = e.target.value === 'Owner' || e.target.value === 'Admin';
+    $('#inv-loc').disabled = all;
+  });
+  function openInvite(trigger) {
+    const ib = $('#invite-btn');
+    if (isDisabled(ib)) return;
+    $('#inv-form-err').hidden = true;
+    syncInviteSend();
+    openDialog(dlgInvite, trigger || ib);
+    invName.focus();
+  }
+  $('#invite-btn').addEventListener('click', e => openInvite(e.currentTarget));
+  $('#inv-cancel').addEventListener('click', () => dlgInvite.close());
+  $('#inv-form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (isDisabled(invGo)) return;
+    const a = nameMsg(invName.value), b = emailMsg(invEmail.value);
+    fieldErr(invName, a); fieldErr(invEmail, b);
+    if (a) { invName.focus(); return; }
+    if (b) { invEmail.focus(); return; }
+    const used = members.filter(m => !m.pending).length, pend = members.length - used;
+    const formErr = $('#inv-form-err');
+    if (!stress && used + pend >= SEAT_LIMIT) {
+      formErr.querySelector('span').textContent = `All ${SEAT_LIMIT} seats are taken. Remove someone, or add seats from Change plan, then send the invite.`;
+      formErr.hidden = false;
+      return;
+    }
+    formErr.hidden = true;
+    setDisabled(invGo, true);
+    invGo.textContent = 'Sending…';
+    setTimeout(() => {
+      const role = $('#inv-role').value;
+      const m = { id: ++uid, name: invName.value.trim(), email: invEmail.value.trim(), role, home: $('#inv-loc').value, mins: 0, pending: true, by: me.name, self: false };
+      members.push(m);
+      invGo.textContent = 'Send invite';
+      setDisabled(invGo, false);
+      invName.value = ''; invEmail.value = '';
+      dlgInvite.close();
+      render(); updateCounts();
+      toast(`Invite sent to ${m.email}.`, () => { members = members.filter(x => x.id !== m.id); render(); updateCounts(); });
+    }, 600);
+  });
+
+  /* ---------- Delete workspace ---------- */
+  const dd = $('#dlg-delete'), ddIn = $('#dd-confirm'), ddGo = $('#dd-go'), ddWhy = $('#dd-why');
+  function syncDelete() {
+    const ok = ddIn.value.trim() === saved.name;
+    let why = ok ? 'This deletes the workspace for everyone.' : 'Type the name exactly to turn on Delete.';
+    if (ok && st.offline) why = "You're offline. You can delete it when you reconnect.";
+    setDisabled(ddGo, !ok || st.offline);
+    ddWhy.textContent = why;
+  }
+  function openDelete(trigger) {
+    if (VIEWER !== 'owner') return;
+    ddIn.value = '';
+    syncDelete();
+    openDialog(dd, trigger);
+    syncURL();
+    ddIn.focus();
+  }
+  $('#delete-btn').addEventListener('click', e => openDelete(e.currentTarget));
+  $('#dd-cancel').addEventListener('click', () => dd.close());
+  ddIn.addEventListener('input', syncDelete);
+  $('#dd-form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (isDisabled(ddGo)) { ddIn.focus(); return; }
+    setDisabled(ddGo, true);
+    ddGo.textContent = 'Deleting…';
+    ddGo.setAttribute('aria-busy', 'true');
+    setTimeout(() => {
+      ddGo.textContent = 'Delete workspace';
+      ddGo.removeAttribute('aria-busy');
+      lastTrigger = null;
+      dd.close();
+      $('#wrap').hidden = true;
+      $('#deleted').hidden = false;
+      $('#gone-title').focus();
+    }, 900);
+  });
+  $('#restore').addEventListener('click', e => {
+    const b = e.currentTarget;
+    setDisabled(b, true);
+    b.textContent = 'Restoring…';
+    setTimeout(() => {
+      b.textContent = 'Restore workspace';
+      setDisabled(b, false);
+      $('#deleted').hidden = true;
+      $('#wrap').hidden = false;
+      $('#page-title').focus();
+      toast(`${saved.name} is restored. Everyone has access again.`);
+    }, 700);
+  });
+
+  /* ---------- Navigation menus ---------- */
+  $('#ws-switch').addEventListener('click', e => openMenu(e.currentTarget, [
+    { label: saved.name, checked: true, run: () => {} },
+    { sep: true },
+    { label: 'Create a workspace', href: '/workspaces/new' },
+  ], 'left'));
+  $('#account-btn').addEventListener('click', e => openMenu(e.currentTarget, [
+    { label: 'Your profile', href: '/account' },
+    { label: 'Sign out', icon: 'sign-out', href: '/sign-out' },
+  ], 'left'));
+  const dlgMore = $('#dlg-more');
+  $('#more-btn').addEventListener('click', e => openDialog(dlgMore, e.currentTarget));
+  $('#more-close').addEventListener('click', () => dlgMore.close());
+
+  /* ---------- Offline ---------- */
+  function setOffline(on) {
+    st.offline = on;
+    $('#offline').hidden = !on;
+    syncForm();
+    $$('select[data-role]', body).forEach(s => { s.disabled = on; });
+    syncInviteSend();
+    syncDelete();
+  }
+  addEventListener('offline', () => setOffline(true));
+  addEventListener('online', () => { if (MODE !== 'offline') setOffline(false); });
+
+  /* ---------- Who is looking ---------- */
+  function applyViewer() {
+    $$('[data-viewer-name]').forEach(el => { el.textContent = me.name; });
+    $$('[data-viewer-role]').forEach(el => { el.textContent = me.role; });
+    if (VIEWER === 'owner') return;
+    nameIn.value = saved.name;
+    nameIn.disabled = true;
+    nameIn.setAttribute('aria-invalid', 'false');
+    tzSel.disabled = true;
+    nameErr.hidden = true;
+    nameCount.hidden = true;
+    $('#form-actions').hidden = true;
+    $('#general-noperm').hidden = false;
+    $('#roles-noperm').hidden = false;
+    setDisabled($('#invite-btn'), true);
+    $('#invite-why').hidden = false;
+    $('#plan').hidden = true;
+    $('#billing-noperm').hidden = false;
+    $('#billing .sec-desc').hidden = true;
+    setDisabled($('#delete-btn'), true);
+    $('#delete-why').hidden = false;
+  }
+
+  let rz;
+  addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => markTruncation(body), 150); });
+
+  applyViewer();
+  syncTzNow();
+  syncForm();
+  setOffline(st.offline);
+  updateCounts();
+  render();
+  if (P.get('dialog') === 'delete') openDelete($('#delete-btn'));
+})();
+</script>
+</body>
+</html>

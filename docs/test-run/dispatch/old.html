@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Today · Fieldline</title>
+<style>
+/* Palette: Blueprint on near-black. Shortlist Blueprint, Harbour, Nightshift, Tideline; "Fieldline" = 9 letters lands on Blueprint.
+   Blue lead floods the revenue panel, the pink support carries missed calls and the emergency state, the pale pop marks "now" and the late technician. */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  color-scheme:dark;
+  --page:#0A0A0A;
+  --raised:#141414;
+  --raised2:#1C1C1E;
+  --hover:#1A1A1A;
+  --sel:#262626;
+  --line:#2A2A2A;
+  --grid:#1C1C1C;
+  --ctl:#636363;
+  --quiet:#A3A3A3;
+  --off:#858585;
+  --text:#F5F5F5;
+  --ink:#0A0A0A;
+  --lead:#224D95;
+  --support:#D93D7F;
+  --pop:#EDEBDE;
+  --r-s:6px;
+  --r-l:10px;
+  --ease:cubic-bezier(0.23, 1, 0.32, 1);
+  --font:system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html{background:var(--page);scrollbar-color:#3A3A3A var(--page)}
+body{margin:0;background:var(--page);color:var(--text);font:14px/20px var(--font);-webkit-font-smoothing:antialiased}
+::selection{background:var(--lead);color:#FFFFFF}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+input,textarea{caret-color:var(--text)}
+:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+[hidden]{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+.q{color:var(--quiet)}
+.ic{width:20px;height:20px;flex:none;fill:currentColor}
+.ic.s{width:16px;height:16px}
+.skip{position:absolute;left:16px;top:-48px;background:var(--text);color:var(--ink);padding:8px 12px;border-radius:var(--r-s);z-index:60}
+.skip:focus{top:8px}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:24px;height:52px;padding:0 24px;border-bottom:1px solid var(--line)}
+.brand{font-size:16px;font-weight:650;text-decoration:none;letter-spacing:-0.01em}
+.mainnav{display:flex;gap:4px}
+.mainnav a,.toplink{padding:6px 10px;border-radius:var(--r-s);color:var(--quiet);text-decoration:none}
+.mainnav a:hover,.toplink:hover{background:var(--hover);color:var(--text)}
+.mainnav a[aria-current]{background:var(--sel);color:var(--text)}
+.topend{margin-left:auto;display:flex;align-items:center;gap:4px}
+.account{display:flex;align-items:center;gap:8px;padding:6px 10px;border:0;background:none;border-radius:var(--r-s);cursor:pointer}
+.account:hover{background:var(--hover)}
+.acct-co{color:var(--quiet)}
+.co-mobile{display:none;color:var(--quiet);font-size:13px;margin-left:auto}
+
+/* Page head */
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:24px 24px 0}
+h1{font-size:24px;line-height:28px;font-weight:650;margin:0}
+.dateline{margin:4px 0 0;color:var(--quiet);font-size:13px}
+.headtools{display:flex;align-items:flex-end;gap:12px}
+.search label{display:block;font-size:12px;line-height:16px;color:var(--quiet);margin-bottom:4px}
+.field{position:relative}
+.field .ic{position:absolute;left:10px;top:8px;color:var(--quiet);pointer-events:none}
+.field input{width:300px;height:36px;padding:0 12px 0 38px;background:var(--page);border:1px solid var(--ctl);border-radius:var(--r-s);font-size:14px}
+.field input::placeholder{color:#8A8A8A}
+.newjob-wrap{display:flex;align-items:center;gap:8px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border-radius:var(--r-s);border:1px solid var(--ctl);background:transparent;color:var(--text);font-size:14px;font-weight:550;cursor:pointer;white-space:nowrap;transition:background-color 120ms var(--ease),border-color 120ms var(--ease),transform 100ms var(--ease)}
+.btn:hover{background:var(--hover)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--text);color:var(--ink);border-color:var(--text)}
+.btn.primary:hover{background:#FFFFFF}
+.btn:disabled{cursor:not-allowed;color:var(--off);border-color:#333333;background:transparent;transform:none}
+.btn.primary:disabled{background:#2A2A2A;border-color:#2A2A2A;color:#7A7A7A}
+.btn.sm{height:32px;padding:0 12px;font-size:13px}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:0;border-radius:var(--r-s);background:transparent;color:var(--quiet);cursor:pointer;transition:background-color 120ms var(--ease)}
+.iconbtn:hover{background:var(--sel);color:var(--text)}
+.linkbtn{border:0;background:none;padding:0;color:var(--text);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.reason{font-size:12px;line-height:16px;color:var(--quiet)}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;padding:24px 24px 40px;align-items:start}
+.rail{display:grid;gap:24px}
+.sechead{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:36px;margin-bottom:4px}
+h2{font-size:16px;line-height:24px;font-weight:600;margin:0}
+.count{color:var(--quiet);font-weight:500;margin-left:6px}
+#board{margin-top:40px}
+.bulk{display:flex;align-items:center;gap:12px}
+.bulk[hidden]{display:none}
+
+/* Offline / error */
+.banner{display:flex;align-items:center;gap:12px;margin:16px 24px 0;padding:12px 16px;background:var(--raised2);border:1px solid var(--line);border-radius:var(--r-l)}
+.banner p{margin:0;flex:1}
+.banner .ic{color:var(--pop)}
+.errorbox{display:flex;gap:12px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.errorbox .ic{color:var(--support);margin-top:2px}
+.errorbox p{margin:4px 0 0;max-width:60ch}
+.errorbox .btn{margin-top:12px}
+.empty{padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--quiet);margin:0}
+.empty p{margin:0 0 12px;color:var(--text)}
+
+/* Queue table */
+.qtable{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.qtable th{font-size:12px;line-height:16px;font-weight:500;color:var(--quiet);text-align:left;padding:8px 12px;border-bottom:1px solid var(--line)}
+.qtable th.r,.qtable td.r{text-align:right}
+.qtable td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle;min-width:0}
+.qtable .c-sel{width:44px;padding-right:0}
+.qtable .c-win{width:112px}
+.qtable .c-addr{width:172px}
+.qtable .c-type{width:132px}
+.qtable .c-book{width:136px;white-space:nowrap}
+.qtable .c-act{width:108px}
+.qtable input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:var(--text);cursor:pointer}
+.cust-name{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cust-issue{display:block;color:var(--quiet);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cust-meta{display:none}
+.qtable tr:has(:focus-visible) .cust-name,.qtable tr:has(:focus-visible) .cust-issue{white-space:normal}
+.addr{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asap{font-weight:650}
+.qtable tr.is-emer td{background:var(--support);color:var(--ink);border-bottom-color:var(--support)}
+.qtable tr.is-emer td:first-child{border-radius:var(--r-s) 0 0 var(--r-s)}
+.qtable tr.is-emer td:last-child{border-radius:0 var(--r-s) var(--r-s) 0}
+.qtable tr.is-emer .cust-issue,.qtable tr.is-emer .q,.qtable tr.is-emer .cust-meta{color:var(--ink)}
+.qtable tr.is-emer input{accent-color:var(--ink)}
+.qtable tr.is-emer .btn{border-color:var(--ink);color:var(--ink)}
+.qtable tr.is-emer .btn:hover{background:rgba(10,10,10,.14)}
+.qtable tr.is-emer .btn:disabled{border-color:rgba(10,10,10,.35);color:rgba(10,10,10,.5);background:transparent}
+.qtable tr.is-emer .reason{color:var(--ink)}
+.etype{display:inline-flex;align-items:center;gap:4px;font-weight:650}
+.act-cell{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.more-row{display:flex;align-items:center;gap:12px;padding:12px 0}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;padding:2px 8px;border-radius:var(--r-s);white-space:nowrap}
+.chip.crit{background:var(--support);color:var(--ink);font-weight:600}
+.chip.attn{background:var(--pop);color:var(--ink);font-weight:600}
+
+/* Board timeline */
+.board{--name:208px}
+.hours{display:grid;grid-template-columns:var(--name) minmax(0,1fr);height:28px}
+.scale{position:relative}
+.scale span{position:absolute;top:6px;font-size:12px;line-height:16px;color:var(--quiet);padding-left:4px}
+.scale .nowlab{padding:0 6px;border-radius:var(--r-s);background:var(--pop);color:var(--ink);font-weight:600;transform:translateX(-50%);top:4px;line-height:20px}
+.lane{display:grid;grid-template-columns:var(--name) minmax(0,1fr);border-top:1px solid var(--line)}
+.lanes .lane:last-child{border-bottom:1px solid var(--line)}
+.lane-head{padding:6px 12px 6px 0;min-width:0}
+.lane-name{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lane-status{display:flex;align-items:center;gap:6px;font-size:12px;line-height:16px;color:var(--quiet);white-space:nowrap;overflow:hidden}
+.lane.off .lane-name,.lane.off .lane-status{color:var(--off)}
+.track{position:relative;height:48px;margin:0;padding:0;list-style:none;background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px);background-size:calc(100% / 12) 100%}
+.track .offnote{position:absolute;left:8px;top:14px;font-size:12px;color:var(--off)}
+.job{z-index:1;position:absolute;top:6px;bottom:6px;border-radius:var(--r-s);padding:2px 8px;font-size:13px;line-height:16px;overflow:hidden;min-width:0;border:1px solid transparent;transition:opacity 150ms var(--ease),outline-color 400ms var(--ease);outline:2px solid transparent;outline-offset:1px}
+.job b{display:block;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job span{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job.done{background:var(--raised);color:var(--quiet)}
+.job.active{background:#2C2C2E;color:var(--text)}
+.job.active span{color:#C8C8C8}
+.job.next,.job.planned{background:var(--page);border-color:#4A4A4A;color:var(--text)}
+.job.next span,.job.planned span{color:var(--quiet)}
+.job.late{background:var(--pop);color:var(--ink)}
+.job.late span{color:var(--ink)}
+.job.emer{background:var(--support);color:var(--ink);border-color:var(--support)}
+.job.emer span{color:var(--ink)}
+.job.just{outline-color:var(--text)}
+.job.faded{opacity:.3}
+.job:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.nowline{z-index:0;position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--pop);pointer-events:none}
+.tlist{display:none}
+
+/* Panels and charts */
+.panel{background:var(--raised);border-radius:var(--r-l);padding:20px}
+.panel.lead{background:var(--lead);color:#FFFFFF}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.psub{margin:2px 0 0;font-size:13px;color:var(--quiet)}
+.lead .psub{color:#FFFFFF}
+.seg{display:inline-flex;gap:2px;flex:none}
+.seg button{height:32px;padding:0 10px;border-radius:var(--r-s);border:0;background:transparent;color:var(--quiet);font-size:13px;cursor:pointer;transition:background-color 120ms var(--ease)}
+.seg button:hover{background:var(--sel);color:var(--text)}
+.seg button[aria-pressed="true"]{background:var(--sel);color:var(--text)}
+.lead .seg button{color:#FFFFFF}
+.lead .seg button:hover{background:#2E5BA6}
+.lead .seg button[aria-pressed="true"]{background:#FFFFFF;color:var(--ink)}
+.figs{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}
+.fig{display:block;font-size:24px;line-height:28px;font-weight:650}
+.figl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--quiet)}
+.lead .figl{color:#FFFFFF}
+.sw{width:10px;height:10px;flex:none}
+.sw.ans{background:#C8C8C8}
+.sw.miss{background:var(--support)}
+.cmp{font-size:13px;margin:8px 0 0;color:var(--quiet)}
+.lead .cmp{color:#FFFFFF}
+.cplot{display:grid;grid-template-columns:28px minmax(0,1fr);margin-top:20px}
+.yax{position:relative;height:160px}
+.yax span{position:absolute;right:8px;font-size:12px;line-height:12px;color:var(--quiet);transform:translateY(50%)}
+.area{position:relative;height:160px;border-bottom:1px solid #6B6B6B}
+.area .gl{position:absolute;left:0;right:0;height:1px;background:var(--line)}
+.bars{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr)}
+.bar{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;cursor:default;transition:opacity 150ms var(--ease);border-radius:var(--r-s)}
+.bar i{display:block;width:56%;max-width:44px}
+.bar .a{background:#C8C8C8}
+.bar .m{background:var(--support)}
+.bars:hover .bar:not(:hover),.bars:focus-within .bar:not(:focus){opacity:.4}
+.xax{display:grid;grid-template-columns:repeat(5,1fr);grid-column:2;margin-top:6px}
+.xax span{text-align:center;font-size:12px;line-height:16px;color:var(--quiet)}
+.rplot{margin-top:20px}
+.rrow{display:grid;grid-template-columns:92px minmax(0,1fr) 76px;align-items:center;height:36px;cursor:default;transition:opacity 150ms var(--ease)}
+.rrows:hover .rrow:not(:hover),.rrows:focus-within .rrow:not(:focus){opacity:.45}
+.rlabel{font-size:13px}
+.rtrack{position:relative;height:100%;background-image:linear-gradient(to right,rgba(255,255,255,.24) 1px,transparent 1px);background-size:50% 100%;box-shadow:inset -1px 0 0 rgba(255,255,255,.24)}
+.rbar{position:absolute;left:0;top:10px;bottom:10px;background:#FFFFFF}
+.rval{text-align:right;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.raxis{display:grid;grid-template-columns:92px minmax(0,1fr) 76px;margin-top:4px}
+.ticks{position:relative;height:16px}
+.ticks span{position:absolute;font-size:12px;line-height:16px;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+.ticks span:last-child{transform:translateX(-100%)}
+.pempty{margin:16px 0 0;color:var(--quiet)}
+.lead .pempty{color:#FFFFFF}
+
+/* Skeleton */
+.sk{background:var(--raised2);border-radius:4px;height:12px}
+.skrow{display:grid;grid-template-columns:44px 112px 1fr 180px 132px 112px 108px;gap:0;align-items:center;height:64px;border-bottom:1px solid var(--line)}
+.skrow > div{padding:0 12px}
+.sklane{display:grid;grid-template-columns:208px 1fr;height:48px;border-top:1px solid var(--line);align-items:center}
+
+/* Tooltip */
+#tip{margin:0;inset:auto;position:fixed;max-width:300px;padding:8px 10px;border:0;border-radius:var(--r-s);background:#F5F5F5;color:var(--ink);font-size:12px;line-height:16px;pointer-events:none;white-space:pre-line;overflow:visible}
+
+/* Popovers */
+[popover]{margin:0;padding:0;border:1px solid #3A3A3A;border-radius:var(--r-l);background:var(--raised2);color:var(--text)}
+.menu{inset:auto;position:fixed;min-width:248px;padding:4px}
+.menu:popover-open,#picker:popover-open{animation:rise 160ms var(--ease)}
+.menu a{display:block;padding:8px 12px;border-radius:var(--r-s);text-decoration:none}
+.menu a:hover{background:var(--sel)}
+.menu .who{padding:8px 12px 10px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.menu .who span{display:block;font-size:12px;color:var(--quiet)}
+#picker{inset:auto;position:fixed;width:420px;max-height:min(560px, calc(100dvh - 32px));overflow:hidden}
+#picker:popover-open{display:flex;flex-direction:column}
+#picker::backdrop{background:transparent}
+#picker form{display:flex;flex-direction:column;min-height:0;flex:1}
+.pk-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:14px 12px 12px 16px;border-bottom:1px solid var(--line)}
+.pk-head p{margin:0;font-size:13px;color:var(--quiet);overflow:hidden;text-overflow:ellipsis}
+.pk-list{overflow:auto;padding:4px;min-height:0;flex:1 1 auto}
+.opt{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:8px 12px;border-radius:var(--r-s);cursor:pointer;transition:background-color 120ms var(--ease)}
+.opt:hover{background:var(--sel)}
+.opt:has(input:checked){background:var(--sel)}
+.opt input{grid-row:1 / span 2;margin:0;width:16px;height:16px;accent-color:var(--text)}
+.opt b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .on{font-size:12px;line-height:16px;color:var(--quiet);grid-column:2}
+.opt .left{grid-column:3;grid-row:1 / span 2;font-size:12px;color:var(--quiet);text-align:right}
+.opt .best{font-size:12px;color:var(--text);font-weight:600;margin-left:6px}
+.opt.dis{cursor:not-allowed}
+.opt.dis b,.opt.dis .on,.opt.dis .left{color:var(--off)}
+.pk-foot{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.pk-foot .reason{margin-right:auto}
+
+/* Dialog */
+dialog{padding:0;border:1px solid #3A3A3A;border-radius:var(--r-l);background:var(--raised2);color:var(--text);width:min(600px, calc(100% - 32px));max-height:calc(100dvh - 32px)}
+dialog[open]{animation:rise 180ms var(--ease)}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.dlg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 12px 0 20px}
+.dlg-head p{margin:2px 0 0;font-size:13px;color:var(--quiet)}
+.form{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0;border:0;margin:0;padding:0}
+.fld.wide{grid-column:1 / -1}
+.fld > label,.fld > legend{font-size:13px;font-weight:550;padding:0;margin-bottom:4px}
+.fld .hint{font-size:12px;line-height:16px;color:var(--quiet)}
+.fld input[type=text],.fld input[type=tel],.fld select,.fld textarea{height:36px;padding:0 10px;background:var(--page);border:1px solid var(--ctl);border-radius:var(--r-s);font-size:14px;width:100%}
+.fld textarea{height:auto;min-height:72px;padding:8px 10px;resize:vertical}
+.fld [aria-invalid="true"]{border-color:var(--support)}
+.radios{display:flex;flex-wrap:wrap;gap:4px 16px}
+.radios label{display:flex;align-items:center;gap:6px;min-height:32px;cursor:pointer}
+.radios input{margin:0;width:16px;height:16px;accent-color:var(--text)}
+.err{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;color:var(--text)}
+.err[hidden]{display:none}
+.err .ic{color:var(--support);margin-top:1px}
+.dlg-foot{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px}
+
+/* Toasts */
+.toasts{position:fixed;right:24px;bottom:24px;display:grid;gap:8px;z-index:50;width:min(440px, calc(100% - 32px))}
+.toast{display:flex;align-items:center;gap:8px;padding:10px 8px 10px 16px;background:#262626;border:1px solid #3A3A3A;border-radius:var(--r-l);animation:rise 200ms var(--ease)}
+.toast p{margin:0;flex:1}
+
+/* Bottom bar and More (phone only) */
+.bottombar{display:none}
+
+@keyframes rise{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+@media (min-width:1800px){
+  .layout{grid-template-columns:minmax(0,1fr) 440px}
+  .board{--name:240px}
+}
+@media (max-width:1099px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .rail{grid-template-columns:1fr 1fr;align-items:start}
+  .qtable .c-addr{width:150px}
+  .qtable .c-book{display:none}
+}
+@media (max-width:759px){
+  body{font-size:15px;line-height:22px;padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+  .topbar{padding:0 16px;height:48px}
+  .mainnav,.topend{display:none}
+  .co-mobile{display:block}
+  .pagehead{flex-direction:column;align-items:stretch;gap:16px;padding:20px 16px 0}
+  .pagehead-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+  .headtools{flex-direction:column;align-items:stretch}
+  .field input{width:100%;height:44px;font-size:16px}
+  .field .ic{top:12px}
+  .newjob-wrap .btn{height:44px}
+  .banner{margin:16px 16px 0;align-items:flex-start;flex-wrap:wrap}
+  .layout{padding:20px 16px 32px;gap:32px}
+  .rail{grid-template-columns:1fr}
+  .btn{height:44px}
+  .btn.sm{height:44px;font-size:14px}
+  .iconbtn{width:44px;height:44px}
+  .seg button{height:44px;padding:0 12px}
+  .phead{flex-wrap:wrap}
+  .qtable thead{display:none}
+  .qtable,.qtable tbody{display:block}
+  .qtable tr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:"sel cust win" "sel type type" "act act act";gap:6px 8px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .qtable td{display:block;padding:0;border:0}
+  .qtable tr.is-emer{background:var(--support);color:var(--ink);border-radius:var(--r-l);padding:14px 12px 14px 4px;border-bottom:0;margin-bottom:4px}
+  .qtable tr.is-emer td{background:none}
+  .qtable .c-sel{grid-area:sel;width:auto;padding-top:2px}
+  .qtable .c-sel label{display:flex;width:36px;height:44px;margin-top:-12px;align-items:center}
+  .qtable input[type=checkbox]{width:20px;height:20px}
+  .qtable .c-win{grid-area:win;width:auto;text-align:right;font-size:14px}
+  .qtable .c-cust{grid-area:cust}
+  .qtable .c-type{grid-area:type;width:auto}
+  .qtable .c-addr,.qtable .c-book{display:none}
+  .qtable .c-act{grid-area:act;width:auto;margin-top:6px}
+  .act-cell{align-items:stretch}
+  .act-cell .btn{width:100%}
+  .cust-issue{white-space:normal;font-size:14px}
+  .cust-meta{display:block;font-size:13px;color:var(--quiet)}
+  .sechead{flex-wrap:wrap}
+  .bulk{width:100%;justify-content:space-between}
+  .board{display:none}
+  .tlist{display:block;border-top:1px solid var(--line)}
+  .filters{display:flex;overflow-x:auto;margin:0 -16px;padding:0 16px 4px;width:calc(100% + 32px);scrollbar-width:none}
+  .filters button{flex:none}
+  .tcard{border-bottom:1px solid var(--line)}
+  .tcard summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 0;cursor:pointer;list-style:none;min-height:44px}
+  .tcard summary::-webkit-details-marker{display:none}
+  .t-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t-status{font-size:13px;color:var(--quiet);text-align:right;display:flex;gap:6px;align-items:center;justify-content:flex-end}
+  .t-now{grid-column:1 / -1;font-size:14px;color:var(--quiet);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tcard.off .t-name,.tcard.off .t-status{color:var(--off)}
+  .t-jobs{list-style:none;margin:0 0 12px;padding:0}
+  .t-jobs li{display:grid;grid-template-columns:116px minmax(0,1fr) auto;gap:8px;padding:8px 0;border-top:1px solid var(--grid);font-size:14px}
+  .t-jobs li b{font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t-jobs li .st{font-size:13px;color:var(--quiet);text-align:right}
+  .t-jobs li.done{color:var(--quiet)}
+  .t-jobs li.emer .st,.t-jobs li.late .st{color:var(--text)}
+  .bottombar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--raised);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .bottombar a,.bottombar button{display:flex;align-items:center;justify-content:center;height:56px;font-size:13px;color:var(--quiet);text-decoration:none;background:none;border:0;padding:0 4px;cursor:pointer}
+  .bottombar [aria-current]{color:var(--text);background:var(--sel)}
+  .toasts{right:16px;bottom:calc(68px + env(safe-area-inset-bottom))}
+  #picker,.menu.sheet{left:0;right:0;bottom:0;top:auto;width:100%;max-height:85dvh;border-radius:var(--r-l) var(--r-l) 0 0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom)}
+  #picker::backdrop,.menu.sheet::backdrop{background:rgba(0,0,0,.6)}
+  .opt{padding:10px 12px;min-height:52px}
+  dialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:var(--r-l) var(--r-l) 0 0;max-height:92dvh}
+  .form{grid-template-columns:1fr}
+  .fld input[type=text],.fld input[type=tel],.fld select{height:44px;font-size:16px}
+  .fld textarea{font-size:16px}
+  .skrow{grid-template-columns:36px 1fr 80px;height:96px}
+  .skrow > div:nth-child(n+4){display:none}
+  .sklane{grid-template-columns:1fr}
+  .sklane > div:last-child{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .menu:popover-open,#picker:popover-open,dialog[open],.toast{animation-name:fade;animation-duration:200ms}
+  .btn:active{transform:none;background:var(--sel)}
+  .btn.primary:active{background:#D9D9D9}
+}
+@media (prefers-contrast:more){
+  :root{--line:#5C5C5C;--grid:#333333;--quiet:#C4C4C4}
+  .panel{border:1px solid #8A8A8A}
+  .job.done{border-color:#5C5C5C}
+}
+@media (forced-colors:active){
+  .job,.chip,.panel,.bar i,.rbar{border:1px solid CanvasText}
+  .nowline{background:Highlight}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to today's jobs</a>
+
+<header class="topbar">
+  <a class="brand" href="#/today">Fieldline</a>
+  <nav class="mainnav" aria-label="Main">
+    <a href="#/today" aria-current="page">Today</a>
+    <a href="#/schedule">Schedule</a>
+    <a href="#/customers">Customers</a>
+    <a href="#/technicians">Technicians</a>
+    <a href="#/reports">Reports</a>
+  </nav>
+  <div class="topend">
+    <a class="toplink" href="#/help">Help</a>
+    <a class="toplink" href="#/settings">Settings</a>
+    <button class="account" id="account-btn" popovertarget="account-menu" aria-haspopup="true">
+      <span>Renee Vaughn</span><span class="acct-co">Northgate Heating &amp; Air</span>
+      <svg class="ic s" viewBox="0 0 256 256" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+    </button>
+  </div>
+  <span class="co-mobile">Northgate Heating &amp; Air</span>
+</header>
+
+<div id="account-menu" class="menu" popover>
+  <div class="who">Renee Vaughn<span>Dispatcher, Northgate Heating &amp; Air</span></div>
+  <a href="#/profile">Your profile</a>
+  <a href="#/settings/company">Company settings</a>
+  <a href="#/sign-out">Sign out</a>
+</div>
+
+<main id="main" tabindex="-1">
+  <div class="pagehead">
+    <div class="pagehead-top">
+      <div>
+        <h1>Today</h1>
+        <p class="dateline" id="dateline">Saturday, October 31</p>
+      </div>
+      <div class="newjob-wrap mobile-only-hook"></div>
+    </div>
+    <div class="headtools">
+      <div class="search">
+        <label for="q">Find a job or technician</label>
+        <div class="field">
+          <svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>
+          <input id="q" type="search" placeholder="Name, street or area" autocomplete="off">
+        </div>
+      </div>
+      <div class="newjob-wrap" id="newjob-wrap">
+        <span class="reason" id="newjob-reason" hidden>Offline, can't book</span>
+        <button class="btn primary" id="newjob">New job</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="banner"></div>
+
+  <div class="layout">
+    <div class="work">
+      <section id="queue" aria-labelledby="queue-h">
+        <div class="sechead">
+          <h2 id="queue-h">Needs a technician<span class="count num" id="queue-count"></span></h2>
+          <div class="bulk" id="bulk" hidden>
+            <span class="num" id="bulk-n"></span>
+            <button class="btn sm" id="bulk-assign">Assign to one technician</button>
+            <button class="linkbtn" id="bulk-clear">Clear selection</button>
+          </div>
+        </div>
+        <div id="queue-body"></div>
+      </section>
+
+      <section id="board" aria-labelledby="board-h">
+        <div class="sechead">
+          <h2 id="board-h">Technicians<span class="count num" id="board-count"></span></h2>
+          <div class="seg filters" role="group" aria-label="Show technicians" id="filters"></div>
+        </div>
+        <div id="board-body"></div>
+      </section>
+    </div>
+
+    <aside class="rail" aria-label="Calls and revenue">
+      <section class="panel" id="calls" aria-labelledby="calls-h">
+        <div class="phead">
+          <div>
+            <h2 id="calls-h">Calls so far today</h2>
+            <p class="psub" id="calls-sub">6:00 to 10:42 AM, by hour</p>
+          </div>
+          <div class="seg" role="group" aria-label="Show calls for">
+            <button type="button" data-calls="today" aria-pressed="true">Today</button>
+            <button type="button" data-calls="last" aria-pressed="false">Last Saturday</button>
+          </div>
+        </div>
+        <div id="calls-body"></div>
+      </section>
+
+      <section class="panel lead" id="revenue" aria-labelledby="rev-h">
+        <div class="phead">
+          <div>
+            <h2 id="rev-h">Revenue booked</h2>
+            <p class="psub" id="rev-sub">Mon, Oct 26 to today</p>
+          </div>
+          <div class="seg" role="group" aria-label="Show revenue for" id="rev-seg">
+            <button type="button" data-rev="this" aria-pressed="true">This week</button>
+            <button type="button" data-rev="last" aria-pressed="false">Last week</button>
+          </div>
+        </div>
+        <div id="rev-body"></div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<nav class="bottombar" aria-label="Main">
+  <a href="#/today" aria-current="page">Today</a>
+  <a href="#/schedule">Schedule</a>
+  <a href="#/customers">Customers</a>
+  <a href="#/technicians">Technicians</a>
+  <button type="button" id="more-btn" popovertarget="more-menu" aria-haspopup="true">More</button>
+</nav>
+<div id="more-menu" class="menu sheet" popover>
+  <div class="who">Renee Vaughn<span>Dispatcher, Northgate Heating &amp; Air</span></div>
+  <a href="#/reports">Reports</a>
+  <a href="#/settings">Settings</a>
+  <a href="#/help">Help</a>
+  <a href="#/profile">Your profile</a>
+  <a href="#/sign-out">Sign out</a>
+</div>
+
+<div id="picker" popover aria-labelledby="pk-title">
+  <form id="pk-form">
+    <div class="pk-head">
+      <h2 id="pk-title"></h2>
+      <button type="button" class="iconbtn" id="pk-close" aria-label="Close" data-tip="Close (Esc)">
+        <svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+      </button>
+      <p id="pk-sub"></p>
+    </div>
+    <div class="pk-list" id="pk-list" role="radiogroup" aria-label="Technician"></div>
+    <div class="pk-foot">
+      <span class="reason" id="pk-reason">Pick a technician</span>
+      <button type="button" class="btn sm" id="pk-cancel">Cancel</button>
+      <button type="submit" class="btn sm primary" id="pk-go" disabled>Assign</button>
+    </div>
+  </form>
+</div>
+
+<dialog id="nj" aria-labelledby="nj-title">
+  <form id="nj-form" novalidate>
+    <div class="dlg-head">
+      <div>
+        <h2 id="nj-title">New job</h2>
+        <p>It goes on today's board as unassigned.</p>
+      </div>
+      <button type="button" class="iconbtn" id="nj-close" aria-label="Close" data-tip="Close (Esc)">
+        <svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+      </button>
+    </div>
+    <div class="form">
+      <div class="fld">
+        <label for="nj-name">Customer name</label>
+        <input type="text" id="nj-name" name="name" autocomplete="name" aria-describedby="nj-name-err">
+        <p class="err" id="nj-name-err" hidden></p>
+      </div>
+      <div class="fld">
+        <label for="nj-phone">Phone</label>
+        <input type="tel" id="nj-phone" name="phone" autocomplete="tel" placeholder="(614) 555-0134" aria-describedby="nj-phone-err">
+        <p class="err" id="nj-phone-err" hidden></p>
+      </div>
+      <div class="fld wide">
+        <label for="nj-addr">Service address</label>
+        <input type="text" id="nj-addr" name="addr" autocomplete="street-address" placeholder="1290 S High St, Merion Village" aria-describedby="nj-addr-hint nj-addr-err">
+        <span class="hint" id="nj-addr-hint">Street, then the area, so the closest technician shows first.</span>
+        <p class="err" id="nj-addr-err" hidden></p>
+      </div>
+      <fieldset class="fld wide" aria-describedby="nj-type-err">
+        <legend>Job type</legend>
+        <div class="radios">
+          <label><input type="radio" name="type" value="repair">Repair</label>
+          <label><input type="radio" name="type" value="maintenance">Maintenance</label>
+          <label><input type="radio" name="type" value="install">Install</label>
+          <label><input type="radio" name="type" value="emergency">Emergency</label>
+          <label><input type="radio" name="type" value="inspection">Inspection</label>
+        </div>
+        <p class="err" id="nj-type-err" hidden></p>
+      </fieldset>
+      <div class="fld">
+        <label for="nj-win">Arrival window</label>
+        <select id="nj-win" name="win" aria-describedby="nj-win-err">
+          <option value="">Choose a window</option>
+          <option value="asap">As soon as possible</option>
+          <option value="12">12–2 PM</option>
+          <option value="14">2–4 PM</option>
+          <option value="16">4–6 PM</option>
+        </select>
+        <p class="err" id="nj-win-err" hidden></p>
+      </div>
+      <div class="fld wide">
+        <label for="nj-issue">What's wrong <span class="q">(optional)</span></label>
+        <textarea id="nj-issue" name="issue" rows="3" placeholder="Furnace runs but blows cold air"></textarea>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn" id="nj-cancel">Cancel</button>
+      <button type="submit" class="btn primary">Add to today's board</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<p class="sr" id="live" aria-live="polite"></p>
+<div id="tip" popover="manual" role="tooltip"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const NOW = 10 + 42 / 60;
+const START = 7, END = 19, SPAN = END - START;
+const PHONE = matchMedia('(max-width: 759px)');
+const params = new URLSearchParams(location.search);
+let mode = params.get('state') || '';
+const TYPES = { repair: 'Repair', maintenance: 'Maintenance', install: 'Install', emergency: 'Emergency', inspection: 'Inspection' };
+const WARN = '<svg class="ic s" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z"/></svg>';
+const XICON = '<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+
+/* ---------- time formatting ---------- */
+function parts(h) { let H = Math.floor(h + 1e-9), m = Math.round((h - H) * 60); if (m === 60) { H++; m = 0; } return { H, m, ap: H >= 12 ? 'PM' : 'AM', h12: ((H + 11) % 12) + 1 }; }
+function clock(p) { return p.m ? `${p.h12}:${String(p.m).padStart(2, '0')}` : `${p.h12}`; }
+function fmt(h) { const p = parts(h); return `${clock(p)} ${p.ap}`; }
+function fmtExact(h) { const p = parts(h); return `${p.h12}:${String(p.m).padStart(2, '0')} ${p.ap}`; }
+function fmtWin(s, e) { const a = parts(s), b = parts(e); return a.ap === b.ap ? `${clock(a)}–${clock(b)} ${b.ap}` : `${clock(a)} ${a.ap}–${clock(b)} ${b.ap}`; }
+function booked(j) { if (j.bookedText) return j.bookedText; const m = Math.round((NOW - j.booked) * 60); return m < 60 ? `${m} min ago` : fmtExact(j.booked); }
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+
+/* ---------- places (miles from downtown Columbus) ---------- */
+const ZONES = { 'Downtown': [0, 0], 'Linden': [1.5, 4], 'North Linden': [1.8, 5.6], 'Clintonville': [-0.8, 5], 'Worthington': [-1.2, 10], 'Northland': [2.2, 8], 'Westerville': [4, 13], 'Dublin': [-9, 10], 'Hilliard': [-10, 3], 'Grandview': [-3, 1.5], 'Hilltop': [-4, -1], 'German Village': [0.3, -1.5], 'Merion Village': [0, -2.6], 'Reynoldsburg': [11, -1], 'Whitehall': [6, -0.5] };
+const travel = (a, b) => { const p = ZONES[a] || ZONES.Downtown, q = ZONES[b] || ZONES.Downtown; return Math.round(Math.hypot(p[0] - q[0], p[1] - q[1]) * 2.1 + 5); };
+
+/* ---------- data ---------- */
+const T = (id, name, status, zone, x = {}) => ({ id, name, status, zone, ...x });
+const J = (id, tech, cust, type, start, end, zone, addr, issue, state) => ({ id, tech, cust, short: cust, type, start, end, zone, addr, issue, state });
+const DATA = {
+  techs: [
+    T('t1', 'Marcus Bell', 'onjob', 'Clintonville'),
+    T('t2', 'Dana Kowalski', 'enroute', 'Worthington', { eta: 10 + 55 / 60 }),
+    T('t3', 'Luis Ortega', 'late', 'German Village', { eta: 11 + 5 / 60, lateBy: 35 }),
+    T('t4', 'Trevor Haines', 'available', 'North Linden', { since: 10.25 }),
+    T('t5', 'Keisha Monroe', 'onjob', 'Hilliard'),
+    T('t6', 'Brandon Sutter', 'onjob', 'Grandview'),
+    T('t7', 'Ahmed Farouk', 'available', 'Reynoldsburg', { since: 10.5 }),
+    T('t8', 'Cody Lindqvist', 'enroute', 'Dublin', { eta: 10 + 58 / 60 }),
+    T('t9', 'Priya Raman', 'onjob', 'Westerville'),
+    T('t10', 'Jake Wendt', 'onjob', 'Hilltop'),
+    T('t11', 'Ray Delgado', 'onjob', 'Whitehall'),
+    T('t12', "Sam O'Connell", 'off', 'Downtown'),
+    T('t13', 'Tyler Brookshire', 'onjob', 'Northland'),
+    T('t14', 'Monique Fairbanks', 'enroute', 'German Village', { eta: 10 + 51 / 60 })
+  ],
+  jobs: [
+    J('j101', 't1', 'Halvorsen', 'repair', 8, 9.5, 'Clintonville', '88 Glencoe Rd', 'Furnace short-cycling', 'done'),
+    J('j102', 't1', 'Pruitt-Lang', 'repair', 10, 11.5, 'Clintonville', '2930 Calumet St', 'Blower motor replacement', 'active'),
+    J('j103', 't1', 'Castellano', 'maintenance', 13, 14.5, 'Worthington', '701 Evening St', 'Furnace tune-up', 'planned'),
+    J('j104', 't2', 'Ferraro', 'maintenance', 7.5, 9, 'Worthington', '155 Kenbrook Dr', 'Furnace tune-up', 'done'),
+    J('j105', 't2', 'Worthington Hills HOA clubhouse', 'inspection', 9.25, 10.5, 'Worthington', '8155 Worthington Hills Dr', 'Annual boiler inspection', 'done'),
+    J('j106', 't2', 'Ng', 'repair', 11, 12.5, 'Worthington', '6612 Linworth Rd', 'Heat pump stuck in defrost', 'next'),
+    J('j107', 't2', 'Abernathy', 'maintenance', 14, 15.5, 'Worthington', '230 E Granville Rd', 'Furnace tune-up and filter change', 'planned'),
+    J('j108', 't3', 'Schott', 'repair', 8, 9.75, 'German Village', '547 S Third St', 'Cracked flue pipe. Ran to 10:20 AM.', 'done'),
+    J('j109', 't3', 'Brennan', 'maintenance', 10, 11.5, 'Merion Village', '1290 S High St', 'Boiler tune-up. Window was 10–10:30 AM.', 'late'),
+    J('j110', 't3', 'Delacroix', 'repair', 13.5, 15, 'German Village', '221 E Kossuth St', 'Thermostat not calling for heat', 'planned'),
+    J('j111', 't4', 'Mbeki', 'repair', 7.5, 9, 'North Linden', '1784 Karl Rd', 'Igniter replacement', 'done'),
+    J('j112', 't4', 'Sorensen', 'maintenance', 9, 10.25, 'Linden', '1402 Duxberry Ave', 'Furnace tune-up', 'done'),
+    J('j113', 't4', 'Kilbourne', 'inspection', 15, 16.5, 'Northland', '5521 Karl Rd', 'Pre-sale HVAC inspection', 'planned'),
+    J('j114', 't5', 'Varga', 'install', 8, 12, 'Hilliard', '4519 Avery Rd', 'Furnace and coil replacement', 'active'),
+    J('j115', 't5', 'Otieno', 'repair', 13.5, 15, 'Hilliard', '3902 Leap Rd', 'Condensate pump leaking', 'planned'),
+    J('j116', 't6', 'Lindgren', 'repair', 8.5, 10, 'Grandview', '1450 Grandview Ave', 'No hot water', 'done'),
+    J('j117', 't6', 'Kaczmarek', 'repair', 10.25, 11.75, 'Grandview', '1121 Lincoln Rd', 'Inducer motor noise', 'active'),
+    J('j118', 't6', 'Grandview Yard Lofts, unit 4C', 'inspection', 13, 14, 'Grandview', '901 Yard St', 'Move-in HVAC inspection', 'planned'),
+    J('j119', 't7', 'Pham', 'maintenance', 8, 9.5, 'Reynoldsburg', '7120 E Main St', 'Furnace tune-up', 'done'),
+    J('j120', 't7', 'Ridgeway', 'inspection', 9.75, 10.5, 'Reynoldsburg', '1840 Brice Rd', 'Carbon monoxide check', 'done'),
+    J('j121', 't7', 'Castillo', 'repair', 14, 15.5, 'Whitehall', '4500 E Broad St', 'Heat pump tripping the breaker', 'planned'),
+    J('j122', 't8', 'Oduya', 'maintenance', 7.5, 9.5, 'Dublin', '5980 Perimeter Dr', 'Two-system tune-up', 'done'),
+    J('j123', 't8', 'Hartwell', 'maintenance', 11, 12.5, 'Dublin', '7330 Riverside Dr', 'Furnace tune-up', 'next'),
+    J('j124', 't8', 'Riverside Montessori School', 'repair', 13.5, 16, 'Dublin', '5600 Post Rd', 'Classroom unit ventilator not heating', 'planned'),
+    J('j125', 't9', 'Fitzgerald', 'install', 7.5, 16.5, 'Westerville', '88 W Home St', '3-ton heat pump and air handler', 'active'),
+    J('j126', 't10', 'Abubakar', 'repair', 9, 11, 'Hilltop', '3215 W Broad St', 'Furnace control board', 'active'),
+    J('j127', 't10', 'Moreno', 'repair', 12, 13, 'Hilltop', '612 S Hague Ave', 'Water heater leaking at the base', 'planned'),
+    J('j128', 't10', 'Szabo', 'maintenance', 14.5, 16, 'Hilltop', '2870 Sullivant Ave', 'Furnace tune-up', 'planned'),
+    J('j129', 't11', 'Whitehall Family Dental', 'install', 8, 12.5, 'Whitehall', '4219 E Broad St', 'Rooftop unit swap', 'active'),
+    J('j130', 't11', 'Beckett', 'inspection', 14, 15, 'Whitehall', '533 S Yearling Rd', 'Gas line pressure test', 'planned'),
+    J('j131', 't13', 'Idowu', 'repair', 9.5, 11, 'Northland', '1960 Morse Rd', 'Heat exchanger check', 'active'),
+    J('j132', 't13', 'Marchetti', 'maintenance', 12.5, 14, 'Northland', '4722 Cleveland Ave', 'Furnace tune-up', 'planned'),
+    J('j133', 't13', 'Yoder', 'repair', 15, 16, 'Westerville', '220 S State St', 'Zone damper stuck closed', 'planned'),
+    J('j134', 't14', 'Truong', 'maintenance', 8, 9.5, 'Merion Village', '1150 S Fourth St', 'Furnace tune-up', 'done'),
+    J('j135', 't14', 'Pollard', 'repair', 11, 12, 'German Village', '738 Mohawk St', 'Radiator valve leaking', 'next'),
+    J('j136', 't14', 'Hendricks', 'maintenance', 13, 14.5, 'German Village', '169 E Whittier St', 'Boiler tune-up', 'planned'),
+    J('j137', 't14', 'Gallagher', 'repair', 16, 17.5, 'Merion Village', '1385 S Fifth St', 'Furnace blowing cold air', 'planned')
+  ],
+  queue: [
+    { id: 'j201', cust: 'Dolores Whitfield', short: 'Whitfield', type: 'emergency', asap: true, zone: 'Linden', addr: '2217 Brentnell Ave', issue: "No heat. Furnace won't ignite and it's 54°F inside. Caller is 81 and lives alone.", booked: 10 + 31 / 60, dur: 1.5 },
+    { id: 'j202', cust: 'Scioto Valley Pediatric Dentistry & Orthodontics', short: 'Scioto Valley Pediatric Dentistry', type: 'inspection', start: 12, end: 14, zone: 'Hilliard', addr: '4085 Main St, Suite 210', issue: 'Rooftop unit inspection before lease renewal. Ask for Denise at the front desk.', booked: 9.8, dur: 1 },
+    { id: 'j203', cust: 'Gareth and Lin Okafor', short: 'Okafor', type: 'maintenance', start: 13, end: 15, zone: 'Clintonville', addr: '341 Arden Rd', issue: 'Tune-up on two furnaces, plus a humidifier pad', bookedText: 'Yesterday, 4:12 PM', dur: 1.5 },
+    { id: 'j204', cust: 'Marisol Vega', short: 'Vega', type: 'repair', start: 14, end: 16, zone: 'Hilltop', addr: '618 S Wheatland Ave', issue: 'Water heater pilot keeps going out', booked: 10 + 5 / 60, dur: 1.5 }
+  ]
+};
+const CALLS = {
+  today: [[6, 7, 2], [7, 16, 3], [8, 22, 1], [9, 19, 4], [10, 12, 1]],
+  last: [[6, 5, 1], [7, 13, 2], [8, 18, 1], [9, 17, 2], [10, 9, 0]]
+};
+const REV = {
+  order: ['install', 'repair', 'maintenance', 'emergency', 'inspection'],
+  this: { install: [38420, 7], repair: [14865, 61], maintenance: [6240, 52], emergency: [5190, 14], inspection: [1315, 11] },
+  last: { install: [31950, 6], repair: [13310, 55], maintenance: [7080, 59], emergency: [3745, 10], inspection: [1620, 13] }
+};
+
+const S = {
+  ...JSON.parse(JSON.stringify(DATA)),
+  sel: new Set(),
+  q: params.get('q') || '',
+  show: params.get('show') || 'all',
+  calls: params.get('calls') === 'last' ? 'last' : 'today',
+  rev: params.get('rev') === 'last' ? 'last' : 'this',
+  shownQ: 25,
+  online: mode !== 'offline' && navigator.onLine !== false
+};
+
+/* Stress and state hooks: ?state=empty|loading|error|offline|noperm, ?unassigned=0|1|10000 */
+if (mode === 'empty') {
+  S.jobs = []; S.queue = [];
+  S.techs.forEach(t => { if (t.status !== 'off') { t.status = 'available'; t.since = 7; delete t.eta; delete t.lateBy; } });
+}
+if (params.has('unassigned')) {
+  const n = Math.max(0, parseInt(params.get('unassigned'), 10) || 0);
+  if (n <= S.queue.length) S.queue = S.queue.slice(0, n);
+  else {
+    const F = ['Avery', 'Jordan', 'Priscilla', 'Desmond', 'Hollis', 'Imani', 'Rocco', 'Thea', 'Wendell', 'Yusuf', 'Corinne', 'Ezra', 'Margit', 'Tobias'];
+    const L = ['Baumgartner', 'Okonkwo', 'Lindahl', 'Petrakis', 'Quintero', 'Ashby', 'Wojcik', 'Nakamura', 'Fairweather', 'Delgado-Ruiz', 'Strand', 'Achterberg'];
+    const Z = Object.keys(ZONES), TY = ['repair', 'maintenance', 'inspection', 'repair', 'install'], W = [12, 13, 14, 15, 16];
+    for (let i = S.queue.length; i < n; i++) {
+      const last = L[(i * 7) % L.length], s = W[i % W.length];
+      S.queue.push({ id: 'g' + i, cust: `${F[i % F.length]} ${last}`, short: last, type: TY[Math.floor(i / 5) % TY.length], start: s, end: s + 2, zone: Z[(i * 5) % Z.length], addr: `${100 + (i * 37) % 8900} ${['Oak', 'Maple', 'High', 'Broad', 'Karl', 'Morse'][i % 6]} St`, issue: ['Furnace tune-up', 'No hot water', 'Thermostat blank', 'Noisy blower'][i % 4], booked: 7 + (i % 37) / 10, dur: 1.5 });
+    }
+  }
+}
+
+const tech = id => S.techs.find(t => t.id === id);
+const jobsOf = t => S.jobs.filter(j => j.tech === t.id).sort((a, b) => a.start - b.start);
+const activeOf = t => jobsOf(t).find(j => j.state === 'active' || j.state === 'late');
+const nextOf = t => jobsOf(t).find(j => j.state === 'next' || j.state === 'planned');
+const leftOf = t => jobsOf(t).filter(j => j.state !== 'done').length;
+const shortName = j => j.short || j.cust;
+
+/* ---------- status text ---------- */
+function statusHTML(t) {
+  const a = activeOf(t);
+  switch (t.status) {
+    case 'available': return `Available since ${fmt(t.since)}`;
+    case 'onjob': return a ? `${a.type === 'install' ? 'On install' : 'On job'} · free ${fmt(a.end)}` : 'On job';
+    case 'enroute': return `En route · ETA ${fmt(t.eta)}`;
+    case 'late': return `<span class="chip attn">${t.lateBy} min late</span><span>ETA ${fmt(t.eta)}</span>`;
+    case 'off': return 'Off today';
+  }
+  return '';
+}
+function statusText(t) { return statusHTML(t).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(); }
+function jobStateWord(j) {
+  if (j.state === 'done') return 'Done';
+  if (j.state === 'active') return 'In progress';
+  if (j.state === 'late') { const t = tech(j.tech); return `${t.lateBy} min late, ETA ${fmt(t.eta)}`; }
+  if (j.state === 'next') return 'Next';
+  return 'Booked';
+}
+
+/* ---------- search and filters ---------- */
+const norm = s => String(s || '').toLowerCase();
+function jobMatches(j) { if (!S.q) return true; const q = norm(S.q); return [j.cust, j.addr, j.zone, j.issue, TYPES[j.type]].some(v => norm(v).includes(q)); }
+function techMatches(t) { return !S.q || norm(t.name).includes(norm(S.q)); }
+const FILTERS = [['all', 'All'], ['available', 'Available'], ['enroute', 'En route'], ['onjob', 'On job'], ['late', 'Late'], ['off', 'Off']];
+function syncURL() {
+  const p = new URLSearchParams(location.search);
+  S.q ? p.set('q', S.q) : p.delete('q');
+  S.show !== 'all' ? p.set('show', S.show) : p.delete('show');
+  S.calls !== 'today' ? p.set('calls', S.calls) : p.delete('calls');
+  S.rev !== 'this' ? p.set('rev', S.rev) : p.delete('rev');
+  const qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+}
+
+/* ---------- queue ---------- */
+function sortedQueue() {
+  return S.queue.slice().sort((a, b) => (b.type === 'emergency') - (a.type === 'emergency') || (b.asap ? 1 : 0) - (a.asap ? 1 : 0) || (a.start || 0) - (b.start || 0));
+}
+function renderQueue() {
+  const body = $('#queue-body');
+  $('#queue-count').textContent = mode === 'loading' || mode === 'error' ? '' : S.queue.length.toLocaleString('en-US');
+  if (mode === 'loading') { body.innerHTML = skeletonQueue(); renderBulk(); return; }
+  if (mode === 'error') {
+    body.innerHTML = `<div class="errorbox" role="alert">${WARN}<div><h2>Couldn't load today's jobs</h2><p>Fieldline didn't answer within 20 seconds, so this board can't show jobs or technicians yet. Nothing was changed.</p><button class="btn" id="retry">Try again</button><p class="q">If it keeps failing, call Fieldline support at (614) 555-0190.</p></div></div>`;
+    renderBulk(); return;
+  }
+  if (!S.queue.length) {
+    body.innerHTML = mode === 'empty'
+      ? `<div class="empty"><p>No jobs are booked for today yet. Each job you book waits here until you give it a technician.</p><button class="btn" data-newjob>Book the first job</button></div>`
+      : `<p class="empty">Every job today has a technician. New bookings wait here until they're assigned.</p>`;
+    renderBulk(); return;
+  }
+  const items = sortedQueue().filter(jobMatches);
+  if (!items.length) {
+    body.innerHTML = `<div class="empty"><p>No unassigned jobs match “${esc(S.q)}”.</p><button class="btn sm" data-clearq>Clear search</button></div>`;
+    renderBulk(); return;
+  }
+  const shown = items.slice(0, S.shownQ);
+  const dis = S.online ? '' : ' disabled';
+  const rows = shown.map(j => {
+    const typeCell = j.type === 'emergency' ? `<span class="etype">${WARN}Emergency</span>` : TYPES[j.type];
+    const win = j.asap ? '<span class="asap">ASAP</span>' : `<span class="num">${fmtWin(j.start, j.end)}</span>`;
+    return `<tr data-id="${j.id}"${j.type === 'emergency' ? ' class="is-emer"' : ''}>
+      <td class="c-sel"><label><input type="checkbox" data-sel="${j.id}" aria-label="Select ${esc(j.cust)}"${S.sel.has(j.id) ? ' checked' : ''}></label></td>
+      <td class="c-win">${win}</td>
+      <td class="c-cust"><span class="cust-name" title="${esc(j.cust)}">${esc(j.cust)}</span><span class="cust-issue" title="${esc(j.issue)}">${esc(j.issue)}</span><span class="cust-meta">${esc(j.addr)}, ${esc(j.zone)} · booked ${esc(booked(j))}</span></td>
+      <td class="c-addr"><span class="addr" title="${esc(j.addr)}">${esc(j.addr)}</span><span class="addr q">${esc(j.zone)}</span></td>
+      <td class="c-type">${typeCell}</td>
+      <td class="c-book r q num" title="${j.bookedText ? '' : 'Booked at ' + fmtExact(j.booked)}">${esc(booked(j))}</td>
+      <td class="c-act"><div class="act-cell"><button class="btn sm" data-assign="${j.id}" aria-label="Assign ${esc(j.cust)}"${dis}>Assign</button>${S.online ? '' : '<span class="reason">Offline</span>'}</div></td>
+    </tr>`;
+  }).join('');
+  const rest = items.length - shown.length;
+  const allSel = shown.every(j => S.sel.has(j.id));
+  body.innerHTML = `<table class="qtable">
+    <thead><tr>
+      <th class="c-sel"><input type="checkbox" id="sel-all" aria-label="Select all shown jobs"${allSel ? ' checked' : ''}></th>
+      <th class="c-win">Window</th><th>Customer</th><th class="c-addr">Address</th><th class="c-type">Type</th><th class="c-book r">Booked</th><th class="c-act"><span class="sr">Action</span></th>
+    </tr></thead>
+    <tbody>${rows}</tbody></table>
+    ${rest > 0 ? `<div class="more-row"><button class="btn sm" id="more-q">Show ${Math.min(25, rest)} more</button><span class="q num">${rest.toLocaleString('en-US')} not shown</span></div>` : ''}`;
+  renderBulk();
+}
+function renderBulk() {
+  const n = [...S.sel].filter(id => S.queue.some(j => j.id === id)).length;
+  $('#bulk').hidden = n === 0;
+  $('#bulk-n').textContent = `${n} selected`;
+  $('#bulk-assign').disabled = !S.online;
+  $('#bulk-assign').textContent = n > 1 ? `Assign ${n} jobs to one technician` : 'Assign';
+}
+function skeletonQueue() {
+  const r = () => `<div class="skrow"><div><div class="sk" style="width:16px"></div></div><div><div class="sk" style="width:64px"></div></div><div><div class="sk" style="width:60%;margin-bottom:8px"></div><div class="sk" style="width:85%"></div></div><div><div class="sk" style="width:70%"></div></div><div><div class="sk" style="width:72px"></div></div><div><div class="sk" style="width:56px;margin-left:auto"></div></div><div><div class="sk" style="width:64px;height:32px;margin-left:auto"></div></div></div>`;
+  return `<div aria-busy="true"><p class="sr">Loading today's jobs</p>${r()}${r()}${r()}${r()}</div>`;
+}
+
+/* ---------- board ---------- */
+function visibleTechs() {
+  return S.techs.filter(t => S.show === 'all' || t.status === S.show).filter(t => techMatches(t) || jobsOf(t).some(jobMatches));
+}
+function renderFilters() {
+  const counts = {}; S.techs.forEach(t => counts[t.status] = (counts[t.status] || 0) + 1);
+  $('#filters').innerHTML = FILTERS.map(([k, label]) => {
+    const n = k === 'all' ? S.techs.length : (counts[k] || 0);
+    return `<button type="button" data-show="${k}" aria-pressed="${S.show === k}">${label} <span class="num">${n}</span></button>`;
+  }).join('');
+  const working = S.techs.filter(t => t.status !== 'off').length;
+  $('#board-count').textContent = mode === 'loading' || mode === 'error' ? '' : `${working} working`;
+}
+function laneRows(list) {
+  const ends = [];
+  return list.map(j => { let r = ends.findIndex(e => e <= j.start + 1e-6); if (r < 0) { r = ends.length; ends.push(0); } ends[r] = j.end; return r; });
+}
+function renderBoard() {
+  renderFilters();
+  const body = $('#board-body');
+  if (mode === 'error') { body.innerHTML = ''; return; }
+  if (mode === 'loading') {
+    const l = () => `<div class="sklane"><div><div class="sk" style="width:120px;margin-bottom:6px"></div><div class="sk" style="width:150px;height:10px"></div></div><div style="position:relative;height:36px"><div class="sk" style="position:absolute;left:8%;width:14%;height:36px"></div><div class="sk" style="position:absolute;left:28%;width:12%;height:36px"></div></div></div>`;
+    body.innerHTML = `<div aria-busy="true"><p class="sr">Loading technicians</p>${l()}${l()}${l()}${l()}${l()}</div>`; return;
+  }
+  const list = visibleTechs();
+  if (!list.length) {
+    const why = S.q ? `No technicians or jobs match “${esc(S.q)}”${S.show !== 'all' ? ' with this filter' : ''}.` : 'No technicians have this status right now.';
+    const queueSaidIt = S.q && S.queue.length && !S.queue.some(jobMatches);
+    body.innerHTML = `<div class="empty"><p>${why}</p>${S.q ? (queueSaidIt ? '' : '<button class="btn sm" data-clearq>Clear search</button>') : '<button class="btn sm" data-showall>Show all technicians</button>'}</div>`;
+    return;
+  }
+  const nowPct = (NOW - START) / SPAN * 100;
+  const hourLabels = [];
+  for (let h = START; h < END; h++) {
+    if (Math.abs(h - NOW) < 0.45) continue;
+    const p = parts(h); const lab = h === START || h === 12 ? `${p.h12} ${p.ap}` : `${p.h12}`;
+    hourLabels.push(`<span style="left:${(h - START) / SPAN * 100}%">${lab}</span>`);
+  }
+  const lanes = list.map(t => {
+    const js = jobsOf(t), rows = laneRows(js), nRows = Math.max(0, ...rows) + 1;
+    const nameMatch = techMatches(t) && S.q;
+    const blocks = js.map((j, i) => {
+      const l = (Math.max(j.start, START) - START) / SPAN * 100;
+      const w = (Math.min(j.end, END) - Math.max(j.start, START)) / SPAN * 100;
+      const cls = [j.type === 'emergency' && j.state !== 'done' ? 'emer' : j.state];
+      if (j.just) cls.push('just');
+      if (S.q && !nameMatch && !jobMatches(j)) cls.push('faded');
+      const sub = j.state === 'late' ? `${t.lateBy} min late` : j.type === 'emergency' ? 'Emergency' : j.state === 'done' ? 'Done' : j.state === 'active' ? 'In progress' : TYPES[j.type];
+      const tip = `${j.cust}\n${fmtWin(j.start, j.end)} · ${TYPES[j.type]}\n${j.addr}, ${j.zone}\n${j.issue}\n${jobStateWord(j)}`;
+      return `<li class="job ${cls.join(' ')}" style="left:${l}%;width:calc(${w}% - 3px)${nRows > 1 ? `;top:${6 + rows[i] * 42}px;bottom:auto;height:36px` : ''}" tabindex="-1" data-job="${j.id}" data-tip="${esc(tip)}" aria-label="${esc(tip.replace(/\n/g, '. '))}"><b>${esc(shortName(j))}</b><span>${esc(sub)}</span></li>`;
+    }).join('');
+    const off = t.status === 'off';
+    return `<div class="lane${off ? ' off' : ''}">
+      <div class="lane-head"><span class="lane-name" title="${esc(t.name)}">${esc(t.name)}</span><span class="lane-status">${statusHTML(t)}</span></div>
+      <ul class="track"${nRows > 1 ? ` style="height:${12 + nRows * 42 - 6}px"` : ''} aria-label="${esc(t.name)}: ${esc(statusText(t))}. ${js.length} job${js.length === 1 ? '' : 's'} today">${off ? '<span class="offnote">Off today</span>' : blocks}<span class="nowline" style="left:${nowPct}%" aria-hidden="true"></span></ul>
+    </div>`;
+  }).join('');
+  const mobile = list.map(t => {
+    const js = jobsOf(t); const a = activeOf(t), n = nextOf(t);
+    const line = t.status === 'off' ? 'Not working today' : a ? `Now: ${esc(shortName(a))}, ${TYPES[a.type].toLowerCase()} until ${fmt(a.end)}` : n ? `Next: ${esc(shortName(n))} at ${fmt(n.start)}` : 'Nothing else booked today';
+    const items = js.map(j => `<li class="${j.state}${j.type === 'emergency' ? ' emer' : ''}"><span class="num">${fmtWin(j.start, j.end)}</span><b title="${esc(j.cust)}">${esc(shortName(j))}</b><span class="st">${j.type === 'emergency' && j.state !== 'done' ? 'Emergency' : j.state === 'late' ? `${t.lateBy} min late` : j.state === 'done' ? 'Done' : j.state === 'active' ? 'In progress' : TYPES[j.type]}</span></li>`).join('');
+    return `<details class="tcard${t.status === 'off' ? ' off' : ''}"${S.q && jobsOf(t).some(jobMatches) ? ' open' : ''}><summary><span class="t-name">${esc(t.name)}</span><span class="t-status">${statusHTML(t)}</span><span class="t-now">${line}</span></summary>${js.length ? `<ol class="t-jobs">${items}</ol>` : ''}</details>`;
+  }).join('');
+  body.innerHTML = `<div class="board" id="tl" aria-describedby="tl-help">
+      <p class="sr" id="tl-help">Use the arrow keys to move between jobs.</p>
+      <div class="hours" aria-hidden="true"><div></div><div class="scale">${hourLabels.join('')}<span class="nowlab" style="left:${nowPct}%">${fmtExact(NOW).replace(' AM', '')}</span></div></div>
+      <div class="lanes">${lanes}</div>
+    </div>
+    <div class="tlist">${mobile}</div>`;
+  const first = $('#tl .job:not(.faded)') || $('#tl .job');
+  if (first) first.tabIndex = 0;
+}
+
+/* ---------- charts ---------- */
+function renderCalls() {
+  $$('[data-calls]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.calls === S.calls)));
+  const body = $('#calls-body');
+  if (mode === 'loading') { body.innerHTML = `<div aria-busy="true" style="margin-top:16px"><div class="sk" style="width:60%;height:24px"></div><div class="sk" style="height:160px;margin-top:20px"></div></div>`; return; }
+  const data = mode === 'empty' && S.calls === 'today' ? [] : CALLS[S.calls];
+  if (!data.length) { body.innerHTML = `<p class="pempty">No calls yet today. Answered and missed calls show here hour by hour.</p>`; return; }
+  const ans = data.reduce((s, d) => s + d[1], 0), miss = data.reduce((s, d) => s + d[2], 0);
+  const rate = Math.round(ans / (ans + miss) * 100);
+  const other = CALLS[S.calls === 'today' ? 'last' : 'today'];
+  const oa = other.reduce((s, d) => s + d[1], 0), om = other.reduce((s, d) => s + d[2], 0), orate = Math.round(oa / (oa + om) * 100);
+  const cmp = S.calls === 'today' ? `${rate}% answered. Last Saturday by 10:42 AM it was ${orate}%.` : `${rate}% answered by 10:42 AM. Today it's ${orate}%.`;
+  const max = 30;
+  const grid = [0, 10, 20, 30].map(v => `<span class="gl" style="bottom:${v / max * 100}%"></span>`).join('');
+  const ylab = [0, 10, 20, 30].map(v => `<span style="bottom:${v / max * 100}%">${v}</span>`).join('');
+  const bars = data.map(([h, a, m], i) => {
+    const p = parts(h), label = i === data.length - 1 ? `10:00–10:42 AM${S.calls === 'today' ? ', in progress' : ''}` : `${p.h12}–${parts(h + 1).h12} ${parts(h + 1).ap}`;
+    const pct = Math.round(a / (a + m) * 100);
+    return `<div class="bar" tabindex="0" role="img" aria-label="${label}: ${a} answered, ${m} missed" data-tip="${label}\n${a} answered, ${m} missed (${pct}% answered)"><i class="m" style="height:${m / max * 100}%"></i><i class="a" style="height:${a / max * 100}%"></i></div>`;
+  }).join('');
+  const xs = data.map(([h]) => { const p = parts(h); return `<span>${p.h12} ${p.ap}</span>`; }).join('');
+  body.innerHTML = `<div class="figs">
+      <div><span class="fig num">${ans}</span><span class="figl"><i class="sw ans" aria-hidden="true"></i>answered</span></div>
+      <div><span class="fig num">${miss}</span><span class="figl"><i class="sw miss" aria-hidden="true"></i>missed</span></div>
+    </div>
+    <p class="cmp">${cmp}</p>
+    <div class="cplot"><div class="yax" aria-hidden="true">${ylab}</div><div class="area">${grid}<div class="bars">${bars}</div></div><div class="xax" aria-hidden="true">${xs}</div></div>`;
+}
+function renderRevenue() {
+  const panel = $('#revenue'), body = $('#rev-body');
+  $$('[data-rev]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.rev === S.rev)));
+  $('#rev-sub').textContent = S.rev === 'this' ? 'Mon, Oct 26 to today' : 'Mon, Oct 19 to Sat, Oct 24';
+  if (mode === 'noperm') {
+    panel.classList.remove('lead'); $('#rev-seg').hidden = true;
+    body.innerHTML = `<p class="pempty">Revenue is visible to owners and office managers. Gail Pruitt can give you access in Settings, under Team.</p>`;
+    return;
+  }
+  if (mode === 'loading') { body.innerHTML = `<div aria-busy="true" style="margin-top:16px"><div class="sk" style="width:50%;height:24px;background:#2E5BA6"></div><div class="sk" style="height:180px;margin-top:20px;background:#2E5BA6"></div></div>`; return; }
+  if (mode === 'empty' && S.rev === 'this') { body.innerHTML = `<p class="pempty">No revenue booked this week yet. It adds up here as jobs are booked.</p>`; return; }
+  const d = REV[S.rev], o = REV[S.rev === 'this' ? 'last' : 'this'];
+  const total = REV.order.reduce((s, k) => s + d[k][0], 0), ototal = REV.order.reduce((s, k) => s + o[k][0], 0);
+  const chg = ((S.rev === 'this' ? total / ototal : ototal / total) - 1) * 100;
+  const cmp = S.rev === 'this' ? `Up ${chg.toFixed(1)}% on the same days last week (${money(ototal)}).` : `This week is ${chg.toFixed(1)}% higher so far (${money(ototal)}).`;
+  const max = 40000;
+  const rows = REV.order.map(k => {
+    const [v, n] = d[k]; const share = Math.round(v / total * 100);
+    return `<div class="rrow" tabindex="0" role="img" aria-label="${TYPES[k]}: ${money(v)} from ${n} jobs, ${share}% of the week" data-tip="${TYPES[k]}\n${money(v)} from ${n} jobs\n${share}% of booked revenue"><span class="rlabel">${TYPES[k]}</span><span class="rtrack"><span class="rbar" style="width:${v / max * 100}%"></span></span><span class="rval">${money(v)}</span></div>`;
+  }).join('');
+  const ticks = [0, 20, 40].map(v => `<span style="left:${v / 40 * 100}%">${v ? '$' + v + 'k' : '$0'}</span>`).join('');
+  body.innerHTML = `<div class="figs"><div><span class="fig num">${money(total)}</span><span class="figl">booked across five job types</span></div></div>
+    <p class="cmp">${cmp}</p>
+    <div class="rplot"><div class="rrows">${rows}</div><div class="raxis" aria-hidden="true"><span></span><div class="ticks">${ticks}</div><span></span></div></div>`;
+}
+
+/* ---------- banner (offline) ---------- */
+function renderBanner() {
+  const b = $('#banner');
+  b.innerHTML = S.online ? '' : `<div class="banner" role="status">${WARN}<p><b>You're offline.</b> This board is from 10:39 AM and won't update. Assigning and booking will work again when you reconnect.</p><button class="btn sm" id="reconnect">Try again</button></div>`;
+  $('#newjob').disabled = !S.online;
+  $('#newjob-reason').hidden = S.online;
+}
+
+function renderDateline() {
+  const n = S.jobs.length + S.queue.length, d = 'Saturday, October 31';
+  $('#dateline').textContent = mode === 'error' ? `${d} · couldn't refresh at 10:42 AM` : mode === 'loading' ? `${d} · loading jobs` : `${d} · ${n.toLocaleString('en-US')} job${n === 1 ? '' : 's'} · updated ${S.online ? '10:42' : '10:39'} AM`;
+  $('#board').hidden = mode === 'error';
+}
+function renderAll() { renderDateline(); renderBanner(); renderQueue(); renderBoard(); renderCalls(); renderRevenue(); }
+
+/* ---------- tooltip ---------- */
+const tip = $('#tip'); let tipFor = null;
+function showTip(el) {
+  const text = el.dataset.tip; if (!text) return;
+  tipFor = el; tip.textContent = text;
+  try { if (!tip.matches(':popover-open')) tip.showPopover(); } catch (e) {}
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  let top = r.top - h - 8; if (top < 8) top = r.bottom + 8;
+  let left = r.left + r.width / 2 - w / 2; left = Math.max(8, Math.min(left, innerWidth - w - 8));
+  tip.style.top = top + 'px'; tip.style.left = left + 'px';
+}
+function hideTip() { tipFor = null; try { tip.hidePopover(); } catch (e) {} }
+document.addEventListener('pointerover', e => { const t = e.target.closest('[data-tip]'); if (t && t !== tipFor) showTip(t); });
+document.addEventListener('pointerout', e => { const t = e.target.closest('[data-tip]'); if (t && !t.contains(e.relatedTarget) && document.activeElement !== t) hideTip(); });
+document.addEventListener('focusin', e => { const t = e.target.closest('[data-tip]'); if (t && e.target.matches(':focus-visible')) showTip(t); else if (!t) hideTip(); });
+document.addEventListener('focusout', e => { if (e.target.closest('[data-tip]')) hideTip(); });
+addEventListener('scroll', hideTip, { passive: true });
+
+/* ---------- popover placement ---------- */
+function place(pop, btn, opts = {}) {
+  if (PHONE.matches) { pop.style.top = pop.style.left = ''; return; }
+  const r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+  let top = r.bottom + 6; if (top + h > innerHeight - 8) top = Math.max(8, r.top - 6 - h);
+  let left = opts.alignLeft ? r.left : r.right - w; left = Math.max(8, Math.min(left, innerWidth - w - 8));
+  pop.style.top = top + 'px'; pop.style.left = left + 'px';
+}
+['account', 'more'].forEach(k => {
+  const btn = $(`#${k}-btn`), menu = $(`#${k}-menu`);
+  menu.addEventListener('toggle', e => { if (e.newState === 'open') { place(menu, btn); const a = $('a', menu); a && a.focus(); } else if (menu.contains(document.activeElement) || document.activeElement === document.body) btn.focus(); });
+});
+
+/* ---------- assign picker ---------- */
+const picker = $('#picker'); let pickIds = [], invoker = null, returnTo = null;
+function evalOne(t, j) {
+  if (t.status === 'off') return { off: true, note: 'Off today', order: 1e9 };
+  const js = jobsOf(t);
+  if (j.asap) {
+    let depart = NOW, from = t.zone, note;
+    if (t.status !== 'available') {
+      const cur = t.status === 'enroute' ? js.find(x => x.state === 'next') : activeOf(t);
+      if (cur) { depart = cur.end + (cur.state === 'late' ? t.lateBy / 60 : 0); from = cur.zone; }
+    }
+    const mins = travel(from, j.zone), arrive = depart + mins / 60;
+    note = t.status === 'available' ? `Available · ${mins} min away, there by ${fmtExact(arrive)}` : `Free ${fmt(depart)} · there by ${fmtExact(arrive)}`;
+    return { note, order: arrive, arrive };
+  }
+  const clash = js.filter(x => x.state !== 'done' && x.start < j.end - 1e-6 && x.end > j.start + 1e-6);
+  const prev = js.filter(x => x.end <= j.start + 1e-6).pop();
+  const mins = travel(prev ? prev.zone : t.zone, j.zone);
+  if (clash.length) return { note: `Busy ${fmtWin(clash[0].start, clash[0].end)} with ${shortName(clash[0])}`, order: 1000 + mins, busy: true };
+  return { note: `Free ${fmtWin(j.start, j.end)} · ${mins} min from ${prev ? shortName(prev) : 'current spot'}`, order: mins, arrive: j.start };
+}
+function evalTech(t, list) {
+  if (list.length === 1) return evalOne(t, list[0]);
+  const all = list.map(j => evalOne(t, j));
+  if (all[0].off) return all[0];
+  const busy = all.filter(a => a.busy).length;
+  return { note: busy ? `Clashes with ${busy} of ${list.length} jobs` : `Free for all ${list.length} jobs`, order: all.reduce((s, a) => s + a.order, 0), busy: busy > 0 };
+}
+function openPicker(ids, btn) {
+  if (!S.online) return;
+  const list = S.queue.filter(j => ids.includes(j.id)); if (!list.length) return;
+  pickIds = ids; invoker = btn;
+  const one = list.length === 1 ? list[0] : null;
+  $('#pk-title').textContent = one ? `Assign ${shortName(one)}` : `Assign ${list.length} jobs`;
+  $('#pk-sub').textContent = one ? `${one.addr}, ${one.zone} · ${one.asap ? 'As soon as possible' : fmtWin(one.start, one.end)}` : list.map(shortName).join(', ');
+  $('#pk-sub').title = $('#pk-sub').textContent;
+  const opts = S.techs.map(t => ({ t, ...evalTech(t, list) })).sort((a, b) => a.order - b.order);
+  const firstOk = opts.find(o => !o.off && !o.busy);
+  $('#pk-list').innerHTML = opts.map(o => {
+    const left = leftOf(o.t);
+    return `<label class="opt${o.off ? ' dis' : ''}"><input type="radio" name="tech" value="${o.t.id}"${o.off ? ' disabled' : ''}><b>${esc(o.t.name)}${o === firstOk ? '<span class="best">Soonest</span>' : ''}</b><span class="on">${esc(o.note)}</span><span class="left num">${o.off ? '' : `${left} job${left === 1 ? '' : 's'} left`}</span></label>`;
+  }).join('');
+  $('#pk-go').disabled = true; $('#pk-go').textContent = 'Assign'; $('#pk-reason').hidden = false;
+  picker.showPopover();
+  place(picker, btn);
+  const r = $('#pk-list input:not(:disabled)'); r && r.focus();
+}
+$('#pk-list').addEventListener('change', e => {
+  const t = tech(e.target.value); if (!t) return;
+  $('#pk-go').disabled = false; $('#pk-go').textContent = `Assign to ${t.name}`; $('#pk-reason').hidden = true;
+});
+$('#pk-form').addEventListener('submit', e => {
+  e.preventDefault(); const v = $('#pk-list input:checked'); if (!v) return;
+  const ids = pickIds.slice(); returnTo = 'next';
+  picker.hidePopover();
+  assign(ids, v.value);
+});
+$('#pk-cancel').addEventListener('click', () => picker.hidePopover());
+$('#pk-close').addEventListener('click', () => picker.hidePopover());
+picker.addEventListener('toggle', e => {
+  if (e.newState !== 'closed') return;
+  hideTip();
+  if (returnTo === 'next') {
+    returnTo = null;
+    const nb = $('[data-assign]'); (nb || $('#queue-h')).focus && (nb ? nb.focus() : ($('#queue-h').tabIndex = -1, $('#queue-h').focus()));
+  } else if (invoker && document.contains(invoker)) invoker.focus();
+});
+
+/* ---------- actions ---------- */
+let undoStack = null;
+function snapshot() { return JSON.stringify({ techs: S.techs, jobs: S.jobs, queue: S.queue }); }
+function restore(s) { const d = JSON.parse(s); S.techs = d.techs; S.jobs = d.jobs; S.queue = d.queue; S.jobs.forEach(j => delete j.just); }
+function assign(ids, techId) {
+  const snap = snapshot(), t = tech(techId), moved = [];
+  ids.forEach(id => {
+    const i = S.queue.findIndex(j => j.id === id); if (i < 0) return;
+    const j = S.queue[i], ev = evalOne(t, j);
+    S.queue.splice(i, 1);
+    let start, state;
+    if (j.asap) { start = ev.arrive; state = 'next'; if (t.status === 'available') { t.status = 'enroute'; t.eta = start; } }
+    else { start = j.start; state = 'planned'; }
+    S.jobs.push({ id: j.id, tech: t.id, cust: j.cust, short: j.short || j.cust, type: j.type, start, end: start + (j.dur || 1.5), zone: j.zone, addr: j.addr, issue: j.issue, state, just: true });
+    moved.push({ j, start });
+    S.sel.delete(id);
+  });
+  if (!moved.length) return;
+  renderAll();
+  setTimeout(() => { S.jobs.forEach(j => delete j.just); $$('.job.just').forEach(el => el.classList.remove('just')); }, 4000);
+  const m = moved[0];
+  const msg = moved.length === 1
+    ? `${shortName(m.j)} assigned to ${t.name}${m.j.asap ? `, there by about ${fmtExact(m.start)}` : `, ${fmtWin(m.j.start, m.j.end)}`}.`
+    : `${moved.length} jobs assigned to ${t.name}.`;
+  toast(msg, () => { restore(snap); renderAll(); toast(moved.length === 1 ? `Undone. ${shortName(m.j)} needs a technician again.` : `Undone. ${moved.length} jobs need a technician again.`); });
+}
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg, undo) {
+  const box = $('#toasts'); clearTimeout(toastTimer);
+  box.innerHTML = `<div class="toast"><p>${esc(msg)}</p>${undo ? '<button class="btn sm" data-undo>Undo</button>' : ''}<button class="iconbtn" data-dismiss aria-label="Dismiss" data-tip="Dismiss">${XICON}</button></div>`;
+  const el = box.firstElementChild;
+  if (undo) $('[data-undo]', el).addEventListener('click', () => { box.innerHTML = ''; undo(); });
+  $('[data-dismiss]', el).addEventListener('click', () => { hideTip(); box.innerHTML = ''; });
+  const arm = () => { clearTimeout(toastTimer); toastTimer = setTimeout(() => { if (!el.matches(':hover, :focus-within')) box.innerHTML = ''; else arm(); }, 8000); };
+  arm();
+}
+
+/* ---------- new job ---------- */
+const nj = $('#nj'), njf = $('#nj-form');
+function openNewJob(btn) { if (!S.online) return; invoker = btn; nj.showModal(); $('#nj-name').focus(); }
+function closeNewJob() { nj.close(); }
+nj.addEventListener('close', () => { const b = invoker && document.contains(invoker) ? invoker : $('#newjob'); b.focus(); });
+$('#nj-cancel').addEventListener('click', closeNewJob);
+$('#nj-close').addEventListener('click', closeNewJob);
+const RULES = {
+  name: v => v.trim() ? '' : "Enter the customer's name.",
+  phone: v => { const d = v.replace(/\D/g, ''); return d.length === 10 || (d.length === 11 && d[0] === '1') ? '' : 'Enter a 10-digit phone number, like (614) 555-0134.'; },
+  addr: v => v.trim().length >= 5 ? '' : 'Enter the street address so the technician can find it.',
+  type: () => njf.querySelector('[name=type]:checked') ? '' : 'Pick a job type.',
+  win: v => v ? '' : 'Pick an arrival window. Emergencies go out as soon as possible.'
+};
+const FIELD = { name: '#nj-name', phone: '#nj-phone', addr: '#nj-addr', win: '#nj-win' };
+function validate(key) {
+  const input = FIELD[key] ? $(FIELD[key]) : null;
+  const msg = RULES[key](input ? input.value : '');
+  const err = $(`#nj-${key}-err`);
+  err.hidden = !msg; err.innerHTML = msg ? `${WARN}<span>${esc(msg)}</span>` : '';
+  if (input) input.setAttribute('aria-invalid', String(!!msg));
+  return !msg;
+}
+Object.keys(FIELD).forEach(k => $(FIELD[k]).addEventListener('blur', () => { if ($(FIELD[k]).value || $(`#nj-${k}-err`).hidden === false) validate(k); }));
+/* Clear a shown error as soon as the value is fixed, so leaving the field never shifts the layout under the pointer. */
+Object.keys(FIELD).forEach(k => $(FIELD[k]).addEventListener('input', () => { if (!$(`#nj-${k}-err`).hidden && !RULES[k]($(FIELD[k]).value)) validate(k); }));
+njf.addEventListener('change', e => {
+  if (e.target.name === 'type') { validate('type'); if (e.target.value === 'emergency' && !$('#nj-win').value) { $('#nj-win').value = 'asap'; validate('win'); } }
+  if (e.target.id === 'nj-win') validate('win');
+});
+njf.addEventListener('submit', e => {
+  e.preventDefault();
+  const keys = ['name', 'phone', 'addr', 'type', 'win'];
+  const bad = keys.filter(k => !validate(k));
+  if (bad.length) { const k = bad[0]; (FIELD[k] ? $(FIELD[k]) : njf.querySelector('[name=type]')).focus(); return; }
+  const name = $('#nj-name').value.trim(), addr = $('#nj-addr').value.trim(), win = $('#nj-win').value;
+  const type = njf.querySelector('[name=type]:checked').value;
+  const zone = Object.keys(ZONES).find(z => norm(addr).includes(norm(z))) || 'Downtown';
+  const words = name.split(/\s+/);
+  const job = { id: 'n' + Date.now(), cust: name, short: words.length <= 3 ? words[words.length - 1] : name, type, zone, addr: addr.replace(new RegExp(',?\\s*' + zone + '$', 'i'), ''), issue: $('#nj-issue').value.trim() || 'No details yet', booked: NOW, dur: type === 'install' ? 4 : 1.5 };
+  if (win === 'asap') job.asap = true; else { job.start = +win; job.end = +win + 2; }
+  const snap = snapshot();
+  S.queue.push(job);
+  if (mode === 'empty') mode = 'fresh';
+  nj.close(); njf.reset(); $$('.err', njf).forEach(x => { x.hidden = true; }); $$('[aria-invalid]', njf).forEach(x => x.removeAttribute('aria-invalid'));
+  renderAll();
+  toast(`${job.short} added to today. It's waiting for a technician.`, () => { restore(snap); renderAll(); toast(`Removed ${job.short} from today.`); });
+});
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-assign]'); if (a) return openPicker([a.dataset.assign], a);
+  if (e.target.closest('#bulk-assign')) return openPicker([...S.sel], e.target.closest('#bulk-assign'));
+  if (e.target.closest('#bulk-clear')) { S.sel.clear(); renderQueue(); return; }
+  if (e.target.closest('#newjob') || e.target.closest('[data-newjob]')) return openNewJob(e.target.closest('button'));
+  if (e.target.closest('[data-clearq]')) { S.q = ''; $('#q').value = ''; syncURL(); renderQueue(); renderBoard(); $('#q').focus(); return; }
+  if (e.target.closest('[data-showall]')) { S.show = 'all'; syncURL(); renderBoard(); return; }
+  if (e.target.closest('#more-q')) { S.shownQ += 25; renderQueue(); return; }
+  const f = e.target.closest('[data-show]'); if (f) { S.show = f.dataset.show; syncURL(); renderBoard(); const n = visibleTechs().length; $('#live').textContent = `${n} technician${n === 1 ? '' : 's'} shown`; const b = $(`[data-show="${S.show}"]`); b && b.focus(); return; }
+  const c = e.target.closest('[data-calls]'); if (c) { S.calls = c.dataset.calls; syncURL(); renderCalls(); return; }
+  const r = e.target.closest('[data-rev]'); if (r) { S.rev = r.dataset.rev; syncURL(); renderRevenue(); return; }
+  if (e.target.closest('#retry')) {
+    mode = ''; renderDateline(); $('#queue-body').innerHTML = ''; $('#board-body').innerHTML = '';
+    setTimeout(() => { mode = 'loading'; renderDateline(); renderQueue(); renderBoard(); }, 300);
+    setTimeout(() => { mode = ''; renderAll(); $('#live').textContent = "Today's jobs loaded"; }, 1100);
+    return;
+  }
+  if (e.target.closest('#reconnect')) { S.online = true; renderAll(); toast('Back online. The board is up to date.'); $('#newjob').focus(); return; }
+  const bar = e.target.closest('.bar, .rrow, .job'); if (bar) showTip(bar);
+});
+document.addEventListener('change', e => {
+  if (e.target.matches('[data-sel]')) { e.target.checked ? S.sel.add(e.target.dataset.sel) : S.sel.delete(e.target.dataset.sel); renderBulk(); const all = $('#sel-all'); if (all) all.checked = $$('[data-sel]').every(x => x.checked); }
+  if (e.target.id === 'sel-all') { $$('[data-sel]').forEach(x => { x.checked = e.target.checked; e.target.checked ? S.sel.add(x.dataset.sel) : S.sel.delete(x.dataset.sel); }); renderBulk(); }
+});
+$('#q').value = S.q;
+$('#q').addEventListener('input', e => { S.q = e.target.value; S.shownQ = 25; syncURL(); renderQueue(); renderBoard(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && tipFor) hideTip();
+  const j = e.target.closest && e.target.closest('#tl .job'); if (!j) return;
+  const all = $$('#tl .job'), lanes = $$('#tl .lane');
+  let target = null;
+  if (e.key === 'ArrowRight') target = all[all.indexOf(j) + 1];
+  else if (e.key === 'ArrowLeft') target = all[all.indexOf(j) - 1];
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    const li = lanes.indexOf(j.closest('.lane')), step = e.key === 'ArrowDown' ? 1 : -1, x = j.getBoundingClientRect().left;
+    for (let i = li + step; i >= 0 && i < lanes.length; i += step) {
+      const js = $$('.job', lanes[i]); if (!js.length) continue;
+      target = js.reduce((b, c) => Math.abs(c.getBoundingClientRect().left - x) < Math.abs(b.getBoundingClientRect().left - x) ? c : b); break;
+    }
+  } else if (e.key === 'Home') target = all[0]; else if (e.key === 'End') target = all[all.length - 1];
+  if (target) { e.preventDefault(); j.tabIndex = -1; target.tabIndex = 0; target.focus(); }
+});
+addEventListener('offline', () => { S.online = false; renderAll(); });
+addEventListener('online', () => { if (mode !== 'offline') { S.online = true; renderAll(); toast('Back online. The board is up to date.'); } });
+addEventListener('resize', () => { hideTip(); if (picker.matches(':popover-open') && invoker) place(picker, invoker); });
+
+/* phone: New job sits beside the title */
+function moveNewJob() { const w = $('#newjob-wrap'), host = PHONE.matches ? $('.pagehead-top') : $('.headtools'); if (w.parentElement !== host) host.appendChild(w); }
+PHONE.addEventListener('change', moveNewJob); moveNewJob();
+$('.mobile-only-hook').remove();
+
+renderAll();
+})();
+</script>
+</body>
+</html>

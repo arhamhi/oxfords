@@ -5,7 +5,9 @@ alwaysApply: false
 ---
 
 Before writing or reviewing interface code, read `skills/oxfords/SKILL.md` and follow it:
-work its Build order, read the reference file it names for this surface, fill its Done gate,
-and run `node skills/oxfords/scripts/check.mjs <path>` on the result.
+work its Build order, read the reference file it names for this surface, generate every
+colour with `node skills/oxfords/scripts/palette.mjs`, and fill its Done gate. Then run
+`node skills/oxfords/scripts/check.mjs <path>` on the source and
+`node skills/oxfords/scripts/shoot.mjs <page>` on the page, and look at the screenshots.
 
-This project's own design system, tokens and brand rules take priority over Oxfords.
+This project's own `DESIGN.md`, design system, tokens and brand rules take priority over Oxfords.

@@ -5,7 +5,8 @@ not show a state change, a relationship or a response, remove it.
 
 ## Response comes first
 
-- Acknowledge a press as it starts, within 100ms. A slight dim or a scale to about 0.97.
+- Acknowledge a press as it starts, within 100ms. The pressed token (a step darker) or a scale to
+  about 0.97.
 - Never block input while something animates. The user can always act again.
 - Look for delays you added yourself: debounces on buttons, timers before a transition,
   waiting for one animation before starting the next.

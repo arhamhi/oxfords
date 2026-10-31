@@ -28,10 +28,10 @@ made it.
 </p>
 
 <p align="center">
-  <img src="docs/dashboard.gif" alt="The same dashboard brief built without Oxfords, then with it" width="100%">
+  <img src="docs/dashboard.gif" alt="A restaurant dashboard built with no skill, then redesigned with Oxfords" width="100%">
 </p>
 
-<p align="center"><sub>Same one-paragraph brief. First with no skill, then with Oxfords.</sub></p>
+<p align="center"><sub>A dashboard built with no skill, then redesigned with Oxfords. Same data, same labels, same links.</sub></p>
 
 ## What you get
 
@@ -66,14 +66,24 @@ gradients, and if you tell it to be "clean" you get white, grey and one blue but
 all the same problem, the colour got picked by default. So Oxfords comes with 26 palettes,
 three colours each, and the agent has to choose one for your product and say why. The
 palette goes on top of proper neutrals though, white, black and greys still do most of the
-work, so you don't end up with a page that's cream from edge to edge. On a phone it sits on
-pure black or pure white, with the navigation in Liquid Glass.
+work, so you don't end up with a page that's cream from edge to edge.
+
+And the agent doesn't type colours by hand anymore. A script turns the palette into every
+colour the page needs: the hover and pressed shades, a version of each colour that's actually
+readable as text, three levels of grey for text, red for delete that never gets mixed up with
+your brand, and a dark mode that's designed instead of just flipped. Every pair is contrast
+checked before it's written. Got a client colour? Give it that and it builds the rest around it.
+
+```bash
+node skills/oxfords/scripts/palette.mjs Tideline --mode both
+node skills/oxfords/scripts/palette.mjs --brand "#FF8A3D"
+```
 
 <p align="center">
   <img src="docs/palettes.png" alt="The Oxfords palettes, each shown as lead, support and pop colour on a white or black card" width="100%">
 </p>
 
-**A checker, so it's not just vibes.** One script, no dependencies:
+**Checkers, so it's not just vibes.** The first one reads your code, no dependencies:
 
 ```bash
 node skills/oxfords/scripts/check.mjs ./src
@@ -90,6 +100,16 @@ src/components/Sidebar.tsx
 ```
 
 It exits with an error when something fails, so you can put it in CI or a pre-commit hook.
+
+The second one actually opens the page. It renders it on a phone width and a desktop width,
+in light and dark, saves the screenshots, and measures the stuff you can't see in code: text
+that fails contrast, text that's clipped or overlapping, sideways scrolling, focus you can't
+see, buttons too small to tap, and how much of the screen is colour. It needs Playwright, and
+if you don't have it, it tells you and gets out of the way.
+
+```bash
+node skills/oxfords/scripts/shoot.mjs ./dist/index.html
+```
 
 ## Install
 
@@ -126,8 +146,9 @@ It works in three modes:
 
 | Mode | What happens |
 |---|---|
-| Build | Works an eight-step build order from intent to finished states, then fills a done gate |
-| Review | Looks first, runs the checker second, reports each finding as symptom, fix and reason |
+| Build | Reads the brief, works a twelve-step build order from intent to finished states, measures the result and fills a done gate |
+| Redesign | Writes down what has to stay first (links, labels, fields, data), then redesigns, then proves nothing went missing |
+| Review | Looks at the screenshots first, measures second, reports each finding as symptom, fix and reason |
 | Fix | Changes only what a finding names and leaves your copy and identity alone |
 
 ## What is inside
@@ -139,12 +160,18 @@ skills/oxfords/
     app-ui.md                    dashboards, tables, charts, settings
     mobile.md                    app screens, navigation, sheets, gestures
     landing.md                   message, structure, what to leave out
+    redesign.md                  what to keep, what to change, in what order
     states-forms-copy.md         every state, forms, errors, copy, accessibility
-    palettes.md                  neutrals, 26 palettes and how to apply them
+    colour.md                    neutrals, palettes, states, dark mode, client colours
     slop-floor.md                the full ban list with replacements
     motion.md                    timing, easing, gestures, reduced motion
-    review.md                    the two-pass review and severity scale
-  scripts/check.mjs              the slop checker
+    review.md                    fresh eyes, the two passes, severity, when to stop
+  scripts/
+    palette.mjs                  turns a palette into every colour token, contrast checked
+    palettes.json                the 26 palettes
+    check.mjs                    the slop checker, reads code
+    shoot.mjs                    the render check, opens the page and measures it
+    keep.mjs                     checks a redesign kept every link, label and field
 ```
 
 The main file is short on purpose. Your agent reads it every time, and only opens a reference
@@ -156,8 +183,9 @@ file for the thing it's actually building.
   those win. The palettes are for when you've got nothing.
 - **It won't give you a look.** If you want a landing page with a signature animation, use a
   design skill built for that and let Oxfords check the result after.
-- **It can't see everything.** The checker reads text, so it can't tell if a label is clipped
-  or if you've got a card inside a card. Those are on a short list you check by eye.
+- **It can't see everything.** The render check measures contrast, clipping and focus, but it
+  can't tell you've put a card inside a card or a button that does nothing. Those are on a
+  short list you check by eye.
 
 One thing I had to be careful with: plain doesn't mean empty. If you strip all the slop out
 and add nothing, you get a grey page with one accent colour, and that's just a different kind
@@ -166,7 +194,8 @@ you can give a reason for.
 
 ## More examples
 
-Same deal as the dashboard up top. Same brief, first with no skill and then with Oxfords.
+These two are from the first version of Oxfords. Same brief twice, first with no skill and then
+with Oxfords.
 
 **A startup landing page**
 
@@ -191,24 +220,56 @@ matter get colour.
 
 ## How it was tested
 
-Each example got the same one-paragraph brief twice, once with no skill and once with
-Oxfords. All six builds are in [`docs/builds`](docs/builds) and you can run the checker on
-them yourself:
+I froze a copy of the last version of Oxfords and a copy of this one, wrote four briefs that
+each push on something different, and had the same model build every brief twice, once with
+each. The briefs are a dark dispatch board for an HVAC company, a landing page that has to use
+a client's orange, a settings screen in light and dark, and a redesign of an existing screen
+that has to keep its labels and links.
+
+Then a fresh judge on a different model got the brief and the screenshots and nothing else.
+The two builds were labelled X and Y in a random order, it scored seven things out of 5 and
+picked one. I only unblinded once all four had answered.
 
 ```text
-dashboard-no-skill.html   1 fail, 3 warn
-landing-no-skill.html     1 fail, 3 warn
-mobile-no-skill.html      2 fail, 3 warn
-the three Oxfords builds  0 fail, 0 warn
+                      judge picked   points, old / new   checker warnings, old / new
+dispatch board        new            19 / 28             6 / 0
+landing page          old            29 / 23             0 / 0
+workspace settings    new            27 / 29             42 / 0
+redesign              new            24 / 29             1 / 0
 ```
 
-To be straight about it, this isn't a fair fight and I'm not going to pretend it is. The
-no-skill builds are first attempts from Claude Sonnet. The Oxfords ones went through a few
-rounds while I was fixing the skill, mostly the colour rules, and the final dashboard and
-landing page were built by a stronger model with some colours ruled out so the three examples
-wouldn't look alike. So take them as what the skill is going for and not a benchmark. And
-the checker only catches the mechanical stuff. Most of what's different in those GIFs is the
-part it can't see.
+The new one won three out of four, and every judge that picked it gave colour as a reason:
+states that mean something, the client's brand kept as the brand, delete in red. The landing
+page went to the old one and the judge was right. The new build put a muddy brown card where
+the price lives and built the hero like an app with tabs and a chart, when the old one just
+showed the report the clinic actually gets. The brown was a bug in the colour engine and
+that's fixed. Everything else the judges flagged, on either side, is a rule in the skill now.
+
+That's 22 rule changes I haven't re-run yet, so treat this as one round. One judge per brief,
+one judge model, four briefs, and 29 to 27 on settings is close to a coin flip. One judge also
+said a link failed contrast when it measures 5.18:1, so the judges get things wrong too.
+
+<p align="center">
+  <img src="docs/v2-dispatch.gif" alt="The dispatch board brief built with the first version of Oxfords, then with this one" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/v2-settings.gif" alt="The workspace settings brief built with the first version of Oxfords, then with this one" width="100%">
+</p>
+
+Every brief and both builds are in [`docs/test-run`](docs/test-run), so you can run the
+checkers on them yourself:
+
+```bash
+node skills/oxfords/scripts/check.mjs docs/test-run/settings/old.html
+node skills/oxfords/scripts/shoot.mjs docs/test-run/settings/old.html
+```
+
+The six builds in [`docs/builds`](docs/builds) are older, Oxfords against no skill at all, and
+that one isn't a fair fight. I'm not going to pretend it is. The no-skill builds are first
+attempts from Claude Sonnet and the Oxfords ones went through a few rounds while I was fixing
+the skill. Take them as what the skill is going for. And the checkers only catch the
+mechanical stuff. Most of what's different in those GIFs is the part they can't see.
 
 <p align="center">
   <img src="art/bands-strip.jpg" alt="" width="100%">

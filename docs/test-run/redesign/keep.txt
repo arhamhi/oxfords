@@ -1,0 +1,90 @@
+# Keep list for the Tablewise "Today" redesign (oxfords references/redesign.md step 1)
+# Plain lines: visible text that must appear on index.html. "#" lines are notes keep.mjs skips.
+#
+# Product and screen
+Tablewise
+Today
+# Navigation labels, exactly as written. Every link target on the original is href="#" (all six nav links).
+Orders
+Tables
+Menu
+Reports
+Settings
+# Restaurant and account block
+Olive & Ember
+Downtown · Maya (Manager)
+# Service line
+Thursday, 8 October
+Dinner service
+Live
+# Figures (labels, values, comparisons)
+Revenue today
+$4,820
+12%
+vs last Thu
+137
+8%
+Avg. ticket
+$35.18
+3%
+Open tables
+24
+4 reserved for 8 pm
+# Chart: daily revenue Fri 3,980 / Sat 5,640 / Sun 4,720 / Mon 2,310 / Tue 2,760 / Wed 4,230 / Thu 4,820 (today, so far)
+Revenue this week
+Total $28,460
+(today, so far)
+# Orders list: heading, filters, every order on the original with its fields
+Recent orders
+All
+Active
+Done
+#1042
+Table 4
+2 × Ribeye, 1 × Caesar
+7:42 pm
+$112.50
+#1041
+Delivery · J. Okafor
+Pad thai, spring rolls
+7:38 pm
+$38
+#1040
+Table 11
+4 × Margherita, 2 × Lemonade
+7:31 pm
+$86.20
+#1039
+Takeaway · Priya
+Lamb curry, naan ×3
+7:24 pm
+$41.75
+#1038
+Table 2
+Tasting menu ×2
+7:10 pm
+$210
+#1037
+Table 8
+Burger, fries, shake
+7:02 pm
+$29.40
+# Status words (keys new / prep / ready / done)
+Preparing
+Ready
+Served
+# New order form: field names type, where, items, total, status; ids where, items, total
+New order
+Dine-in
+Takeaway
+Delivery
+Table or customer
+Items
+Total ($)
+Status
+Add order
+Cancel
+# Error wording (set by script, so not checked here): "Add a table or customer name",
+# "Add at least one item", "Enter a total above $0". Toast: "Order #<id> added · $<total>".
+# Brand: orange #c2410c on the "T" logo mark and accents -> carried with palette.mjs --brand "#c2410c".
+# Typeface: system stack (nobody chose a named face). The bone page #f6f4ef is a default, not identity.
