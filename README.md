@@ -10,7 +10,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licence-MIT-4F404C" alt="MIT licence"></a>
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex%20%C2%B7%20Cursor-B6CCDD" alt="Works with Claude Code, Codex and Cursor">
-  <img src="https://img.shields.io/badge/dependencies-none-F9E7C9" alt="No dependencies">
+  <img src="https://img.shields.io/badge/dependencies-none%20required-F9E7C9" alt="No required dependencies">
 </p>
 
 ---
@@ -55,7 +55,7 @@ skills loaded, so there's a strict list of them and what to use instead:
 | Inter, Geist, Poppins, Instrument Serif, Playfair | The system font, or a face you can give a reason for |
 | Emoji as icons, the stock icon set at default stroke | One icon set, one weight, matched to the text |
 | Bone and orange, white and blue, purple gradients | A palette chosen for the product, with a reason |
-| Gradient text, glows | One accent, used for action and state |
+| Gradient text, glows | Flat colour, and each colour does one job |
 | A tinted pill on every status | Colour only where something needs attention |
 | Bounce, fade-up on everything, pulsing dots | Short ease-out transitions that explain a change |
 | "Seamless", "Get started", Acme, 99.9% | The plain sentence and believable data |
@@ -142,7 +142,7 @@ Review this settings page with oxfords.
 This looks AI-generated. Fix it.
 ```
 
-It works in three modes:
+It works in four modes:
 
 | Mode | What happens |
 |---|---|
@@ -192,37 +192,10 @@ and add nothing, you get a grey page with one accent colour, and that's just a d
 of generic. So Oxfords asks for real content, one clear thing to look at first, and choices
 you can give a reason for.
 
-## More examples
-
-These two are from the first version of Oxfords. Same brief twice, first with no skill and then
-with Oxfords.
-
-**A startup landing page**
-
-<p align="center">
-  <img src="docs/landing.gif" alt="A startup landing page built without Oxfords, then with it" width="100%">
-</p>
-
-The one without the skill looks fine at first, I'll be honest. But it's the bone background
-again, with a little uppercase label over every section, numbered steps and an italic word in
-the headline. You've seen that page a hundred times. The Oxfords one sits on white, shows the
-actual product, and keeps the colour for one section, one button and the number you owe.
-
-**A calorie tracking app**
-
-<p align="center">
-  <img src="docs/mobile.gif" alt="A calorie tracking app screen built without Oxfords, then with it" width="360">
-</p>
-
-Pure black, so it looks right on an OLED screen. The add button comes out of the middle of
-the tab bar, the tab bar is glass with the list scrolling under it, and only the things that
-matter get colour.
-
 ## How it was tested
 
-I froze a copy of the last version of Oxfords and a copy of this one, wrote four briefs that
-each push on something different, and had the same model build every brief twice, once with
-each. The briefs are a dark dispatch board for an HVAC company, a landing page that has to use
+I froze a copy of v1 and a copy of v2, wrote four briefs that each push on something
+different, and had the same model build every brief twice, once with each version. The briefs are a dark dispatch board for an HVAC company, a landing page that has to use
 a client's orange, a settings screen in light and dark, and a redesign of an existing screen
 that has to keep its labels and links.
 
@@ -231,18 +204,18 @@ The two builds were labelled X and Y in a random order, it scored seven things o
 picked one. I only unblinded once all four had answered.
 
 ```text
-                      judge picked   points, old / new   checker warnings, old / new
-dispatch board        new            19 / 28             6 / 0
-landing page          old            29 / 23             0 / 0
-workspace settings    new            27 / 29             42 / 0
-redesign              new            24 / 29             1 / 0
+                      judge picked   points, v1 / v2     checker warnings, v1 / v2
+dispatch board        v2             19 / 28             6 / 0
+landing page          v1             29 / 23             0 / 0
+workspace settings    v2             27 / 29             42 / 0
+redesign              v2             24 / 29             1 / 0
 ```
 
-The new one won three out of four, and every judge that picked it gave colour as a reason:
-states that mean something, the client's brand kept as the brand, delete in red. The landing
-page went to the old one and the judge was right. The new build put a muddy brown card where
-the price lives and built the hero like an app with tabs and a chart, when the old one just
-showed the report the clinic actually gets. The brown was a bug in the colour engine and
+v2 won three out of four, and every judge that picked it gave colour as a reason: states that
+mean something, the client's brand kept as the brand, delete in red. The landing page went to
+v1 and the judge was right. The v2 build put a muddy brown card where the price lives and
+built the hero like an app with tabs and a chart, when v1 just showed the report the clinic
+actually gets. The brown was a bug in the colour engine and
 that's fixed. Everything else the judges flagged, on either side, is a rule in the skill now.
 
 That's 22 rule changes I haven't re-run yet, so treat this as one round. One judge per brief,
@@ -250,26 +223,20 @@ one judge model, four briefs, and 29 to 27 on settings is close to a coin flip. 
 said a link failed contrast when it measures 5.18:1, so the judges get things wrong too.
 
 <p align="center">
-  <img src="docs/v2-dispatch.gif" alt="The dispatch board brief built with the first version of Oxfords, then with this one" width="100%">
+  <img src="docs/v2-dispatch.gif" alt="The dispatch board brief built with Oxfords v1, then v2" width="100%">
 </p>
 
 <p align="center">
-  <img src="docs/v2-settings.gif" alt="The workspace settings brief built with the first version of Oxfords, then with this one" width="100%">
+  <img src="docs/v2-settings.gif" alt="The workspace settings brief built with Oxfords v1, then v2" width="100%">
 </p>
 
-Every brief and both builds are in [`docs/test-run`](docs/test-run), so you can run the
-checkers on them yourself:
+Every brief and both builds of it are in [`docs/test-run`](docs/test-run) (`old.html` is v1,
+`new.html` is v2), so you can run the checkers on them yourself:
 
 ```bash
 node skills/oxfords/scripts/check.mjs docs/test-run/settings/old.html
 node skills/oxfords/scripts/shoot.mjs docs/test-run/settings/old.html
 ```
-
-The six builds in [`docs/builds`](docs/builds) are older, Oxfords against no skill at all, and
-that one isn't a fair fight. I'm not going to pretend it is. The no-skill builds are first
-attempts from Claude Sonnet and the Oxfords ones went through a few rounds while I was fixing
-the skill. Take them as what the skill is going for. And the checkers only catch the
-mechanical stuff. Most of what's different in those GIFs is the part they can't see.
 
 <p align="center">
   <img src="art/bands-strip.jpg" alt="" width="100%">
