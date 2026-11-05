@@ -28,6 +28,14 @@ Each of them does things Oxfords deliberately does not.
 
 ## Also
 
+- Charles Liu, "20 AI Design Slop Indicators" (Instagram, 2026), for most of the tells added
+  in v2.1: tags and pills, excessive italics, overused dividers, bordered containers,
+  over-detailed UI, verbose text, code breadcrumbs, monospace as costume, ALL CAPS subtitles,
+  gradient backgrounds and full stops in titles. Oxfords left out the ones it disagrees with,
+  like negative tracking on display type and squircles.
+- Impeccable's command table and its scored audit gave the shape for Oxfords' commands and
+  the `audit` command.
+
 - Sajid, "The Easy Way to Pick UI Colors" (https://www.youtube.com/watch?v=vvPklRN0Tco), for
   neutrals as even lightness steps, every colour as a set of shades, OKLCH over hex, and the
   two-layer shadow.

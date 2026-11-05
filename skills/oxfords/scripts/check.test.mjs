@@ -47,6 +47,20 @@ const bad = [
   ['danger-as-brand', `:root{--lead:#075431;--danger:#C92A2A}\n.btn-delete{background:var(--lead);color:var(--lead-ink)}`],
   ['danger-as-brand', `[data-action="remove"]:hover{background:var(--support-hover);color:var(--on-support)}`],
   ['one-blue-button', `:root{--page:#fff;--lead:#2360E8;--support:#1E40AF;--pop:#DBEAFE;--info:#006DBD;--danger:#CC2827;--focus:#2360E8;--series-1:#2360E8}\nbody{background:var(--page)}\n:focus-visible{outline:2px solid var(--focus)}\n.btn.primary{background:var(--lead)}\na{color:var(--lead)}`],
+  // From the 2026 tells list: pills, italics, dividers, code breadcrumbs, caps, gradients, full stops.
+  ['period-title', `<h1>Built for teams.</h1>`],
+  ['period-title', `<h2 class="t">Ship it <em>today</em>.</h2>`],
+  ['code-breadcrumb', `<span class="label">// features</span>`],
+  ['code-breadcrumb', `<p>~/work/clients</p>`],
+  ['caps-subtitle', `<p class="text-sm uppercase text-gray-600">The finance tool for small studios that bill by the hour</p>`],
+  ['caps-subtitle', `.hero-subtitle{text-transform:uppercase;font-size:18px}`],
+  ['gradient-bg', `.hero{background:linear-gradient(135deg,#0ea5e9,#22c55e)}`],
+  ['gradient-bg', `<section class="bg-gradient-to-b from-sky-50 to-white">`],
+  ['fake-chrome', `.dot.red{background:#ff5f57}.dot.yellow{background:#febc2e}`],
+  ['italic-heading', `<h2>Plan <em>less</em></h2>\n<h2>Ship <i>more</i></h2>`],
+  ['pill-overuse', `<span class="badge">New</span><span class="badge">AI</span><span class="tag">Beta</span><span class="tag">Pro</span><span class="chip">Fast</span><span class="pill">Free</span>`],
+  ['mono-costume', `.eyebrow{font-family:"JetBrains Mono",monospace}.nav a{font-family:ui-monospace}h2{font-family:"Geist Mono"}.stat-label{font:12px "IBM Plex Mono"}`],
+  ['divider-overuse', `<hr><p>a</p><hr><p>b</p><hr><p>c</p><hr><p>d</p><hr><p>e</p><hr>`],
 ];
 for (const [id, src] of bad) assert(ids(src).has(id), `expected ${id} on: ${src}`);
 
@@ -95,6 +109,24 @@ const quiet = [
   // em-dash and buzzwords in comments or code are not visible copy.
   ['em-dash', `<style>/* Poppy on white — chrome stays neutral */</style><!-- draft — v2 --><p>Orders</p>`],
   ['buzzword', `<script>\nconst unlock = () => audio.resume();\n</script><p>Orders</p>`],
+  // period-title: an ellipsis, a question, and a full stop in body copy are fine.
+  ['period-title', `<h1>Loading...</h1><h2>Why now?</h2><p>Paid in full.</p>`],
+  // code-breadcrumb: real code samples and URLs in prose are not decoration.
+  ['code-breadcrumb', `<pre>// set up the client</pre><code>~/projects</code><p>See https://example.com/docs</p>`],
+  // caps-subtitle: a short letter-spaced eyebrow is the eyebrow rule's job; uppercase on a button is not a subtitle.
+  ['caps-subtitle', `.kicker{text-transform:uppercase;letter-spacing:.08em}\n.btn{text-transform:uppercase}`],
+  ['caps-subtitle', `<p class="uppercase tracking-wider text-xs">New</p>`],
+  // gradient-bg: a neutral scrim over a photo is not a gradient background; a purple one is the purple rule's.
+  ['gradient-bg', `.cover::after{background:linear-gradient(to top,rgba(0,0,0,.6),transparent)}`],
+  ['gradient-bg', `.hero{background:linear-gradient(90deg,#6366f1,#a855f7)}`],
+  // italic-heading: one italic accent is a choice, and italic body copy is not a heading.
+  ['italic-heading', `<h1>Plan <em>less</em></h1><p>A <em>very</em> long <i>essay</i></p>`],
+  // pill-overuse: a few status chips are fine.
+  ['pill-overuse', `<span class="badge">Paid</span><span class="badge">Late</span><span class="badge">Draft</span>`],
+  // mono-costume: monospace on code and figures is its job.
+  ['mono-costume', `code,pre,kbd{font-family:ui-monospace,monospace}.num{font-family:"Commit Mono"}.figure{font-family:monospace}td.code{font-family:monospace}`],
+  // divider-overuse: menu separators and a couple of section rules are fine.
+  ['divider-overuse', `<hr><p>a</p><hr><div role="menu"><a>x</a><hr><a>y</a></div>`],
 ];
 for (const [id, src] of quiet) assert(!ids(src).has(id), `did not expect ${id} on: ${src}`);
 

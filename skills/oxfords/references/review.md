@@ -2,6 +2,9 @@
 
 Review in two separate passes so the tool's output does not steer your eye.
 
+For a score and a marked-up report of how generated a live page looks, use `audit.md` instead.
+This file is the fuller review: tasks, wayfinding, states and severity.
+
 ## Fresh eyes
 
 The builder is the worst reviewer of a build: they see what they meant, not what is there.

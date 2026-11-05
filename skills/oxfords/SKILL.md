@@ -1,6 +1,6 @@
 ---
 name: oxfords
-description: Use when building, changing, redesigning or reviewing any interface a person operates - dashboard, admin panel, table, form, settings, modal, onboarding, mobile app screen, landing page - or choosing its colours, palette or dark theme. Also use when a UI looks AI-generated, cluttered, generic, "vibe coded", over-decorated, unfinished or hard to scan, or when asked to remove AI slop, make a UI clean, plain, polished or professional, fix the UX, or check a build before shipping.
+description: Use when building, changing, redesigning, reviewing or auditing any interface a person operates - dashboard, admin panel, table, form, settings, modal, onboarding, mobile app screen, landing page, website - or choosing its colours, palette or dark theme. Also use when a UI looks AI-generated, cluttered, generic, "vibe coded", over-decorated, unfinished or hard to scan, when asked to remove AI slop, make a UI clean, plain, polished or professional, fix the UX, or check a build before shipping, and when asked to audit or score a website or page for AI slop ("how AI-generated does my site look", "audit my landing page").
 license: MIT
 ---
 
@@ -25,14 +25,20 @@ its character. Build on neutrals and put a real palette on top of them.
 colour are measured by the scripts in this skill. A screen is done when the measurements pass
 and you have looked at the screenshots, not when the code looks right.
 
-## How to use
+## Commands
 
-| Job | Do this |
-|---|---|
-| Build | Work the Build order, read the reference for your surface, fill the Done gate. |
-| Redesign | Read `references/redesign.md` first and write the Keep list. Then work the Build order. |
-| Review | Read `references/review.md` and do its look pass before running any checker. Report `symptom -> fix -> why`. |
-| Fix | Change only what the finding names. Keep existing copy, names and identity. |
+Pick the command from the request. Each one has its reference; read it before starting.
+
+| Command | When | Do this | Reference |
+|---|---|---|---|
+| `build` | A new screen, page or component | Work the Build order, read the reference for your surface, fill the Done gate | the surface table below |
+| `redesign` | An existing screen gets a new look | Write the Keep list first, then work the Build order, then prove nothing went missing | `references/redesign.md` |
+| `review` | "Review this", "is this good", before shipping | Look pass first, then measure. Report `symptom -> fix -> why` with severity | `references/review.md` |
+| `audit` | "Audit my site for AI slop", "score this page", a URL to judge | Run `audit.mjs`, add a look pass, hand over the report: a score out of 100, five bars, every tell boxed on the page's own screenshots | `references/audit.md` |
+| `fix` | After a review or audit | Change only what the finding names, most costly first. Keep existing copy, names and identity. Re-run what found it | the finding's reference |
+
+No command named and none clearly implied: a URL or a finished page to judge is `audit`, code to
+change is `build` or `fix`. Ask only when two fit equally.
 
 Precedence, highest first:
 
@@ -56,6 +62,7 @@ defaults. `references/redesign.md` draws the line.
 | Fonts, icons, the full ban list | `references/slop-floor.md` |
 | Motion, gestures, reduced motion | `references/motion.md` |
 | Reviewing a finished screen | `references/review.md` |
+| Auditing a live page or site for slop | `references/audit.md` |
 
 The scripts live in this skill's `scripts/` folder. They have no dependencies. Commands in
 this skill are written relative to the skill folder; from a project, use the full path:
@@ -67,6 +74,7 @@ this skill are written relative to the skill folder; from a project, use the ful
 | `check.mjs` | Fast pass over source files for the mechanical tells. |
 | `shoot.mjs` | Renders the page at 390 and 1440 wide, light and dark. Saves screenshots and measures contrast, clipped and overlapping text, sideways scroll, focus, target size, names and colour share. Uses Playwright when it is installed and exits with code 3 when it is not. |
 | `keep.mjs` | Compares a redesign with the original: link targets, navigation labels, form fields, Keep-list lines and numbers. Reports changed headings. |
+| `audit.mjs` | Scores a URL or page for AI slop out of 100 and writes one self-contained HTML report with the screenshots marked up. Runs the render check and `check.mjs` inside it. Needs Playwright, like `shoot.mjs`. |
 
 ## Build order
 
@@ -168,22 +176,26 @@ The marks of a generated interface. Remove them and put the plain replacement in
 The full list, with replacements, is in `references/slop-floor.md`.
 
 - **Structure:** a coloured bar down the side of the active nav item or a card; a card around
-  everything; cards inside cards; a small uppercase label above every heading; numbered
-  section labels; a greeting header; a row of icon-and-number tiles; the same figures
-  repeated on several pages; controls that do nothing.
-- **Type and icons:** a default font nobody chose, such as Inter, Geist, Roboto, Poppins or
-  Playfair Display (the full list is in `references/slop-floor.md`); a serif word dropped
-  into a sans headline; emoji as icons; icons whose stroke does not match the text beside them; an icon in
-  a tinted square above every heading.
+  everything; cards inside cards; a divider between everything; tags and pills everywhere;
+  a small uppercase label above every heading; numbered section labels; a greeting header;
+  a row of icon-and-number tiles; an over-detailed mock UI or fake window chrome in the hero;
+  the same figures repeated on several pages; controls that do nothing.
+- **Type and icons:** a default font nobody chose, such as Inter, Geist, Roboto, Poppins,
+  Instrument Serif or Playfair Display (the full list is in `references/slop-floor.md`); a
+  serif word dropped into a sans headline; an italic word in every heading; monospace as a
+  costume on labels and headings; ALL CAPS subtitles; emoji as icons; icons whose stroke does
+  not match the text beside them; an icon in a tinted square above every heading.
 - **Colour:** a bone or cream page with an orange or red accent; a neutral page whose only
   colour is one blue button; a whole interface tinted in palette colours with no neutrals;
-  purple or indigo gradients; gradient text; glows and blurred colour blobs; a tinted pill on
-  every status; the brand colour on a delete button; translucent text for hierarchy; colour
-  values written by hand outside the tokens.
+  gradient backgrounds, purple or indigo above all; gradient text; glows and blurred colour
+  blobs; a tinted pill on every status; the brand colour on a delete button; translucent text
+  for hierarchy; colour values written by hand outside the tokens.
 - **Motion:** bounce; everything fading up on scroll; pulsing dots; marquees; content hidden
   until a script reveals it.
 - **Copy:** seamless, effortless, unlock, elevate, supercharge; "Get started" and "Submit";
-  Acme and Jane Doe; round invented numbers; exclamation marks and em dashes.
+  Acme and Jane Doe; round invented numbers; exclamation marks and em dashes; full stops at the
+  end of headings; code syntax as decoration (`// features`, `~/work`); subtitles that repeat
+  their heading.
 
 ## Numbers
 

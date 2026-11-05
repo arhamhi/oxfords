@@ -434,12 +434,55 @@ const RULES = [
   { id: 'exclamation', level: 'warn', msg: 'exclamation mark in interface copy',
     re: />[^<>{}]*[A-Za-z]!\s*</ },
   { id: 'custom-cursor', level: 'warn', msg: 'custom cursor', re: /cursor\s*:\s*url\(/i },
+  { id: 'period-title', level: 'warn', msg: 'heading ends in a full stop; a title is a name, not a sentence',
+    re: /<h[1-3]\b[^>]*>(?:(?!<\/h[1-3]).)*?[^.\s]\.\s*(?:<\/(?:em|i|span|strong|b|mark)>\s*)*<\/h[1-3]>/i },
+  { id: 'code-breadcrumb', level: 'warn', msg: 'code syntax as decoration (// label, ~/path, </>); write the label plainly',
+    re: /<(?!(?:code|pre|kbd|samp|var|tt)\b)[a-z][\w-]*\b[^>]*>\s*(?:\/\/\s?[A-Za-z]|\/\*\s?[A-Za-z]|~\/[\w-]|&lt;\/&gt;|&gt;_)/i },
+  { id: 'caps-subtitle', level: 'warn', msg: 'ALL CAPS on a subtitle or paragraph; set it in sentence case',
+    re: /<(?:p|h[2-6])\b[^>]*\bclass(?:Name)?\s*=\s*["'](?![^"']*\btracking-)[^"']*\buppercase\b[^"']*["']/i },
+  { id: 'gradient-bg', level: 'warn', msg: 'gradient background; use a flat surface from the tokens',
+    re: /\bbg-(?:gradient-to|linear-to|linear-\d|radial|conic)(?:-[\w[\]]+)?\b/,
+    skip: (m, line) => new RegExp(PURPLE, 'i').test(line) || /\b(?:from|via|to)-(?:purple|violet|indigo|fuchsia)-\d/.test(line) },
+  { id: 'fake-chrome', level: 'warn', msg: 'fake window chrome (traffic-light dots); show the real product or nothing',
+    re: /#(?:ff5f57|ff605c|febc2e|ffbd2e|ffbd44|28c840|27c93f|28ca42|00ca4e)\b/i },
   { id: 'alpha-text', level: 'warn', msg: ALPHA_TEXT,
     re: /\btext-(?:white|black|[a-z]+-\d{2,3})\/[1-9]\d?(?![\d%])|<(?:p|span|small|label|li|td|th|h[1-6])\b[^>]*\bclass(?:Name)?\s*=\s*["'][^"']*\bopacity-[1-9]\d?\b/ },
 ];
 
 // Rules about visible copy. They read the copy view: no <script>, <style> or comments.
-const COPY_ONLY = new Set(['exclamation', 'vague-button', 'em-dash', 'buzzword']);
+const COPY_ONLY = new Set(['exclamation', 'vague-button', 'em-dash', 'buzzword', 'period-title', 'code-breadcrumb']);
+
+const MONO = /\b(?:monospace|ui-monospace|[\w-]*mono\b|courier|consolas|menlo|monaco|fira code|source code pro|jetbrains)/i;
+const CODEISH = /^(?:code|pre|kbd|samp|var|tt)(?![\w-])|\.(?:code|mono|num|figure|tabular|kbd|terminal|cli)(?![\w-])/i;
+
+// A gradient background with real colour in it. Neutral scrims over photos are fine.
+function gradientBgs(ctx) {
+  const out = [], purple = new Set(purpleGradients(ctx).map(f => f.line));
+  for (const r of ctx.rules) for (const d of r.decls) {
+    if (d.custom || !/^background(?:-image)?$/.test(d.prop) || purple.has(d.line) || ctx.ignored(d.line)) continue;
+    if (!/gradient\(|var\(|\$/.test(d.value)) continue;
+    const hit = themed(d.value, ctx.tk, isDark(r)).some(({ v }) => gradientBodies(v).some(g => literals(g).some(x => chroma(x.rgb) >= NEUTRAL_C)));
+    if (hit) out.push({ line: d.line, text: `${r.sel}{${d.prop}:${d.value}}` });
+  }
+  return out;
+}
+
+// ALL CAPS on something meant to be read: a subtitle, a lede, a paragraph. Eyebrows (short and
+// letter-spaced) are their own rule.
+function capsSubtitles(ctx) {
+  const out = [];
+  for (const r of ctx.rules) {
+    if (inKeyframes(r) || !r.decls.some(d => d.prop === 'text-transform' && /uppercase/i.test(d.value))) continue;
+    if (r.decls.some(d => d.prop === 'letter-spacing' && !/^(?:0|normal|-)/.test(d.value.trim()))) continue;
+    const readable = subjects(r.sel).some(s => /^(?:p|h[2-6]|blockquote)(?![\w-])|\.[\w-]*(?:sub(?:title|head|heading|text)?|lede|tagline|desc(?:ription)?|intro|strap|deck|summary)(?![\w])/i.test(s));
+    if (readable && !ctx.ignored(r.line)) out.push({ line: r.line, text: r.sel });
+  }
+  return out;
+}
+
+// Headings with an italic word or phrase dropped in for emphasis. One is a choice; two is a habit.
+const ITALIC_HEADING = /<h[1-3]\b[^>]*>(?:(?!<\/h[1-3]>)[\s\S])*?(?:<(?:em|i)\b|\bclass(?:Name)?\s*=\s*["'][^"']*\bitalic\b)/gi;
+const lineAt = (s, i) => s.slice(0, i).split('\n').length;
 
 // Rules that need the whole file. test(code, ctx) returns a count, or a list of { line, text }.
 const FILE_RULES = [
@@ -467,6 +510,28 @@ const FILE_RULES = [
     test: (s, ctx) => dangerAsBrand(ctx) },
   { id: 'many-sizes', level: 'warn', msg: 'more than eight distinct font sizes; keep to a scale',
     test: s => { const z = new Set([...s.matchAll(/font-size\s*:\s*([\d.]+(?:px|rem|em))/gi)].map(m => m[1].toLowerCase())); return z.size > 8 ? z.size : 0; } },
+  { id: 'gradient-bg', level: 'warn', msg: 'gradient background; use a flat surface from the tokens',
+    test: (s, ctx) => gradientBgs(ctx) },
+  { id: 'caps-subtitle', level: 'warn', msg: 'ALL CAPS on a subtitle or paragraph; set it in sentence case',
+    test: (s, ctx) => capsSubtitles(ctx) },
+  { id: 'italic-heading', level: 'warn', msg: 'italic words dropped into several headings; emphasis that is everywhere is nowhere',
+    test: (s, ctx) => { const m = [...ctx.copy.matchAll(ITALIC_HEADING)]; return m.length >= 2 ? m.map(x => ({ line: lineAt(ctx.copy, x.index), text: x[0] })) : []; } },
+  { id: 'pill-overuse', level: 'warn', msg: 'tags and pills everywhere; a pill marks one state, plain text labels the rest',
+    test: s => {
+      const tw = [...s.matchAll(/\bclass(?:Name)?\s*=\s*["']([^"']*)["']/gi)].filter(m => /\brounded-full\b/.test(m[1]) && /\bpx-/.test(m[1]) && /\btext-(?:xs|sm|\[1[0-3]px\])/.test(m[1])).length;
+      const named = [...s.matchAll(/\bclass(?:Name)?\s*=\s*["'][^"']*\b(?:badge|pill|tag|chip)s?(?![\w-])[^"']*["']/gi)].length;
+      return tw + named >= 6 ? tw + named : 0;
+    } },
+  { id: 'mono-costume', level: 'warn', msg: 'monospace on labels and headings; keep it for code, figures and measurements',
+    test: (s, ctx) => {
+      const css = ctx.rules.filter(r => !inKeyframes(r) && !/^@/.test(r.sel) && !subjects(r.sel).every(x => CODEISH.test(x)) &&
+        r.decls.some(d => (d.prop === 'font-family' || d.prop === 'font') && MONO.test(d.value)));
+      const tw = [...ctx.copy.matchAll(/<(?!(?:code|pre|kbd|samp)\b)[a-z][\w-]*\b[^>]*\bclass(?:Name)?\s*=\s*["'][^"']*\bfont-mono\b/gi)];
+      const n = css.length + tw.length;
+      return n >= 4 ? n : 0;
+    } },
+  { id: 'divider-overuse', level: 'warn', msg: 'a divider between everything; separate with space and keep one rule where the content changes',
+    test: s => { const n = (s.match(/<hr\b/gi) || []).length + (s.match(/\bdivide-[xy]\b/g) || []).length; return n >= 6 ? n : 0; } },
   { id: 'many-fonts', level: 'warn', msg: 'more than two font families declared',
     test: s => { const f = new Set([...s.matchAll(/font-family\s*:\s*["']?([^,;"'}]+)/gi)].map(m => m[1].trim().toLowerCase()).filter(n => !/^(inherit|var\(|system-ui|-apple-system|ui-|sans-serif|serif|monospace)/.test(n))); return f.size > 2 ? f.size : 0; } },
 ];

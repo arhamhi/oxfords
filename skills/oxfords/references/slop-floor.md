@@ -29,9 +29,15 @@ All of the named faces are free to use. Check each licence before you bundle a f
   not a reason. No reason means the system stack.
 - A banned face is allowed when the project already uses it or the brand owns it.
 - One family. Two at most, when the second has a job the first cannot do. A third is costume.
-- Emphasis inside a heading is the same family in another weight or its italic. Never a word
-  in a second typeface.
-- Monospace is for code, figures and measurements. Not a costume for "technical".
+- Emphasis inside a heading is the same family in another weight. Never a word in a second
+  typeface, and no italic word dropped into headline after headline: once on a page is a choice,
+  in every heading it is a habit. Running text stays upright; italic is for titles and the odd
+  stressed word.
+- Monospace is for code, figures and measurements. Not a costume for "technical": no monospace
+  labels, eyebrows, navigation or headings.
+- No ALL CAPS on anything meant to be read: subtitles, ledes, paragraphs. A short label in caps
+  is allowed when it carries information; a whole line in caps shouts and slows reading.
+- Negative tracking on large display type is fine (see the numbers in `SKILL.md`).
 - No display face on buttons, labels or data.
 - Any list of approved fonts becomes the next default. Rotate, and prefer the system stack.
 - The system stack is a complete answer, not a fallback. When a page cannot load external
@@ -71,6 +77,8 @@ All of the named faces are free to use. Check each licence before you bundle a f
 **Banned.**
 
 - Purple, indigo and violet gradients, on anything.
+- Gradient backgrounds in any hue: the soft peach-to-mint hero, the sky-to-white section. A
+  neutral scrim over a photo, so text can sit on it, is not a gradient background.
 - Gradient-filled text.
 - Coloured glows, neon outlines, and large blurred colour shapes behind content.
 - A different pastel for every tile or category. More than three or four saturated hues.
@@ -113,8 +121,15 @@ All of the named faces are free to use. Check each licence before you bundle a f
 
 - A coloured bar down the left edge of the active nav item, a card or an alert.
 - A border and a card around everything. Cards inside cards. Border on border.
-- A small uppercase, letter-spaced label above headings.
+- A small uppercase, letter-spaced label above headings (the eyebrow).
 - Numbered section labels where order means nothing.
+- Tags and pills everywhere: a row of rounded labels under the headline, a chip on every card.
+  A pill marks one real state; everything else is plain text.
+- A divider between everything: a rule under every row, every section, every list item. Space
+  separates; one rule marks where the content changes.
+- Over-detailed UI: a mock dashboard in the hero with dozens of tiny unreadable labels,
+  floating cards, fake charts. Show one real, legible screen, or one clear claim.
+- Fake window chrome: three traffic-light dots on a mock app frame.
 - A greeting as the page title.
 - A row of tiles, each an icon and a number.
 - The same figures repeated on several pages or in the sidebar.
@@ -164,6 +179,12 @@ game-changing, all-in-one, at your fingertips, take control, journey, level up.
 - Marketing voice in product labels.
 - Title Case On Every Label.
 - Small print under every button.
+- A full stop at the end of a heading: "Built for teams." A title is a name, not a sentence.
+  Questions and real sentences in body copy keep their punctuation.
+- Code syntax as decoration: `// features`, `~/work`, `</>`, `$ ship` on labels that are not
+  code. Write the label plainly.
+- Verbose, redundant text: a subtitle that says the heading again, three sentences where one
+  works. Each block says one new thing, or it goes.
 
 **Use instead.** The plain sentence a colleague would say. See `states-forms-copy.md`.
 

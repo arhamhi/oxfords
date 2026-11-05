@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- A landing page built from the 2026 tells on purpose. audit.test.mjs expects each one found. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerly</title>
+<style>
+body{margin:0;font-family:"Instrument Serif",Georgia,serif;background:#f6efe3;color:#1d1a16}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 24px}
+.hero{background:linear-gradient(135deg,#ffe8cc 0%,#d3f9d8 100%);padding:64px 40px;border-radius:24px}
+.eyebrow{font:500 12px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.14em;color:#8a5a2b;margin:0 0 12px}
+h1{font-size:64px;line-height:1.05;margin:0 0 16px;font-weight:400}
+h2{font-size:40px;font-weight:400;margin:0 0 12px}
+h1 em,h2 em{font-style:italic;color:#c2410c}
+.sub{font:500 15px/1.5 ui-monospace,monospace;text-transform:uppercase;color:#5c4a36;max-width:46ch}
+.crumb{font:13px ui-monospace,monospace;color:#8a5a2b}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pill{font:12px/1 ui-monospace,monospace;padding:6px 12px;border-radius:999px;background:#fde3c8;color:#7a3d0b}
+.card{border:1px solid #e3d6c3;border-radius:16px;padding:20px;margin:16px 0}
+.card .card{border-color:#eadfcf}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e3d6c3;font:14px ui-monospace,monospace}
+.window{border:1px solid #e3d6c3;border-radius:12px;padding:12px;margin-top:24px;background:#fff}
+.dots{display:flex;gap:6px;margin-bottom:10px}
+.dots i{width:12px;height:12px;border-radius:50%;display:block}
+.mock{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;font:10px/1.2 ui-monospace,monospace;color:#6b5a48}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:700px){.grid{grid-template-columns:1fr}h1{font-size:44px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <p class="crumb">// 01 — overview</p>
+    <p class="eyebrow">Finance OS</p>
+    <h1>Your books, <em>finally</em> handled.</h1>
+    <p class="sub">The finance tool for small studios that bill by the hour and hate spreadsheets</p>
+    <div class="pills"><span class="pill">AI-native</span><span class="pill">SOC 2</span><span class="pill">Real-time</span><span class="pill">Multi-currency</span><span class="pill">Open API</span><span class="pill">New</span></div>
+    <div class="window">
+      <div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+      <div class="mock">
+        <span>MRR</span><span>ARR</span><span>Churn</span><span>LTV</span><span>CAC</span><span>NRR</span>
+        <span>$48.2k</span><span>$578k</span><span>1.2%</span><span>$9.1k</span><span>$410</span><span>118%</span>
+        <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span><span>YTD</span><span>Δ</span>
+        <span>Inv 1043</span><span>Inv 1044</span><span>Inv 1045</span><span>Inv 1046</span><span>Inv 1047</span><span>Inv 1048</span>
+        <span>Paid</span><span>Paid</span><span>Late</span><span>Draft</span><span>Paid</span><span>Sent</span>
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+    </div>
+  </section>
+
+  <p class="eyebrow">Features</p>
+  <h2>Everything you need. <em>Nothing</em> you don't.</h2>
+  <div class="grid">
+    <div class="card"><p class="eyebrow">Invoicing</p><h3>Invoices that send themselves.</h3><div class="card"><p>Recurring, reminders, late fees.</p></div></div>
+    <div class="card"><p class="eyebrow">Payroll</p><h3>Payroll on autopilot.</h3><div class="card"><p>Contractors and staff in one run.</p></div></div>
+    <div class="card"><p class="eyebrow">Tax</p><h3>Tax season, solved.</h3><div class="card"><p>Quarterly estimates, filed for you.</p></div></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span>Invoices sent</span><span>1,204</span></div>
+    <div class="row"><span>Paid on time</span><span>94%</span></div>
+    <div class="row"><span>Average days to pay</span><span>11</span></div>
+    <div class="row"><span>Reminders sent</span><span>312</span></div>
+    <div class="row"><span>Late fees collected</span><span>$2,140</span></div>
+    <div class="row"><span>Clients</span><span>87</span></div>
+    <div class="row"><span>Currencies</span><span>6</span></div>
+    <div class="row"><span>Bank feeds</span><span>3</span></div>
+    <div class="row"><span>Receipts matched</span><span>2,871</span></div>
+  </div>
+  <p><a href="#start">Get started</a></p>
+</main>
+</body>
+</html>

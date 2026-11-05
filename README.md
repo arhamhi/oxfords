@@ -50,15 +50,18 @@ skills loaded, so there's a strict list of them and what to use instead:
 | Out | In |
 |---|---|
 | A coloured bar down the side of the active nav item | A full-row fill |
-| A card around everything, cards inside cards | Space, alignment, one hairline |
+| A card around everything, cards inside cards, a divider under every row | Space, alignment, one hairline |
+| Tags and pills on everything | Plain labels, and a pill only for a real status |
 | A small uppercase label above every heading | The heading |
 | Inter, Geist, Poppins, Instrument Serif, Playfair | The system font, or a face you can give a reason for |
+| An italic word in every headline, monospace labels, ALL CAPS subtitles | One face, upright, in sentence case |
 | Emoji as icons, the stock icon set at default stroke | One icon set, one weight, matched to the text |
-| Bone and orange, white and blue, purple gradients | A palette chosen for the product, with a reason |
+| Bone and orange, white and blue, gradient backgrounds | A palette chosen for the product, with a reason |
 | Gradient text, glows | Flat colour, and each colour does one job |
 | A tinted pill on every status | Colour only where something needs attention |
 | Bounce, fade-up on everything, pulsing dots | Short ease-out transitions that explain a change |
 | "Seamless", "Get started", Acme, 99.9% | The plain sentence and believable data |
+| Headings that end in a full stop, `// features` code breadcrumbs | A heading that's just a name |
 
 **Colours somebody actually picked.** You've probably noticed Claude goes for the same bone
 background with an orange accent on pretty much everything now. Before that it was purple
@@ -111,6 +114,23 @@ if you don't have it, it tells you and gets out of the way.
 node skills/oxfords/scripts/shoot.mjs ./dist/index.html
 ```
 
+**Audit any site for AI slop.** Point it at a URL (yours, a client's, a competitor's) and you
+get a score out of 100, a bar for type, colour, layout, copy and finish, and the site's own
+screenshots with every tell boxed and numbered, ranked by what it costs. It's one HTML file you
+can send to someone. The agent also looks at the screenshots itself and adds what a script
+can't see, like copy that says the same thing twice, and it can mark something as kept when
+it's actually the brand's thing and not slop.
+
+```bash
+node skills/oxfords/scripts/audit.mjs https://yoursite.com
+```
+
+<p align="center">
+  <img src="docs/audit.png" alt="An Oxfords audit report: a score of 29 out of 100, a bar per area, and the page's screenshot with every tell boxed and numbered" width="100%">
+</p>
+
+<p align="center"><sub>The audit on a test page built from every tell on purpose. gov.uk scores 89 on the same audit.</sub></p>
+
 ## Install
 
 **Claude Code, Codex and other agents that read skills**
@@ -139,16 +159,18 @@ loads when the task is a UI.
 ```text
 Build the orders dashboard.
 Review this settings page with oxfords.
+Audit https://yoursite.com for AI slop.
 This looks AI-generated. Fix it.
 ```
 
-It works in four modes:
+It has five commands. You can name one, or just ask and it picks:
 
-| Mode | What happens |
+| Command | What happens |
 |---|---|
 | Build | Reads the brief, works a twelve-step build order from intent to finished states, measures the result and fills a done gate |
 | Redesign | Writes down what has to stay first (links, labels, fields, data), then redesigns, then proves nothing went missing |
 | Review | Looks at the screenshots first, measures second, reports each finding as symptom, fix and reason |
+| Audit | Scores a page out of 100 for AI slop and hands you a report with every tell marked on the screenshot |
 | Fix | Changes only what a finding names and leaves your copy and identity alone |
 
 ## What is inside
@@ -166,12 +188,14 @@ skills/oxfords/
     slop-floor.md                the full ban list with replacements
     motion.md                    timing, easing, gestures, reduced motion
     review.md                    fresh eyes, the two passes, severity, when to stop
+    audit.md                     scoring a page for AI slop, the look pass, the report
   scripts/
     palette.mjs                  turns a palette into every colour token, contrast checked
     palettes.json                the 26 palettes
     check.mjs                    the slop checker, reads code
     shoot.mjs                    the render check, opens the page and measures it
     keep.mjs                     checks a redesign kept every link, label and field
+    audit.mjs                    scores a page for slop and writes the HTML report
 ```
 
 The main file is short on purpose. Your agent reads it every time, and only opens a reference

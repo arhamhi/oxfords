@@ -9,5 +9,7 @@ work its Build order, read the reference file it names for this surface, generat
 colour with `node skills/oxfords/scripts/palette.mjs`, and fill its Done gate. Then run
 `node skills/oxfords/scripts/check.mjs <path>` on the source and
 `node skills/oxfords/scripts/shoot.mjs <page>` on the page, and look at the screenshots.
+To audit a page for AI slop, follow `skills/oxfords/references/audit.md` and run
+`node skills/oxfords/scripts/audit.mjs <url or page>`.
 
 This project's own `DESIGN.md`, design system, tokens and brand rules take priority over Oxfords.
